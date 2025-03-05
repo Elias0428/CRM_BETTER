@@ -1,0 +1,236 @@
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Carta Explicativa de los Ingresos Anuales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #eef2f3;
+            font-family: 'Roboto', sans-serif;
+        }
+        .bg-bone{
+            background-color: #eef2f3;
+        }
+        .container {
+            background: linear-gradient(135deg, #ffffff, #f7f7f7);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 10px 15px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 86, 179, 0.4);
+        }
+        ul {
+            margin-left: 20px;
+        }
+        ul ul {
+            list-style-type: circle;
+        }
+        p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        .fw-bold {
+            color: #343a40;
+            font-weight: 700;
+        }
+        .text-center {
+            margin-top: 20px;
+        }
+        .form-label {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container my-5">
+        <h1 class="text-center mb-4">{% trans "Carta explicativa de los ingresos anuales" %}</h1>
+        <form id="signatureForm" method="POST">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="nombre" class="form-label">{% trans "Nombre Completo:" %}</label>
+                    <input readonly type="text" class="form-control" id="nombre" name="nombre" placeholder="{% trans 'NOMBRE' %}" value="{{obamacare.client.first_name}}">
+                </div>
+                <div class="col-md-6">
+                    <label for="apellido" class="form-label">{% trans "Apellido:" %}</label>
+                    <input readonly type="text" class="form-control" id="apellido" name="apellido" placeholder="{% trans 'APELLIDO' %}" value="{{obamacare.client.last_name}}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="fechaNacimiento" class="form-label">{% trans "Fecha de Nacimiento del Aplicante Principal:" %}</label>
+                <input readonly type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" value="{{obamacare.client.date_birth|date:'Y-m-d'}}">
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="ingresos" class="form-label">{% trans "Mi hogar espera recibir:" %}</label>
+                    <input readonly type="number" class="form-control" id="ingresos" name="ingresos" value="{{obamacare.taxes}}">
+                </div>
+                <div class="col-md-6">
+                    <label for="anio" class="form-label">{% trans "Durante el año:" %}</label>
+                    <input readonly type="number" class="form-control" id="anio" name="anio" value=2025>
+                </div>
+            </div>
+
+            <h5 class="mt-4">{% trans "Cómo enviar por correo:" %}</h5>
+            <ul>
+                <li>{% blocktrans %}Incluya la página de código de barras impresa que vino con su carta. Si no tiene un código de barras, incluya su nombre completo impreso y la identificación de la solicitud en cada página de su formulario. Su ID de solicitud está cerca de su dirección postal en la parte superior de su carta.{% endblocktrans %}</li>
+                <li>{% trans "Envíe el formulario a:" %}</li>
+                <ul>
+                    <li>{% trans "Mercado de Seguros Médicos" %}</li>
+                    <li>{% trans "Attn: Coverage Processing" %}</li>
+                    <li>{% trans "465 Industrial Blvd." %}</li>
+                    <li>{% trans "London, KY 40750" %}</li>
+                </ul>
+            </ul>
+
+            <p class="fw-bold mt-4">{% trans "Nota:" %}</p>
+            <p>{% blocktrans %}El ingreso anual que informe debe coincidir con el ingreso que informó en su solicitud del Mercado u otra solicitud de seguro médico. Si no es así, actualice su solicitud del Mercado.{% endblocktrans %}</p>
+            <p>{% trans "Visite:" %} <a href="https://CuidadoDeSalud.gov/es/income-and-household-information/how-to-report/"> {% trans "CuidadoDeSalud.gov/es/income-and-household-information/how-to-report/" %} </a> {% trans "o" %} <a href="https://CuidadoDeSalud.gov/es/income-calculator"> {% trans "CuidadoDeSalud.gov/es/income-calculator" %} </a> {% trans "si necesita ayuda para estimar su ingreso anual esperado." %} </p>
+
+            <p class="fw-bold">{% trans "Recuerde:" %}</p>
+            <p>{% blocktrans %}Es importante ingresar una estimación de ingresos precisa en su solicitud del Mercado. Si los ingresos que ingresó en su solicitud son menores que los ingresos que declara en sus impuestos al final del año, es posible que tenga que devolver parte o la totalidad de su crédito tributario de prima cuando presente su declaración de impuestos. Si su ingreso estimado cambia durante el año, actualice su solicitud del Mercado con esta información de inmediato.{% endblocktrans %}</p>
+
+            <!-- Signature Section -->
+            <div class="bg-orange p-3 rounded mb-3 row m-1">
+                <div class="col-12">
+                    <label class="form-label">
+                        {% blocktrans %}Firma Aplicante o Representante Autorizado{% endblocktrans %}
+                        <span class="text-danger">*</span>
+                        {% if signed %}
+                            <strong style="color: chartreuse; text-shadow: 1px 1px 2px black, 0 0 25px green, 0 0 5px darkgreen;">
+                                {% trans "Firmado" %}
+                            </strong>
+                        {% endif %}
+                    </label>
+                </div>
+                <div class="col-12 container-fluid">
+                    <canvas width="330px" id="drawingCanvas" class="signature-pad"></canvas>
+                    <input type="hidden" id="signatureInput" name="signature">
+                </div>
+                <button type="button" id="clearCanvas" class="btn btn-secondary btn-sm">Clear</button>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            const form = document.getElementById('signatureForm');
+            const signatureInput = document.getElementById('signatureInput');
+            const clearCanvasButton = document.getElementById('clearCanvas');
+        
+            let drawing = false;
+        
+            // Configurar el estilo del dibujo
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+        
+            const startDrawing = (event) => {
+                drawing = true;
+                ctx.beginPath();
+                ctx.moveTo(getX(event), getY(event));
+            };
+        
+            const draw = (event) => {
+                if (!drawing) return;
+                ctx.lineTo(getX(event), getY(event));
+                ctx.stroke();
+            };
+        
+            const stopDrawing = () => {
+                drawing = false;
+                ctx.closePath();
+            };
+        
+            const getX = (event) => {
+                const rect = canvas.getBoundingClientRect();
+                return event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
+            };
+        
+            const getY = (event) => {
+                const rect = canvas.getBoundingClientRect();
+                return event.touches ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
+            };
+
+            // Verificar si el canvas está vacío
+            const isCanvasEmpty = () => {
+                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                for (let i = 0; i < pixels.length; i += 4) {
+                    if (pixels[i + 3] !== 0) { // Comprueba si hay algún píxel no transparente
+                        return false;
+                    }
+                }
+                return true;
+            };
+        
+            // Eventos de dibujo
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+        
+            // Limpiar canvas
+            clearCanvasButton.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        
+            // Antes de enviar el formulario, convierte el canvas a Base64
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (isCanvasEmpty()) {
+                    canvas.focus()
+                    alert('Por favor, firma antes de enviar el formulario.');
+                    return;
+                }
+                const canvasData = canvas.toDataURL('image/png'); // Base64 de la firma
+                signatureInput.value = canvasData; // Pasa la firma al campo oculto
+                form.submit()
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

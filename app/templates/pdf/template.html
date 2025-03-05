@@ -1,0 +1,176 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Agentes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #00A0DC;
+            border-radius: 5px;
+            margin-top: -80px;
+        }
+        .title-section {
+            text-align: center;
+            margin-top: -80px;
+            flex-grow: 1;
+            line-height: 0.4; 
+        }
+        .date {
+            text-align: center;
+            margin-top: -80px;
+            line-height: 0.4;
+        }
+        .observations {
+            margin-bottom: 20px;
+            line-height: 0;
+        }
+        .firma{
+            line-height: 0.8;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+            line-height: 0.8;
+        }
+        .footer-table {
+            width: 300px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        .footer-table th, .footer-table td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">
+            <p><strong>Version: 1.2 </strong></p>
+
+        </div>
+        <div class="title-section">
+            <h2>Report the Agent</h2>
+            <p>Date Selected:</p>
+            <p>{{ start_date }} hasta {{ end_date }} </p>
+            <p>Agent: {{ agentReport.agent.first_name }} {{ agentReport.agent.last_name }}</p>
+        </div>
+        <div class="date">
+            <p>Date Report</p>
+            <p>{{date|date:'Y-m-d'}}</p>
+        </div>
+    </div>
+    
+
+    <div class="observations">
+        <p><strong>Findings:</strong></p>
+    </div>
+
+    {% for item in consultQuality %}
+
+        {% if item.findings %}           
+
+            <div class="content">
+
+                <p style="line-height: 2;" >{{ item.findings }}.</p>
+
+        {% else %}
+
+                <p>No hay información en findings para este registro.</p>
+
+            </div>
+
+        {% endif %}        
+        
+    {% endfor %}
+
+    <br>
+
+    <div class="observations">
+        <p><strong>Observations:</strong></p>
+    </div>
+
+    {% for item in consultQuality %}
+
+        {% if item.observation %}           
+
+            <div class="content">
+
+                <p style="line-height: 2;" >{{ item.observation }}.</p>
+
+
+            </div>
+
+        {% endif %}
+        
+        
+    {% endfor %}      
+
+    {% if consultQuality %}
+        <table class="footer-table">
+            <thead>
+                <tr>
+                    <th>categoria</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in consultQuality %}
+                    {% if item.category != None %}
+                        <tr>
+                            <td>{{item.category}}</td>
+                            <td>{{item.amount}}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                
+            </tbody>
+        </table>
+    {% endif %}
+
+    <table class="footer-table">
+        <thead>
+            <tr>
+                <th>All Call</th>
+                <th>Call Answered</th>
+                <th> Call +3 Mins</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{total_daily}}</td>
+                <td>{{total_answered}}</td>
+                <td>{{total_mins}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <br>
+    <div class="firma">
+        <p><strong>Auditor:</strong>________________________</p>
+        <p><strong>Agent:</strong>_________________________</p>
+        <p><strong>Supervisor:</strong>_____________________</p>       
+    </div>
+
+
+</body>
+</html>

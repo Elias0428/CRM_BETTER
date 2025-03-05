@@ -1,0 +1,143 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Table BD</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">BD assigned</h6>
+<hr/>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tableClient" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        {% if request.user.role == 'Admin' or request.user.role == 'S'%}
+                            <th>Sold</th>
+                        {% endif %}
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>ZipCode</th>
+                        <th>Obs.</th>
+						{% if request.user.role == 'Admin' or request.user.role == 'S'%}
+                        	<th>View Obs.</th>
+						{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bd %}
+                    <tr>
+                        {% if request.user.role == 'Admin' %}
+                        <td style="vertical-align: middle;">
+                            {% if item.is_sold %}
+                                <div class="font-35 text-success"><i class='bx bxs-check-circle'></i></div>
+                            {% elif not item.is_sold %}
+                                <div class="font-35 text-danger"><i class='bx bxs-message-square-x'></i></div>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td style="vertical-align: middle;">{{item.first_name}} </td>
+                        <td style="vertical-align: middle;">{{item.last_name}}</td>
+                        <td style="vertical-align: middle;">{{item.phone}}</td>
+                        <td style="vertical-align: middle;">{{item.address}}</td>
+                        <td style="vertical-align: middle;">{{item.city}}</td>
+                        <td style="vertical-align: middle;">{{item.state}}</td>
+                        <td style="vertical-align: middle;">{{item.zipCode}}</td>
+                        <td style="vertical-align: middle;">
+                            <form method="POST" action="{% url 'bd' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="record_id" value="{{ item.id }}">
+                                <input type="hidden" name="record_id_coment" value="{{ item.excel_metadata }}">
+                                <select name="observation" class="form-select" >
+                                    <option value="no_valid" disabled selected>Please Select</option>
+                                    {% for optionBd in optionBd %}
+                                        <option value="{{optionBd}}">{{optionBd}}</option>                      
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+                            </form>
+                        </td>
+						{% if request.user.role == 'Admin' or request.user.role == 'S'%}
+							<td style="vertical-align: middle;">
+								<button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalVerTexto_{{item.id}}" data-id="{{ item.id }}">
+									<i class='bx bx-comment-detail me-0'></i>
+								</button>
+							</td>
+						{% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Template (clonado para cada cliente) -->
+{% for item in bd %}
+<div class="col-12 col-lg-12">
+    <!-- Modal para ver las observaciones -->
+    <div class="modal fade" id="modalVerTexto_{{item.id}}" tabindex="-1" aria-labelledby="modalVerTextoLabel_{{item.id}}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVerTextoLabel_{{item.id}}">Saved Remarks for {{ item.first_name }} {{ item.last_name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% for observation in comenntAgent %}
+                        {% if observation.bd_excel.id == item.id %}
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <strong>{{ observation.agent_create.username }}:</strong> {{ observation.content }} <strong>Date:</strong> {{ observation.create_at }}
+                                </li>
+                            </ul>						
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	<script>
+        $(document).ready(function() {$('#tableClient').DataTable();} );
+	</script>
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% blocktrans %}Gracias por su Inscripción{% endblocktrans %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .thank-you-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .check-icon {
+            width: 100px;
+            height: 100px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+        .check-icon::before {
+            content: '✓';
+            font-size: 60px;
+            color: white;
+        }
+        .card {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="thank-you-container d-flex align-items-center">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="card">
+                        <div class="card-body text-center p-5">
+                            <div class="check-icon"></div>
+                            <h1 class="display-4 mb-4">{% blocktrans %}¡Gracias!{% endblocktrans %}</h1>
+                            <h2 class="h4 text-muted mb-4">{% blocktrans %}Su póliza ha sido activada exitosamente{% endblocktrans %}</h2>
+                            <p class="lead mb-4">{% blocktrans %}Hemos recibido toda la información necesaria y su proceso de enrolamiento ha sido completado satisfactoriamente.{% endblocktrans %}</p>
+                            <p class="mb-4">{% blocktrans %}En breve recibirá un correo electrónico con todos los detalles de su póliza y la documentación correspondiente.{% endblocktrans %}</p>
+                            <hr class="my-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

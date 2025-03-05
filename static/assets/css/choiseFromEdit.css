@@ -1,0 +1,82 @@
+
+/* Estilo general del select */
+.choices__inner {
+    background-color: #222; /* Fondo oscuro */
+    color: #ddd; /* Texto en gris claro */
+    font-family: 'Arial', sans-serif; /* Fuente moderna */
+    border: 1px solid #444; /* Borde sutil */
+    border-radius: 8px; /* Bordes redondeados */
+    padding: 8px 12px; /* Espaciado interno */
+    transition: all 0.3s ease; /* Transición suave */
+}
+
+/* Estilo para el borde cuando el select está enfocado */
+.choices__inner--focused {
+    border-color: #3b82f6; /* Borde azul cuando está enfocado */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); /* Sombra sutil azul */
+}
+
+/* Estilo para las opciones dentro del dropdown */
+.choices__list--dropdown {
+    background-color: #333; /* Fondo oscuro para el dropdown */
+    color: #ddd; /* Texto claro */
+    max-height: 250px; /* Altura máxima */
+    overflow-y: auto; /* Desplazamiento si las opciones son muchas */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    border: none; /* Sin borde */
+}
+
+/* Estilo para las opciones dentro del dropdown cuando están enfocadas */
+.choices__item--highlighted {
+    background-color: #3b82f6; /* Fondo azul cuando se resalta */
+    color: white; /* Texto blanco */
+    cursor: pointer; /* Puntero */
+}
+
+/* Estilo para las opciones seleccionables dentro del dropdown */
+.choices__item--selectable {
+    background-color: #444; /* Fondo oscuro */
+    color: #ddd; /* Texto claro */
+    padding: 8px 12px; /* Espaciado */
+    transition: background-color 0.2s ease; /* Transición de color suave */
+}
+
+/* Estilo para las opciones seleccionadas en el campo */
+.choices__item {
+    background-color: #3b82f6; /* Fondo azul */
+    color: rgb(59, 59, 59); /* Texto blanco */
+    padding: 6px 10px; /* Espaciado de las opciones seleccionadas */
+    margin: 4px; /* Separación entre opciones */
+    border-radius: 20px; /* Bordes redondeados */
+    font-weight: bold; /* Texto en negrita */
+    font-size: 14px; /* Tamaño de texto */
+}
+
+/* Estilo para el botón de eliminar de las opciones seleccionadas */
+.choices__button {
+    color: #fff; /* Eliminar en blanco */
+    font-size: 16px;
+    background-color: transparent;
+    border: none;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.choices__button:hover {
+    color: #f00; /* Cambiar color a rojo al pasar el mouse */
+}
+
+/* Fondo del área de texto al estar vacío */
+.choices__placeholder {
+    color: #888; /* Color gris claro */
+}
+
+/* Ajustes para el input de búsqueda */
+.choices__input {
+    background-color: #333; /* Fondo oscuro */
+    color: #fff; /* Texto blanco */
+    border: 1px solid #444; /* Borde oscuro */
+    padding: 8px 12px; /* Espaciado interno */
+    border-radius: 6px; /* Bordes redondeados */
+}

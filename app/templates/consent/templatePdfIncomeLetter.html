@@ -1,0 +1,188 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Carta Explicativa de los Ingresos Anuales" %}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f7f9fc;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 5px;
+            margin-top: -90px; /* Ajusta el valor para moverlo hacia arriba */
+        }
+
+        .header h1 {
+            font-size: 22px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background: #fff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .info-table th, .info-table td {
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-table th {
+            background: #3498db;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .info-table tr:nth-child(even) td {
+            background: #f1f7ff;
+        }
+
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background-color: #eef5fc;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .signature img {
+            width: 180px;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{% trans "Carta Explicativa de los Ingresos Anuales" %}</h1>
+            <p>{% now "l, d F Y" %}</p>
+        </div>
+
+        <div class="section">
+            <table class="info-table">
+                <tr>
+                    <th>{% trans "Fecha de Hoy" %}</th>
+                    <td>{% now "l, d F Y" %}</td>
+                </tr>
+                <tr>
+                    <th>{% trans "Nombre Completo" %}</th>
+                    <td>{{ obamacare.client.first_name }} {{ obamacare.client.last_name }}</td>
+                </tr>
+                <tr>
+                    <th>{% trans "Fecha de Nacimiento" %}</th>
+                    <td>{{ obamacare.client.date_birth|date:'Y-m-d' }}</td>
+                </tr>
+                <tr>
+                    <th>{% trans "Ingreso Estimado" %}</th>
+                    <td>${{ obamacare.taxes }}</td>
+                </tr>
+                <tr>
+                    <th>{% trans "Año" %}</th>
+                    <td>{% now "Y" %}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>{% trans "Cómo enviar por correo:" %}</h2>
+            <p>
+                {% blocktrans %}
+                Incluya la página de código de barras impresa que vino con su carta. Si no tiene un código de barras,
+                incluya su nombre completo impreso y la identificación de la solicitud en cada página de su formulario.
+                {% endblocktrans %}
+            </p>
+            <p>{% trans "Envíe el formulario a:" %}</p>
+            <div class="highlight">
+                <strong>{% trans "Mercado de Seguros Médicos" %}</strong><br>
+                    Attn: Coverage Processing<br>
+                    465 Industrial Blvd.<br>
+                    London, KY 40750 
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>{% trans "Nota" %}</h2>
+            <p>
+                {% blocktrans %}
+                El ingreso anual que informe debe coincidir con el ingreso que informó en su solicitud del Mercado u otra
+                solicitud de seguro médico. Si no es así, actualice su solicitud del Mercado.
+                {% endblocktrans %}
+            </p>
+            <p>
+                {% trans "Visite" %}  <a href="https://CuidadoDeSalud.gov/es/income-and-household-information/how-to-report/"> {% trans "CuidadoDeSalud.gov" %} </a>
+                {% trans "o" %}  <a href="https://CuidadoDeSalud.gov/es/income-calculator"> {% trans "CuidadoDeSalud.gov/es/income-calculator" %} </a>
+                {% trans "si necesita ayuda para estimar su ingreso anual esperado." %} 
+            </p>
+        </div>
+        <br><br>
+        <div class="section">
+            <h2>{% trans "Firma" %}</h2>
+            <div class="signature">
+                <p>{% trans "Firma:" %}</p>
+                <img src="{{ incomeLetter.signature.url }}" alt="Firma">
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© {% now "Y" %} - {% trans "Mercado de Seguros Médicos. Todos los derechos reservados." %}</p>
+        </div>
+    </div>
+</body>
+</html>

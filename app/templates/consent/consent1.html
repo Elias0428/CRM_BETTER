@@ -1,0 +1,602 @@
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consent Form</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .rights-section {
+            background-color: #7e7e7e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .signature-pad {
+            border: 2px solid #ffffff;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .roboto-light {
+            font-family: "Roboto", sans-serif;
+            font-weight: 300;
+            font-style: normal;
+        }
+        .roboto-medium {
+            font-family: "Roboto", sans-serif;
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        .roboto-black {
+            font-family: "Roboto", sans-serif;
+            font-weight: 900;
+            font-style: normal;
+        }
+        .color-blue{
+            color: #000000;
+        }
+
+        body {
+            background-color: #1565c0;
+            padding: 20px;
+        }
+
+        /* Backgrounds Colors */
+        .bg-orange{
+            background-color: #fc700C;
+        }
+        .bg-lila{
+            background-color: #99ff00;
+        }
+        .bg-morado{
+            background-color: #8d4aff;
+        }
+        .bg-rosa{
+            background-color: #ff94bc;
+        }
+        canvas {
+            border: 2px solid red; /* Para visualizar mejor los bordes */
+            border-radius: 8px;
+            background: #fff;
+            touch-action: none; /* Disable default touch gestures */
+        }
+
+        /* Floating Container */
+
+        .floating-container {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .copy-button {
+            background-color: #00ff08;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .copy-button:hover {
+            background-color: #48aa4d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        .success-message {
+            color: #00ff08;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .input-verde-sombra {
+            border: 2px solid rgb(0, 255, 0);
+            color: rgb(0, 255, 0);
+            box-shadow: 0 0 8px rgb(22, 107, 1); /* Sombra negra alrededor del input */
+        }
+
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% if temporalyURL %}
+    <!-- Div flotante -->
+    <div class="floating-container">
+        <button class="copy-button" onclick="copyCurrentURL()">
+            <i class="fas fa-link"></i>
+            Copy Link
+        </button>
+        <div class="success-message">¡Link copiado!</div>
+    </div>
+    {% endif %}
+
+    <div class="form-container roboto-medium color-blue">
+        <h2 class="text-center mb-4 roboto-black color-blue">
+           {% trans "AGENTE EN REGISTRO" %}</h2>
+        <h6 class="text-center mb-4 roboto-medium color-blue container">{% blocktrans %}AUTORIZACION DE ENTREGA INFORMACIÓN PARA ENROLAMIENTO EN EL MERCADO DE SALUD{% endblocktrans %}</h6>
+
+        <form id="signatureForm" method="POST" enctype="multipart/form-data">
+            <!-- Personal Information -->
+            <div class="bg-orange p-3 rounded mb-3">
+                <label class="form-label">{% trans "Nombre del Aplicante" %}<span class="text-danger">*</span></label>
+                <div class="row g-2">
+                    <div class="col">
+                        <input id="inputName" name="first_name" type="text" class="form-control" value="{{obamacare.client.first_name}}">
+                    </div>
+                    <div class="col">
+                        <input id="inputLastName" name="last_name" type="text" class="form-control" value="{{obamacare.client.last_name}}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="bg-info p-3 rounded">
+                        <label class="form-label">{% trans "Teléfono" %}<span class="text-danger">*</span></label>
+                        <input name="phone_number" type="tel" class="form-control" value="{{obamacare.client.phone_number}}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="bg-lila p-3 rounded">
+                        <label class="form-label">Email</label>
+                        <input name="email" class="form-control" value="{{obamacare.client.email}}">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="bg-morado p-3 rounded">
+                        <label class="form-label">{% blocktrans %}Acepto a ser contactado por mi broker, mi carrier, y/o el mercado de salud vía:{% endblocktrans %}</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input contactMethod" type="checkbox"  id="{% trans "Telefono" %}"  name="phone" {% if contact.phone %}checked{% endif %} />
+                                    <label class="form-check-label" for="">{% trans "Telefono" %}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input contactMethod" type="checkbox"  id="Sms"  name="sms" {% if contact.sms %}checked{% endif %} />
+                                    <label class="form-check-label" for="">{% trans "Mensajes de Texto" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input contactMethod" type="checkbox" id="Email"  name="email" {% if contact.email %}checked{% endif %} />
+                                    <label class="form-check-label" for="">Email</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input contactMethod" type="checkbox" id="Whatsapp" name="whatsapp" {% if contact.whatsapp %}checked{% endif %} />
+                                    <label class="form-check-label" for="">Whatsapp</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if supps %}
+                <div class="row mb-3">
+                    <div class="col">
+                        <div class="bg-primary p-3 rounded">
+                            <label class="form-label">{% blocktrans %}Cobertura adicional:{% endblocktrans %}</label>
+                            <div class="row">
+                                {% for supp in supps %}
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-check">
+                                            <input hidden class="form-check-input" type="checkbox" id="{{supp.policy_type}}"  name="{{supp.policy_type}}" checked />
+                                            <label class="form-check-label" for="">📌 {{supp.policy_type}}</label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="bg-warning p-3 rounded">
+                        <label class="form-label">{% trans "Aplica" %}<span class="text-danger">*</span></label>
+                        <select name="apply" class="form-select" id="apply">
+                            <option disabled value="no_valid" selected>Please Select</option>
+                            <option {%if obamacare.client.apply %}selected{%endif%} value="True">{% trans "SI" %}</option>
+                            <option {%if not obamacare.client.apply %}selected{%endif%} value="False">{% trans "NO" %}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+                
+
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="bg-morado p-3 rounded">
+                        <label class="form-label">{% blocktrans %}Aplicante (s) Adicional (es) (Nombre Completo, Fecha Nacimiento, Sexo, Status, Parentesco){% endblocktrans %}</label>
+                        <div class="mb-3">
+                            <textarea disabled class="form-control" name="applicants" id="inputApplicants" rows="5" >{% for dependent in dependents %}{{dependent.name}}, {{dependent.date_birth}}, {{dependent.sex}}, {{dependent.migration_status}}, {{dependent.kinship}}
+{% endfor %}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="bg-warning p-3 rounded">
+                        <label class="form-label">{% trans "Direccion" %}<span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <input name="address" class="form-control" value="{{obamacare.client.address}}">
+                                <small>{% trans "Direccion" %}</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <input class="form-control">
+                                <small>{% trans "Apto" %}</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <input name="city" class="form-control" value="{{obamacare.client.city}}">
+                                <small>{% trans "Ciudad" %}</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <input name="state" class="form-control" value="{{obamacare.client.state}}">
+                                <small>{% trans "Estado" %}</small>
+                            </div>
+                            <div class="col-12">
+                                <input name="zipcode" class="form-control" value="{{obamacare.client.zipcode}}">
+                                <small>ZipCode</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-12 bg-rosa p-3 rounded mb-3">
+                            <label class="form-label">{% trans "Fecha de Nacimiento " %}<span class="text-danger">*</span></label>
+                            <input name="date_birth" type="date" class="form-control" value="{{obamacare.client.date_birth|date:'Y-m-d'}}"/>
+                        </div>
+                        <div class="col-12 bg-orange p-3 rounded mb-3">
+                            <label class="form-label">{% trans "Ingreso Anual Estimado " %}<span class="text-danger">*</span></label>
+                            <input name="taxes" type="number" class="form-control" value="{{obamacare.taxes}}"/>
+                        </div>
+                        <div class="col-12 bg-info p-3 rounded">
+                            <label class="form-label">{% trans "Tipo de Ingreso " %}<span class="text-danger">*</span></label>
+                            <select name="work" class="form-select" id="work">
+                                <option value="no_valid">Please Select</option>
+                                <option {%if obamacare.work == 'W2'%}selected{%endif%} value="W2">W2</option>
+                                <option {%if obamacare.work == '1099'%}selected{%endif%} value="1099">1099</option>
+                                <option {%if obamacare.work == 'otro'%}selected{%endif%} value="otro">{% trans "Otro" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <!-- Estatus de Inmigración -->
+                <div class="col-md-6">
+                    <div class="p-3 rounded" style="background-color: #48ff00;">
+                        <label class="form-label">{% trans "Estatus de Inmigración " %}<span class="text-danger">*</span></label>
+                        <select id="migration_status" name="migration_status" class="form-select">
+                            <option value="no_valid" disabled selected>Please Select</option>
+                            <option {%if obamacare.client.migration_status == 'EMPLOYMENT AUTHORIZATION'%}selected{%endif%} value="EMPLOYMENT AUTHORIZATION">Employment Authorization</option>
+                            <option {%if obamacare.client.migration_status == 'NOTICE OF ACTION'%}selected{%endif%} value="NOTICE OF ACTION">Notice of Action (i-797)</option>
+                            <option {%if obamacare.client.migration_status == 'REFUGEE'%}selected{%endif%} value="REFUGEE">Refugee</option>
+                            <option {%if obamacare.client.migration_status == 'ASYLUM'%}selected{%endif%} value="ASYLUM">Asylum</option>
+                            <option {%if obamacare.client.migration_status == 'TPS'%}selected{%endif%} value="TPS">Temporary Protection Status (TPS)</option>
+                            <option {%if obamacare.client.migration_status == 'DOMESTIC VIOLENCE'%}selected{%endif%} value="DOMESTIC VIOLENCE">Domestic Violence</option>
+                            <option {%if obamacare.client.migration_status == 'PERMANENT RESIDENT'%}selected{%endif%} value="PERMANENT RESIDENT">Permanent Resident (Green Card)</option>
+                            <option {%if obamacare.client.migration_status == 'CONDITIONAL RESIDENT'%}selected{%endif%} value="CONDITIONAL RESIDENT">Conditional Resident</option>
+                            <option {%if obamacare.client.migration_status == 'PAROLE'%}selected{%endif%} value="PAROLE">Parole</option>
+                            <option {%if obamacare.client.migration_status == 'US CITIZEN'%}selected{%endif%} value="US CITIZEN">US Citizen (Driver's License)</option>
+                            <option {%if obamacare.client.migration_status == 'STUDENT VISA'%}selected{%endif%} value="STUDENT VISA">Student Visa (I-20)</option>
+                            <option {%if obamacare.client.migration_status == 'CURRENTLY IN PROCESS'%}selected{%endif%} value="CURRENTLY IN PROCESS">Currently In Process (this means the client received an i-797)</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Social Security -->
+                <div class="p-3 rounded col-md-6" style="background-color: #5d00ff;" >
+                    <label class="form-label">Social Security <span class="text-danger">*</span></label>
+                    <input disabled class="form-control" value="{% if obamacare.client.social_security %}YES {%else%} NO {% endif %}">
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <!-- Agente Autorizado de Registro -->
+                <div class="col-md-6">
+                    <div class="p-3 rounded" style="background-color: #ff5e00;">
+                        <label class="form-label">{% trans "Agente Autorizado de Registro" %}<span class="text-danger">*</span></label>
+                        <select name="agent_usa" id="selectAgent" class="form-select">
+                            <option value="no_valid">Please Select</option>
+                            <option {% if obamacare.agent_usa == 'GINA PAOLA LAPEIRA - NPN 19944280' %}selected{% endif %} value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
+                            <option {% if obamacare.agent_usa == 'LUIS EDUARDO LAPEIRA - NPN 20556081' %}selected{% endif %} value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
+                            <option {% if obamacare.agent_usa == 'DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958' %}selected{% endif %} value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
+                            <option {% if obamacare.agent_usa == 'ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295' %}selected{% endif %} value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
+                            <option {% if obamacare.agent_usa == 'DANIESKA LOPEZ SEQUEIRA - NPN 20134539' %}selected{% endif %} value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
+                            <option {% if obamacare.agent_usa == 'VLADIMIR DE LA HOZ FONTALVO - NPN 19915005' %}selected{% endif %} value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
+                            <option {% if obamacare.agent_usa == 'FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603' %}selected{% endif %} value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
+                            <option {% if obamacare.agent_usa == 'BORJA G CANTON HERRERA - NPN 20673324' %}selected{% endif %} value="BORJA G CANTON HERRERA - NPN 20673324">BORJA G CANTON HERRERA - NPN 20673324</option>
+                            <option {% if obamacare.agent_usa == 'RODRIGO G CANTON - NPN 20670005' %}selected{% endif %} value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
+                            <option {% if obamacare.agent_usa == 'EVELYN BEATRIZ HERRERA - NPN 20671818' %}selected{% endif %} value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
+                        </select>
+                        <small class="text-muted">{% trans "TELÉFONO" %}: 1.855.963.6900</small>
+                    </div>
+                </div>
+                <!-- Agencia de Seguros -->
+                <div class="col-md-6 p-3 rounded" style="background-color: #ff005d;">
+                    <label class="form-label">{% trans "Agencia de Seguros" %} <span class="text-danger">*</span></label>
+                    <input readonly id="insuranceAgency" type="text" class="form-control" value="{{company}}"/>
+                </div>
+            </div>
+            
+            <!-- Cargar Documentos -->
+            <div class="p-3 rounded mb-3" style="background-color: #ff5e00;">
+                <label class="form-label">
+                    {% trans "Cargar documento de inmigración, SSN, ID, foto selfie con ID en mano" %}
+                </label>
+                <div class="border rounded bg-light text-center p-4" style="border: 2px dashed #ddd;" id="dropzone">
+                    <div class="mb-2">
+                        <i class="bi bi-cloud-upload" style="font-size: 2rem;"></i>
+                    </div>
+                    <p class="roboto-medium">{% trans "Subir Archivo o Foto (Frente y Atrás)" %}</p>
+                    <small class="text-muted">Drag and drop files here</small>
+                    <input name="documents" type="file" id="fileInput" accept="image/*" multiple hidden />
+                </div>
+                <!-- Lista de archivos -->
+                <ul class="list-group mt-3" id="fileList"></ul>
+            </div>
+
+
+            <!-- Rights Section -->
+            <div class="rights-section mb-3">
+                <div class="rights-section">
+                    <h5 class="mb-3 roboto-black">{% trans "Mis Derechos como Paciente" %}</h5>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", autorizo a " %}<span id="textAgent" class="roboto-black">{{obamacare.agent_usa}}</span> de <span class="roboto-black" id="textCarrier">{{company}}</span>{% blocktrans %} para servir como mi agente y broker de seguros de salud, es decir mi Agente de Registro, para mi y las personas en mi núcleo familiar, cuando aplica, para el propósito de enrolamiento en un Plan Médico Calificado ofrecido en el Mercado de Salud Federal.{% endblocktrans %}</p>
+                    <p class="mb-3 roboto-black" id="authorizationText" ></p>
+                    <p class="roboto-light">{% trans "Al firmar esta forma, autorizo a " %}<span class="roboto-black" id="textCarrier2">{{obamacare.agent_usa}}</span>{% blocktrans %}, y su staff, a trabajar para mi y las personas en mi núcleo familiar, cuando aplica, en las siguientes funciones de apoyo de seguro y cualquier otra tarea administrativa necesaria para mantener mi solicitud y cobertura en buen estado, como sigue:{% endblocktrans %}</p>
+                    <ol class="roboto-light">
+                        <li>{% blocktrans %}Realizar búsquedas de aplicaciones nuevas o actuales en el mercado de salud.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Completar una aplicación para búsqueda de eligibilidad y enrolamiento en el Mercado de Salud Federal, o en programas de gobierno tales como Medicaid y CHIP, en los sitios de Enrolamiento Directo del Mercado de Salud, o enrolamiento en programas del mercado de salud que ayudan a aplicar a crédito fiscales o enrolamiento de productos de seguros en planes a nivel estatal.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Proveer mantenimiento de mi cuenta en el Mercado de Salud Federal, asistencia en enrolamiento, información sobre los beneficios de los planes, nuevos productos, beneficios de nuevos productos, y asesoría en los pagos de transacciones si es necesario.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Apoyar si es necesario en responder inquietudes del Mercado de Salud Federal en lo referente a mi aplicación.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Contactarme vía telefónica o por cualquier medio electrónico o escrito para ayudarme y asistirme en cualquier acción necesaria para mantener mi póliza en buen estado.{% endblocktrans %}</li>
+                    </ol>
+                    <p class="roboto-light">{% blocktrans %}Entiendo que mi Agente de Registro no utilizará o compartirá mi información de identificación personal (PII) para ningún propósito excepto los aquí listados en esta autorización. Entiendo que esta autorización será válida hasta que sea revocada por mi en cualquier momento. Para revocar esta autorización, debo hacerlo por escrito y enviarlo a la persona correspondiente a través del correo electrónico: client@lapeira.com.{% endblocktrans %}</p>
+                    <p class="roboto-light">{% blocktrans %}Entiendo que la información que yo le suministre a mi Agente de Registro se va a utilizar ÚNICAMENTE para asistirme en verificar mi elegibilidad y mi aplicacion o enrolamiento en el mercado de salud federal (Marketplace). Esta aprobación incluye la búsqueda de una aplicacion activa utilizando la páginas web aprobadas para el enrolamiento clásico directo (DE) o el Enhanced Direct Enrollment (EDE). Así mismo, entiendo que no tengo que compatir otra informacion adicional excepto la que es requerida para mi enrolamiento o verificacion de eligibilidad en el mercado de salud federal (Marketplace){% endblocktrans %}</p>
+                    <span class="roboto-black">{% trans "Reconocimiento de Información Correcta y No Falsificación" %}</span><br>
+                    <p class="roboto-light">{% blocktrans %}Al firmar este formulario, afirmo y reconozco que he sido completamente informado y se me ha brindado una explicación clara sobre lo siguiente:{% endblocktrans %}</p>
+                    <ol class="roboto-light">
+                        <li>{% blocktrans %}Los beneficios específicos incluidos en el plan de salud, incluyendo cualquier cobertura de seguro o beneficios asociados.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Si el plan de salud en el que me estoy inscribiendo es considerado un plan de salud mayor o integral, o si es equivalente a dicha cobertura de seguro.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Los costos verdaderos y precisos asociados con el plan de salud, incluyendo primas, deducibles y otras obligaciones financieras.{% endblocktrans %}</li>
+                    </ol>
+                    <p class="roboto-light">{% blocktrans %}Además, confirmo que no se me ha ofrecido ni prometido ningún tipo de ofertas gratuitas, recompensas en efectivo, reembolsos u otros incentivos relacionados con la inscripción en el plan de salud. Reconozco que no se me ha hecho ninguna afirmación o promesa sobre este tipo de incentivos durante el proceso de inscripción.{% endblocktrans %}</p>
+                    <span class="roboto-black">Certificación de Revisión y Reconocimiento de la Información</span><br>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
+                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent2">{{obamacare.agent_usa}}</span><br>
+                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier3">{{company}}</span><br>
+                        {% trans "Teléfono de la Agencia: " %}<span class="roboto-black">+1 (855) 963 6900</span>
+                    </p>
+                </div>
+            </div>
+
+
+            <!-- Signature Section -->
+            <div class="bg-orange p-3 rounded mb-3 row m-1">
+                <div class="col-12">
+                    <label class="form-label">{% trans "Firma Aplicante o Representante Autorizado" %}<span class="text-danger">*</span> {% if consent %}<strong style="color: chartreuse; text-shadow: 1px 1px 2px black, 0 0 25px green, 0 0 5px darkgreen;"> {% trans "Firmado" %} </strong> {% endif %} </label>
+                </div>
+                <div class="col-12 container-fluid">
+                    <canvas width="330px" id="drawingCanvas" class="signature-pad"></canvas>
+                    <input type="hidden" id="signatureInput" name="signature">
+                </div>
+                <button type="button" id="clearCanvas" class="btn btn-secondary btn-sm">{% trans "Limpiar firma" %}</button>
+            </div>
+            
+            {% csrf_token %}
+
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Nombre del Aplicante" %}</label>
+                <input readonly type="text" class="form-control input-verde-sombra" value="{{obamacare.client.first_name}} {{obamacare.client.last_name}}" >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Teléfono" %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.client.phone_number}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">Email</label>
+                <input disabled type="email" class="form-control input-verde-sombra" value="{{obamacare.client.email}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% blocktrans %}Acepto a ser contactado por mi broker, mi carrier, y/o el mercado de salud vía:{% endblocktrans %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" 
+                value="{% if contact.phone %}Phone,{% endif %} {% if contact.sms %}Sms,{% endif %} {% if contact.email %}Email, {% endif %} {% if contact.whatsapp %}Whatsapp{% endif %}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Aplica" %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra"{% if obamacare.client.apply %} value="SI" {% else %}value="NO"{% endif %}  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% blocktrans %}Cobertura adicional:{% endblocktrans %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" {% if supps %} value="SI" {% else  %}value="NO" {% endif %}  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Breve Descripción" %}</label>
+                <ol class="roboto-light">
+                    <li>{% blocktrans %}Realizar búsquedas de aplicaciones nuevas o actuales en el mercado de salud.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}Completar una aplicación para búsqueda de eligibilidad y enrolamiento en el Mercado de Salud Federal, o en programas de gobierno tales como Medicaid y CHIP, en los sitios de Enrolamiento Directo del Mercado de Salud, o enrolamiento en programas del mercado de salud que ayudan a aplicar a crédito fiscales o enrolamiento de productos de seguros en planes a nivel estatal.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}Proveer mantenimiento de mi cuenta en el Mercado de Salud Federal, asistencia en enrolamiento, información sobre los beneficios de los planes, nuevos productos, beneficios de nuevos productos, y asesoría en los pagos de transacciones si es necesario.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}Apoyar si es necesario en responder inquietudes del Mercado de Salud Federal en lo referente a mi aplicación.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}Contactarme vía telefónica o por cualquier medio electrónico o escrito para ayudarme y asistirme en cualquier acción necesaria para mantener mi póliza en buen estado.{% endblocktrans %}</li>
+                </ol>
+
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% blocktrans %}Detalle de Cobertura:{% endblocktrans %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" value="{% for supp in supps %} {{supp.policy_type}}{% endfor %}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% blocktrans %}Aplicante (s) Adicional (es) (Nombre Completo, Fecha Nacimiento, Sexo, Status, Parentesco){% endblocktrans %} </label>
+                <input disabled type="text" class="form-control input-verde-sombra"value="{% for dependent in dependents %}{{dependent.name}}, {{dependent.date_birth}}, {{dependent.sex}}, {{dependent.migration_status}}, {{dependent.kinship}}{% endfor %}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Direccion" %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.client.address}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Fecha de Nacimiento " %}</label>
+                <input disabled class="form-control input-verde-sombra"  value="{{obamacare.client.date_birth}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Ingreso Anual Estimado " %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.taxes}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Tipo de Ingreso " %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.work}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Estatus de Inmigración " %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra"name="estatus_migratorio" value="{{obamacare.client.migration_status}}"  >
+            </div>            
+            <div hidden class="mb-3">
+                <label class="form-label">Social Security</label>
+                <input disabled type="text" class="form-control input-verde-sombra"name="social_security" {% if obamacare.client.social_security %} value="SI" {% else %}value="NO"{% endif %}  >
+            </div>                        
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Agente Autorizado de Registro" %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra"name="agente_autorizado" value="{{obamacare.agent_usa}}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Agencia de Seguros" %} </label>
+                <input disabled id="insuranceAgency" type="text" class="form-control input-verde-sombra"value="{{company}}"/  >
+            </div>
+            <div hidden class="mb-3">
+                <h5 class="mb-3 roboto-black">{% trans "Mis Derechos como Paciente" %}</h5>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", autorizo a " %}<span id="textAgent" class="roboto-black">{{obamacare.agent_usa}}</span> de <span class="roboto-black" id="textCarrier">{{company}}</span>{% blocktrans %} para servir como mi agente y broker de seguros de salud, es decir mi Agente de Registro, para mi y las personas en mi núcleo familiar, cuando aplica, para el propósito de enrolamiento en un Plan Médico Calificado ofrecido en el Mercado de Salud Federal.{% endblocktrans %}</p>
+                    <p class="mb-3 roboto-black" id="authorizationText" ></p>
+                    <p class="roboto-light">{% trans "Al firmar esta forma, autorizo a " %}<span class="roboto-black" id="textCarrier2">{{obamacare.agent_usa}} </span>{% blocktrans %}, y su staff, a trabajar para mi y las personas en mi núcleo familiar, cuando aplica, en las siguientes funciones de apoyo de seguro y cualquier otra tarea administrativa necesaria para mantener mi solicitud y cobertura en buen estado, como sigue:{% endblocktrans %}</p>
+                    <ol class="roboto-light">
+                        <li>{% blocktrans %}Realizar búsquedas de aplicaciones nuevas o actuales en el mercado de salud.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Completar una aplicación para búsqueda de eligibilidad y enrolamiento en el Mercado de Salud Federal, o en programas de gobierno tales como Medicaid y CHIP, en los sitios de Enrolamiento Directo del Mercado de Salud, o enrolamiento en programas del mercado de salud que ayudan a aplicar a crédito fiscales o enrolamiento de productos de seguros en planes a nivel estatal.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Proveer mantenimiento de mi cuenta en el Mercado de Salud Federal, asistencia en enrolamiento, información sobre los beneficios de los planes, nuevos productos, beneficios de nuevos productos, y asesoría en los pagos de transacciones si es necesario.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Apoyar si es necesario en responder inquietudes del Mercado de Salud Federal en lo referente a mi aplicación.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Contactarme vía telefónica o por cualquier medio electrónico o escrito para ayudarme y asistirme en cualquier acción necesaria para mantener mi póliza en buen estado.{% endblocktrans %}</li>
+                    </ol>
+                    <p class="roboto-light">{% blocktrans %}Entiendo que mi Agente de Registro no utilizará o compartirá mi información de identificación personal (PII) para ningún propósito excepto los aquí listados en esta autorización. Entiendo que esta autorización será válida hasta que sea revocada por mi en cualquier momento. Para revocar esta autorización, debo hacerlo por escrito y enviarlo a la persona correspondiente a través del correo electrónico: client@lapeira.com.{% endblocktrans %}</p>
+                    <p class="roboto-light">{% blocktrans %}Entiendo que la información que yo le suministre a mi Agente de Registro se va a utilizar ÚNICAMENTE para asistirme en verificar mi elegibilidad y mi aplicacion o enrolamiento en el mercado de salud federal (Marketplace). Esta aprobación incluye la búsqueda de una aplicacion activa utilizando la páginas web aprobadas para el enrolamiento clásico directo (DE) o el Enhanced Direct Enrollment (EDE). Así mismo, entiendo que no tengo que compatir otra informacion adicional excepto la que es requerida para mi enrolamiento o verificacion de eligibilidad en el mercado de salud federal (Marketplace){% endblocktrans %}</p>
+                    <span class="roboto-black">{% trans "Reconocimiento de Información Correcta y No Falsificación" %}</span><br>
+                    <p class="roboto-light">{% blocktrans %}Al firmar este formulario, afirmo y reconozco que he sido completamente informado y se me ha brindado una explicación clara sobre lo siguiente:{% endblocktrans %}</p>
+                    <ol class="roboto-light">
+                        <li>{% blocktrans %}Los beneficios específicos incluidos en el plan de salud, incluyendo cualquier cobertura de seguro o beneficios asociados.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Si el plan de salud en el que me estoy inscribiendo es considerado un plan de salud mayor o integral, o si es equivalente a dicha cobertura de seguro.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Los costos verdaderos y precisos asociados con el plan de salud, incluyendo primas, deducibles y otras obligaciones financieras.{% endblocktrans %}</li>
+                    </ol>
+                    <p class="roboto-light">{% blocktrans %}Además, confirmo que no se me ha ofrecido ni prometido ningún tipo de ofertas gratuitas, recompensas en efectivo, reembolsos u otros incentivos relacionados con la inscripción en el plan de salud. Reconozco que no se me ha hecho ninguna afirmación o promesa sobre este tipo de incentivos durante el proceso de inscripción.{% endblocktrans %}</p>
+                    <span class="roboto-black">Certificación de Revisión y Reconocimiento de la Información</span><br>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
+                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent2">{{obamacare.agent_usa}}</span><br>
+                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier3">{{company}}</span><br>
+                        {% trans "Teléfono de la Agencia: " %}<span class="roboto-black">+1 (855) 963 6900</span>
+                    </p>
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Fecha y Hora de Firma: " %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra"name="codigo" value="{% now "H:i:s" %}"  >
+            </div>
+            <div hidden class="mb-3">
+                <label class="form-label">{% trans "Autorización válida hasta: " %}</label>
+                <input disabled type="text" class="form-control input-verde-sombra"name="codigo" value="2026"  >
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="row">
+                <div class="row row-cols-auto g-3">                    
+                    
+                    <div hidden class="col mb-3">
+                        <button  id="submitButton" class="btn btn-outline-primary ps-4 pe-4">{% trans "Guardar" %}</button>
+                    </div>
+                    <div class="col mb-3 ">
+                        <button id="revisar" class="btn btn-outline-primary ps-4 pe-4">{% trans "Revise su informacion" %}</button>
+                    </div>
+                    <div hidden class="col mb-3 ">
+                        <button id="devolver" class="btn btn-outline-primary ps-4 pe-4">{% trans "Regresar a la forma" %}</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script src="/static/assets/js/consent/consent.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+ 
+{% if temporalyURL %}
+    <script>
+        function copyCurrentURL() {
+            // Obtener la URL actual
+            const URL = '{{temporalyURL|safe}}';
+            
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(URL).then(() => {
+                // Mostrar mensaje de éxito
+                const successMessage = document.querySelector('.success-message');
+                successMessage.style.display = 'block';
+                
+                // Cambiar el texto del botón temporalmente
+                const button = document.querySelector('.copy-button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> {% trans "Copiado!" %}';
+                
+                // Restaurar después de 2 segundos
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    button.innerHTML = originalContent;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('{% trans "No se pudo copiar el link. Por favor, inténtalo de nuevo." %}');
+            });
+        }
+    </script>
+{% endif %}
+
+
+
+</body>
+</html>

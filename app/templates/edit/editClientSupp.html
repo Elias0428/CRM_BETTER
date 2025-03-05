@@ -1,0 +1,594 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Client Supplemental</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+	
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+
+	<!-- Choise Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/choiseFromEdit.css" %}" />
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">Client supplemental</h6>
+<hr/>
+<div class="row">
+    <div class="col-xl-10 mx-auto">
+        <div class="card">
+            <div class="card-body p-4">
+                <form class="row g-3 needs-validation" method="POST">
+                    <h4>Client</h4>
+                    
+					<div class="col-12 col-lg-4">
+						<label for="first_name" class="form-label">First Name</label>
+						<input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" value="{{supps.client.first_name}}" required>
+						<input hidden class="form-control" name="id_client" id="id_client" value="{{supps.client.id}}">
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="last_name" class="form-label">Last Name</label>
+						<input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last Name" value="{{supps.client.last_name}}" required>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="phone_number" class="form-label">Phone Number</label>
+						<input type="number" class="form-control" name ="phone_number" id="phone_number" placeholder="Phone Number" value="{{supps.client.phone_number}}" required>
+					</div>
+					<div class="col-12 col-lg-5">
+						<label for="email" class="form-label">E-mail Address</label>
+						<input type="email" class="form-control" name="email" id="email" placeholder="Enter Email Address" value="{{supps.client.email}}" required>
+					</div>
+					<div class="col-12 col-lg-5">
+						<label for="address" class="form-label">Address</label>
+						<input type="text" class="form-control" name="address" id="address" placeholder="Address" value="{{supps.client.address}}" required>
+					</div>
+					<div class="col-12 col-lg-2">
+						<label for="zipcode" class="form-label">zipCode</label>
+						<input type="number" class="form-control" name ="zipcode" id="zipcode" placeholder="ZIP-CODE" value="{{supps.client.zipcode}}" required>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="city" class="form-label">City</label>
+						<input type="text" class="form-control" name ="city" id="city" value="{{supps.client.city}}" required>
+					</div>
+					<div class="col-12 col-lg-2">
+						<label for="state" class="form-label font-weight-bold">State</label>
+						<select id="inputState" class="form-select" id="state" name="state" required >
+							<option value="" disabled selected>Please Select</option>
+							<option value="AL" {% if supps.client.state == "AL" %}selected{% endif %} > AL </option>
+							<option value="AR" {% if supps.client.state == "AR" %}selected{% endif %} > AR </option>
+							<option value="AZ" {% if supps.client.state == "AZ" %}selected{% endif %} > AZ </option>
+							<option value="CA" {% if supps.client.state == "CA" %}selected{% endif %} > CA </option>
+							<option value="DE" {% if supps.client.state == "DE" %}selected{% endif %} > DE </option>
+							<option value="FL" {% if supps.client.state == "FL" %}selected{% endif %} > FL </option>
+							<option value="GA" {% if supps.client.state == "GA" %}selected{% endif %} > GA </option>
+							<option value="IL" {% if supps.client.state == "IL" %}selected{% endif %} > IL </option>
+							<option value="IA" {% if supps.client.state == "IA" %}selected{% endif %} > IA </option>
+							<option value="KS" {% if supps.client.state == "KS" %}selected{% endif %} > KS </option>
+							<option value="KY" {% if supps.client.state == "KY" %}selected{% endif %} > KY </option>
+							<option Value="MI" {% if supps.client.state == "MI" %}selected{% endif %} > MI </option>                            
+							<option value="MS" {% if supps.client.state == "MS" %}selected{% endif %} > MS </option>
+							<option Value="MO" {% if supps.client.state == "MO" %}selected{% endif %} > MO </option>
+							<option value="NJ" {% if supps.client.state == "NJ" %}selected{% endif %} > NJ </option>
+							<option value="NC" {% if supps.client.state == "NC" %}selected{% endif %} > NC </option>
+							<option value="ND" {% if supps.client.state == "ND" %}selected{% endif %} > ND </option>
+							<option value="NE" {% if supps.client.state == "NE" %}selected{% endif %} > NE </option>
+							<option value="OH" {% if supps.client.state == "OH" %}selected{% endif %} > OH </option>
+							<option value="OK" {% if supps.client.state == "OK" %}selected{% endif %} > OK </option>
+							<option value="SC" {% if supps.client.state == "SC" %}selected{% endif %} > SC </option>
+							<option value="TN" {% if supps.client.state == "TN" %}selected{% endif %} > TN </option>
+							<option value="TX" {% if supps.client.state == "TX" %}selected{% endif %} > TX </option>
+							<option value="UT" {% if supps.client.state == "UT" %}selected{% endif %} > UT </option>
+							<option value="VA" {% if supps.client.state == "VA" %}selected{% endif %} > VA </option>
+							<option value="WI" {% if supps.client.state == "WI" %}selected{% endif %} > WI </option>
+							<option value="LA" {% if supps.client.state == "LA" %}selected{% endif %} > LA </option>
+							<option value="IN" {% if supps.client.state == "IN" %}selected{% endif %} > IN </option>
+							<option value="OR" {% if supps.client.state == "OR" %}selected{% endif %} > OR </option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="county" class="form-label">County</label>
+						<input type="text" class="form-control" name ="county" id="county"  value="{{supps.client.county}}" required>
+					</div>
+					<div class="col-12 col-lg-2">
+						<label for="sex" class="form-label">Sex</label>
+						<select class="form-select"  name="sex" id="sex" aria-label="Default select example" required>
+							<option value="" disabled selected>Please Select</option>
+							<option value="M" {% if supps.client.sex == "M" %}selected{% endif %} >MALE</option>
+							<option value="F" {% if supps.client.sex == "F" %}selected{% endif %} >FEMALE</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-2">
+						<label for="old" class="form-label">Age</label>
+						<input type="number" nim="1" class="form-control" name ="old" id="old" placeholder="Old" value="{{supps.client.old}}" required>
+					</div>
+					<div class="col-12 col-lg-3">
+						<label for="date_birth" class="form-label">Date Birth</label>
+						<input type="text" class="form-control" name="date_birth" id="date_birth" value="{{ supps.client.date_birth|date:'m/d/Y' }}" required >
+					</div>
+					<div class="col-12 col-lg-7">
+						<label for="migration_status" class="form-label">Migration Status</label>
+						<select class="form-select" id="migration_status"  name="migration_status" required  >
+							<option value="" disabled selected>Please Select</option>
+							<option value="N/A" {% if   supps.client.migration_status == "N/A" %}selected{% endif %} >N/A</option>
+							<option value="EMPLOYMENT AUTHORIZATION" {% if   supps.client.migration_status == "EMPLOYMENT AUTHORIZATION" %}selected{% endif %} >Employment Authorization</option>
+							<option value="NOTICE OF ACTION" {% if   supps.client.migration_status == "NOTICE OF ACTION" %}selected{% endif %} >Notice of Action (i-797)</option>
+							<option value="REFUGEE" {% if  supps.client.migration_status  == "REFUGEE" %}selected{% endif %} >Refugee</option>
+							<option value="ASYLUM" {% if supps.client.migration_status  == "ASYLUM" %}selected{% endif %} >Asylum</option>
+							<option value="TPS" {% if supps.client.migration_status == "TPS" %}selected{% endif %} >Temporary Protection Status (TPS)</option>
+							<option value="DOMESTIC VIOLENCE" {% if supps.client.migration_status == "DOMESTIC VIOLENCE" %}selected{% endif %} >Domestic Violence</option>
+							<option value="PERMANENT RESIDENT" {% if supps.client.migration_status == "PERMANENT RESIDENT" %}selected{% endif %} >Permanent Resident (Green Card)</option>
+							<option value="CONDITIONAL RESIDENT" {% if supps.client.migration_status  == "CONDITIONAL RESIDENT" %}selected{% endif %} >Conditional Resident</option>
+							<option value="PAROLE" {% if supps.client.migration_status  == "PAROLE" %}selected{% endif %} >Parole</option>
+							<option value="US CITIZEN" {% if supps.client.migration_status  == "US CITIZEN" %}selected{% endif %} >US Citizen (Driver's License)</option>
+							<option value="STUDENT VISA" {% if supps.client.migration_status  == "STUDENT VISA" %}selected{% endif %} >Student Visa (I-20)</option>
+							<option value="CURRENTLY IN PROCESS" {% if supps.client.migration_status  == "CURRENTLY IN PROCESS" %}selected{% endif %} >Currently In Process (this means the client received an i-797)</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-5">
+						<label for="agent_usa" class="form-label font-weight-bold">Agente USA</label>
+						<select class="form-select" id="agent_usa" aria-label="Default select example" name="agent_usa" required >
+							<option {% if supps.client.agent_usa == 'GINA PAOLA LAPEIRA - NPN 19944280' %}selected{% endif %} value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
+							<option {% if supps.client.agent_usa == 'LUIS EDUARDO LAPEIRA - NPN 20556081' %}selected{% endif %} value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
+							<option {% if supps.client.agent_usa == 'DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958' %}selected{% endif %} value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
+							<option {% if supps.client.agent_usa == 'ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295' %}selected{% endif %} value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
+							<option {% if supps.client.agent_usa == 'DANIESKA LOPEZ SEQUEIRA - NPN 20134539' %}selected{% endif %} value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
+							<option {% if supps.client.agent_usa == 'VLADIMIR DE LA HOZ FONTALVO - NPN 19915005' %}selected{% endif %} value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
+							<option {% if supps.client.agent_usa == 'FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603' %}selected{% endif %} value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
+							<option {% if supps.client.agent_usa == 'BORJA G CANTON HERRERA - NPN 20673324' %}selected{% endif %} value="BORJA G CANTON HERRERA - NPN 20673324">BORJA G CANTON HERRERA - NPN 20673324</option>
+							<option {% if supps.client.agent_usa == 'RODRIGO G CANTON - NPN 20670005' %}selected{% endif %} value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
+							<option {% if supps.client.agent_usa == 'EVELYN BEATRIZ HERRERA - NPN 20671818' %}selected{% endif %} value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-2">
+						<label for="apply" class="form-label">Apply</label>
+						<select class="form-select" id="apply"  name="apply" >
+							<option value="" disabled selected>Please Select</option>
+							<option value = True {% if supps.client.apply == True %}selected{% endif %} >SI</option>
+							<option value = False {% if supps.client.apply == False %}selected{% endif %} >NO</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="date_effective_coverage_end" class="form-label">Social Security</label>
+						<input type="text" class="form-control" name="social_security" id="social_security" value="{{formatted_social}}" disabled >
+					</div>  
+					<div class="col-12 col-lg-1">
+						<br>							
+						<button id="show-full-social" type="button" class="btn btn-secondary mt-2 "><i class="lni lni-eye"></i></button>
+						<button hidden type="button" id="block-social" class="btn btn-secondary mt-2">Bloquear Número</button>
+					</div>
+                    <hr>
+					{% if dependents %}
+                   	 <h4>Dependents</h4>					
+					{% endif %}
+						{% for dependent in dependents %}
+							<div class="col-12 col-lg-6">
+								<label class="form-label">Name of Dependent #{{ forloop.counter }}</label>
+								<input type="hidden" name="dependentId_{{ dependent.id }}" value="{{ dependent.id }}">
+								<input type="text" class="form-control" name="nameDependent_{{ dependent.id }}" value="{{ dependent.name }}" required >
+							</div>
+							<div class="col-12 col-lg-2">
+								<label class="form-label">Apply</label>
+								<select class="form-select" name="applyDependent_{{ dependent.id }}" required >
+									<option value="" disabled selected>Please Select</option>
+									<option value="SI" {% if dependent.apply == "SI" %}selected{% endif %}>SI</option>
+									<option value="NO" {% if dependent.apply == "NO" %}selected{% endif %}>NO</option>
+								</select>
+							</div>
+							<div class="col-12 col-lg-4">
+								<label class="form-label">Sex</label>
+								<select class="form-select" name="sexDependent_{{ dependent.id }}" required >
+									<option value="" disabled selected>Please Select</option>
+									<option value="M" {% if dependent.sex == "M" %}selected{% endif %}>MALE</option>
+									<option value="F" {% if dependent.sex == "F" %}selected{% endif %}>FEMALE</option>
+								</select>
+							</div>
+							<div class="col-12 col-lg-3">
+								<label for="kinship" class="form-label">Relationship</label>
+								<select class="form-select" id="kinship" name="kinship_{{ dependent.id }}" aria-label="Default select example">
+									<option value="" disabled selected>Please Select</option>
+									<option value="DAD" {% if dependent.kinship == 'DAD' %}selected{% endif %}>DAD</option>
+									<option value="MOM" {% if dependent.kinship == 'MOM' %}selected{% endif %}>MOM</option>
+									<option value="SON" {% if dependent.kinship == 'SON' %}selected{% endif %}>SON</option>
+									<option value="GRANDPARENT" {% if dependent.kinship == 'GRANDPARENT' %}selected{% endif %}>GRANDPARENT</option>
+									<option value="GRANDMOTHER" {% if dependent.kinship == 'GRANDMOTHER' %}selected{% endif %}>GRANDMOTHER</option>
+									<option value="COUPLE" {% if dependent.kinship == 'COUPLE' %}selected{% endif %}>COUPLE</option>
+								</select>
+							</div>
+							<div class="col-12 col-lg-3">
+								<label class="form-label">Date Birth</label>
+								<input type="text" class="form-control" id="dateBirthDependent"  name="dateBirthDependent_{{ dependent.id }}"  value="{{ dependent.date_birth|date:'m/d/Y' }}" >
+							</div>
+							<div class="col-12 col-lg-6">
+								<label class="form-label">Migration Status</label>
+								<select class="form-select" name="migrationStatusDependent_{{ dependent.id }}" required>
+									<option value="" disabled selected>Please Select</option>
+									<option value="EMPLOYMENT AUTHORIZATION" {% if   dependent.migration_status == "EMPLOYMENT AUTHORIZATION" %}selected{% endif %} >Employment Authorization</option>
+									<option value="NOTICE OF ACTION" {% if   dependent.migration_status == "NOTICE OF ACTION" %}selected{% endif %} >Notice of Action (i-797)</option>
+									<option value="REFUGEE" {% if  dependent.migration_status  == "REFUGEE" %}selected{% endif %} >Refugee</option>
+									<option value="ASYLUM" {% if dependent.migration_status  == "ASYLUM" %}selected{% endif %} >Asylum</option>
+									<option value="TPS" {% if dependent.migration_status == "TPS" %}selected{% endif %} >Temporary Protection Status (TPS)</option>
+									<option value="DOMESTIC VIOLENCE" {% if dependent.migration_status == "DOMESTIC VIOLENCE" %}selected{% endif %} >Domestic Violence</option>
+									<option value="PERMANENT RESIDENT" {% if dependent.migration_status == "PERMANENT RESIDENT" %}selected{% endif %} >Permanent Resident (Green Card)</option>
+									<option value="CONDITIONAL RESIDENT" {% if dependent.migration_status  == "CONDITIONAL RESIDENT" %}selected{% endif %} >Conditional Resident</option>
+									<option value="PAROLE" {% if dependent.migration_status  == "PAROLE" %}selected{% endif %} >Parole</option>
+									<option value="US CITIZEN" {% if dependent.migration_status  == "US CITIZEN" %}selected{% endif %} >US Citizen (Driver's License)</option>
+									<option value="STUDENT VISA" {% if dependent.migration_status  == "STUDENT VISA" %}selected{% endif %} >Student Visa (I-20)</option>
+									<option value="CURRENTLY IN PROCESS" {% if dependent.migration_status  == "CURRENTLY IN PROCESS" %}selected{% endif %} >Currently In Process (this means the client received an i-797)</option>
+								</select>
+							</div>
+							<hr>
+						{% endfor %}
+                    <H4>Plan</H4>
+						<div class="col-12 col-lg-6">
+							<label for="agent_usa" class="form-label font-weight-bold">Agente USA</label>
+							<select class="form-select" id="agent_usa" aria-label="Default select example" name="agent_usa" required>
+								<option value="" disabled selected>Please Select</option>
+								<option {% if supps.agent_usa == 'GINA PAOLA LAPEIRA - NPN 19944280' %}selected{% endif %} value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
+								<option {% if supps.agent_usa == 'LUIS EDUARDO LAPEIRA - NPN 20556081' %}selected{% endif %} value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
+								<option {% if supps.agent_usa == 'DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958' %}selected{% endif %} value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
+								<option {% if supps.agent_usa == 'ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295' %}selected{% endif %} value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
+								<option {% if supps.agent_usa == 'DANIESKA LOPEZ SEQUEIRA - NPN 20134539' %}selected{% endif %} value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
+								<option {% if supps.agent_usa == 'VLADIMIR DE LA HOZ FONTALVO - NPN 19915005' %}selected{% endif %} value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
+								<option {% if supps.agent_usa == 'FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603' %}selected{% endif %} value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
+								<option {% if supps.agent_usa == 'BORJA G CANTON HERRERA - NPN 20673324' %}selected{% endif %} value="BORJA G CANTON HERRERA - NPN 20673324">BORJA G CANTON HERRERA - NPN 20673324</option>
+								<option {% if supps.agent_usa == 'RODRIGO G CANTON - NPN 20670005' %}selected{% endif %} value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
+								<option {% if supps.agent_usa == 'EVELYN BEATRIZ HERRERA - NPN 20671818' %}selected{% endif %} value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="effectiveDateSupp" class="form-label">Effective Date</label>
+							<input type="text" class="form-control" id="effectiveDateSupp"  name="effectiveDateSupp"  value="{{ supps.effective_date|date:'m/d/Y'}}" >
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="carrierSuple" class="form-label">Carrier</label>
+							<select class="form-select" id="carrierSuple"  aria-label="Default select example" name="carrierSuple" required>
+								<option value="" disabled selected>Please Select</option>
+								<option value="AFLAC" {% if supps.company == 'AFLAC' %}selected{% endif %}> AFLAC</option>                             
+								<option value="AETNA" {% if supps.company == 'AETNA' %}selected{% endif %}> AETNA </option>
+								<option value="ALLSTATE HEALTH SOLUTIONS" {% if supps.company == 'ALLSTATE HEALTH SOLUTIONS' %}selected{% endif %}> ALLSTATE HEALTH SOLUTIONS </option>  
+								<option value="COMBINED" {% if supps.company == 'COMBINED' %}selected{% endif %}> COMBINED </option>
+								<option value="CIGNA" {% if supps.company == 'CIGNA' %}selected{% endif %}> CIGNA </option>    
+								<option value="MANHATTAN LIFE" {% if supps.company == 'MANHATTAN LIFE' %}selected{% endif %}> MANHATTAN LIFE </option>
+								<option value="METLIFE" {% if supps.company == 'METLIFE' %}selected{% endif %}> METLIFE </option>
+								<option value="OSCAR" {% if supps.company == 'OSCAR' %}selected{% endif %}> OSCAR</option> 
+								<option value="PIVOT" {% if supps.company|default:'' == 'PIVOT' %}selected{% endif %}>PIVOT</option>  
+								<option value="SUREBRIDGE" {% if supps.company == 'SUREBRIDGE' %}selected{% endif %}> SUREBRIDGE </option>    
+								<option value="UNITED" {% if supps.company == 'UNITED' %}selected{% endif %}> UNITED </option>    
+								</select>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="premiumSupp" class="form-label">Premium</label>
+							<input type="number" class="form-control" step="0.01"  id="premiumSupp" value="{{ supps.premium }}"  name="premiumSupp" >
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="preventiveSupp" class="form-label">Preventive</label>
+							<select class="form-select" id="preventiveSupp"  name="preventiveSupp" aria-label="Default select example" required>
+								<option selected disable></option>								
+								<option value="N/A" {% if supps.preventive == 'N/A' %}selected{% endif %}>N/A </option>
+								<option value="60" {% if supps.preventive == '60' %}selected{% endif %}>60% </option>
+								<option value="100" {% if supps.preventive == '100' %}selected{% endif %}>100%</option>
+								<option value="SIN ESPERA" {% if supps.preventive == 'SIN ESPERA' %}selected{% endif %}>Sin Espera</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-5">
+							<label for="policyTypeSupp" class="form-label">Policy Type</label>
+							<input type="text" class="form-control" id="policyTypeSupp" name="policyTypeSupp" value="{{ supps.policy_type }}" disabled >
+						</div>					
+						<div class="col-12 col-lg-2">
+							<label for="coverageSupp" class="form-label">Coverage</label>
+							<select class="form-select" id="coverageSupp"  name="coverageSupp" aria-label="Default select example" required>
+								<option value="" disabled selected>Please Select</option>
+								<option value="N/A" {% if supps.coverage == 'N/A' %}selected{% endif %}>N/A </option>
+								<option value="0" {% if supps.coverage == '0' %}selected{% endif %} >0</option>
+								<option value="500" {% if supps.coverage == '500' %}selected{% endif %} >500</option>
+								<option value="750" {% if supps.coverage == '750' %}selected{% endif %} >750</option>
+								<option value="1000" {% if supps.coverage == '1000' %}selected{% endif %} >1000</option>
+								<option value="1500" {% if supps.coverage == '1500' %}selected{% endif %} >1500</option>
+								<option value="2000" {% if supps.coverage == '2000' %}selected{% endif %} >2000</option>
+								<option value="2500" {% if supps.coverage == '2500' %}selected{% endif %} >2500</option>
+								<option value="3000" {% if supps.coverage == '3000' %}selected{% endif %} >3000</option>
+								<option value="3500" {% if supps.coverage == '3500' %}selected{% endif %} >3500</option>
+								<option value="4000" {% if supps.coverage == '4000' %}selected{% endif %} >4000</option>
+								<option value="4500" {% if supps.coverage == '4500' %}selected{% endif %} >4500</option>
+								<option value="5000" {% if supps.coverage == '5000' %}selected{% endif %} >5000</option>
+								<option value="10000" {% if supps.coverage == '10000' %}selected{% endif %} >10000</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="deducibleSupp" class="form-label">Deducible</label>
+							<select class="form-select" id="deducibleSupp"  name="deducibleSupp"  aria-label="Default select example">
+								<option value="" disabled selected>Please Select</option>
+								<option value="100" {% if supps.deducible == '100' %}selected{% endif %} >100</option>
+									<option value="50" {% if supps.deducible == '50' %}selected{% endif %} >50</option>
+									<option value="0" {% if supps.deducible == '0' %}selected{% endif %} >0</option>
+									<option value="N/A" {% if supps.deducible == 'N/A' %}selected{% endif %}>N/A </option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-5">
+							<label for="statusSupp" class="form-label">Status</label>
+							<select class="form-select" id="statusSupp"  name="statusSupp"  aria-label="Default select example">
+								<option value="" disabled selected>Please Select</option>
+									{% for  list_drow in list_drow %}
+										<option value="{{list_drow.profiling_supp}}" {% if supps.status == list_drow.profiling_supp %}selected{% endif %} >{{list_drow.profiling_supp}}</option>                      
+									{% endfor %}						
+							</select>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="policyNumber" class="form-label">Policy Number</label>
+							<input type="text" class="form-control" name="policyNumber" id="policyNumber" value="{{supps.policyNumber}}">
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="typePaymeSupp" class="form-label">Type Paymet</label>
+							<select class="form-select" id="typePaymeSupp"  name="typePaymeSupp"  aria-label="Default select example">
+								<option value="" disabled selected>Please Select</option>
+								<option value="CARD" {% if supps.payment_type == 'CARD' %}selected{% endif %} >CARD</option>
+								<option value="BANK ACCOUNT" {% if supps.payment_type == 'BANK ACCOUNT' %}selected{% endif %} >BANK ACCOUNT</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="date_effective_coverage" class="form-label">Date Effective Coverage</label>
+							<input type="text" class="form-control" name="date_effective_coverage" id="date_effective_coverage" value="{{supps.date_effective_coverage|date:'m/d/Y'}}" >
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="date_effective_coverage_end" class="form-label">Date Effective Coverage End</label>
+							<input type="text" class="form-control" name="date_effective_coverage_end" id="date_effective_coverage_end" value="{{supps.date_effective_coverage_end|date:'m/d/Y'}}" >
+						</div> 
+						<div class="col-12 col-lg-6">
+							<label for="observationSuple" class="form-label">Observation</label>
+							<textarea class="form-control" id="observationSuple" name="observationSuple" rows="3" type="text" style="resize: none">{{supps.observation}}</textarea>
+						</div>
+						<div class="col-12 col-lg-6">
+							<label for="observationObama" class="form-label">Observation Agent</label>
+							<textarea class="form-control" id="observationObama" name="observationObama" disabled rows="3" style="resize: none">{{ obsSuppText }}</textarea>
+						</div>
+						{% if request.user.role == 'A' %}
+						<div class="col-12 col-lg-6" id="obs_agent">
+							<label for="obs_agent" class="form-label">OBS. AGENT</label>
+							<input type="text" class="form-control" id="obs_agent" name="obs_agent"  >
+						</div> 
+						{% endif %}
+                    <hr> 					                  
+                    <div class="col-md-12">
+                        <div class="d-md-flex d-grid align-items-center gap-3">
+							<button type="submit" name="action" value="save_supp" id="enviar" class="btn btn-primary px-4"  >Submit</button>
+							<button type="submit" name="action" id="enviar2" value="save_supp_agent" class="btn btn-primary px-4" style="display: none;">Submits</button>                            
+							<a href="{% url 'clientSupp' %}" class="btn btn-light px-4">Back</a>
+                        </div>
+                    </div>
+                    {% csrf_token %}	
+                </form>
+				<hr>
+				
+				<div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+					<div style=" padding: 20px; max-width: 400px; margin: 100px auto; border-radius: 8px; text-align: center;">
+						<h3>Ingresa la clave</h3>
+						<input type="password" id="password-input" class="form-control" placeholder="Clave" style="margin: 10px 0; width: 100%;">
+						<button id="submit-password" class="btn btn-primary">Enviar</button>
+						<button id="cancel-password" class="btn btn-secondary">Cancelar</button>
+					</div>
+				</div>
+
+				{% if request.user.role != 'A' %}
+					<h5>Type Entry:</h5>
+					<div class="col-12 col-lg-12">
+						<!-- Botones para abrir los modales -->
+						<button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalIngresarTexto">
+							Enter Observation
+						</button>
+						<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalVerTexto">
+							See Observations
+						</button>
+				
+						<!-- Modal para ingresar texto -->
+						<div class="modal fade" id="modalIngresarTexto" tabindex="-1" aria-labelledby="modalIngresarTextoLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="modalIngresarTextoLabel">Enter Observation</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<form id="formIngresarTexto" action="{% url 'saveCustomerObservationSupp' %}" method="POST">
+											{% csrf_token %}
+											<input type="hidden" name="plan_id" value="{{ supps.id }}">
+											<input type="hidden" name="type_plan" value="SUPP">
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Text:</label>
+												<textarea class="form-control" id="textoIngresado" name="textoIngresado" rows="4" required></textarea>
+											</div>
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Typification:</label>
+												<select class="form-select"  name="observaciones[]"  id="textoIngresados" multiple required>
+													<option value="1095-A">1095-A</option>
+													<option value="AUDITED">Audited</option>
+													<option value="ACTIVE">Active</option>
+													<option value="CANCEL">Cancel</option>
+													<option value="PLAN CHANGE">Plan Change</option>
+													<option value="AGENT CHANGE">Agent Change</option>
+													<option value="T/C CHANGE">T/C Change</option>
+													<option value="CARRIER">Carrier</option>
+													<option value="APPOINTMENTS">Appointments</option>
+													<option value="SATISFIED CUSTOMER">Satisfied Customer</option>
+													<option value="CORRECTION">Correction</option>
+													<option value="PAYMENT ERROR CORRECTION">Payment Error Correction</option>
+													<option value="PORTAL CREATION">Portal/Member ID/Brochure Creation</option>
+													<option value="DEMOGRAPHIC DATA">Demographic Data</option>
+													<option value="DOCUMENTS IN SHERPA">Documents in Sherpa</option>
+													<option value="DOCUMENTS RECEIVED">Documents Received</option>
+													<option value="ID SHIPMENT">ID Shipment</option>
+													<option value="DENTIST SHIPMENT">Dentist Shipment</option>
+													<option value="OPTOMETRIST SHIPMENT">Optometrist Shipment</option>
+													<option value="PLAN EXPLANATION">Plan Explanation</option>
+													<option value="OUT OF SERVICE">Out of Service</option>
+													<option value="HEALTHSAFE ID">HEALTHSAFE ID</option>
+													<option value="ID MEMBER">ID Member</option>
+													<option value="ID SUPERVISOR">ID Supervisor</option>
+													<option value="CARRIER SUP CALL">Carrier Supervisor Call</option>
+													<option value="EFFECTIVE MANAGEMENT">Effective Management</option>
+													<option value="WELCOME MESSAGE">Welcome Message</option>
+													<option value="INFORMATIVE MESSAGE">Informative Message</option>
+													<option value="NO ANSWER">No Answer</option>
+													<option value="OTHER PARTY">Other Party</option>
+													<option value="DENTAL PAYMENT UHC">Dental Payment via UHC</option>
+													<option value="VISION PAYMENT UHC">Vision Payment via UHC</option>
+													<option value="CARRIER ACA PORTAL">Carrier ACA Portal</option>
+													<option value="CARD RECEIPT">Card Receipt</option>
+													<option value="RECOVERED">Recovered</option>
+													<option value="REFERRALS">Referrals</option>
+													<option value="ROLLED OVER">Rolled Over</option>
+													<option value="PREMIUM PAYMENT">Premium Payment</option>
+													<option value="PCP">PCP</option>
+													<option value="REQUEST DOCUMENTS">Request Documents</option>
+													<option value="SUPPLEMENTARY">Supplemental</option>
+													<option value="TRANSFER">Transfer</option>
+													<option value="UHC ID READY">UHC ID Ready</option>
+													<option value="CALL BACK">Call Back</option>
+													<option value="INFORMATIVE CALLS ACA SUP">Informative Calls ACA/Supplementaries</option>
+													<option value="HANGS UP">Hangs Up</option>
+												</select>
+											</div>
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Typification the Call:</label>
+												<select class="form-select"  name="typeCall" required >
+													<option></option>
+													<option value="INBOUND" >Inbound </option>
+													<option value="OUTBOUND" >Outbound </option>
+													<option value="WHATSAPP" >WhatsApp</option>
+													<option value="TXT MESSAGE" >Txt Message</option>
+													<option value="SHERPA" >Sherpa</option>
+												</select>
+											</div>
+											<button type="submit" class="btn btn-primary">Guardar</button>
+										</form>
+										
+									</div>
+								</div>
+							</div>
+						</div>
+				
+						<!-- Modal para ver las observaciones -->
+						<div class="modal fade" id="modalVerTexto" tabindex="-1" aria-labelledby="modalVerTextoLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="modalVerTextoLabel">Saved Remarks</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										{% if obsCustomer %}
+											<ul class="list-group">
+												{% for observation in obsCustomer %}
+													<li class="list-group-item">
+														<strong>{{ observation.agent }}:</strong> {{ observation.content }} <strong>Date:</strong> {{ observation.created_at }}
+													</li>
+												{% endfor %}
+											</ul>
+										{% else %}
+											<p>No hay observaciones guardadas.</p>
+										{% endif %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endif %} 
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	
+
+	<!-- Agregar Flatpickr -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	
+	<!-- Incluir JS de Choices.js -->
+	<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+	<script src="{% static "assets/js/blockSocial.js" %}"></script>
+	{% if request.user.role == 'A' %}
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				var form = document.querySelector('form');
+				var formElements = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+		
+				// Deshabilitar todos los campos del formulario excepto los de tipo 'hidden'
+				formElements.forEach(function (element) {
+					if (element.id !== 'id_client') {  // Asegúrate de no deshabilitar 'id_client'
+						element.disabled = true;
+					}
+				});
+		
+				// Manejar el div y el input de 'obs_agent'
+				var divObsAgent = document.getElementById('obs_agent');
+				var inputObsAgent = document.querySelector('input#obs_agent');
+		
+				// Condición para habilitar y mostrar el campo (modificar según sea necesario)
+				var conditionMet = /* tu lógica aquí */ true; // Cambia esta lógica según lo que necesites
+		
+				if (conditionMet) {
+					if (divObsAgent) divObsAgent.style.display = 'block'; // Mostrar el div
+					if (inputObsAgent) inputObsAgent.disabled = false;    // Habilitar el input
+				} else {
+					if (divObsAgent) divObsAgent.style.display = 'none'; // Ocultar el div
+				}
+		
+				// Opcional: Ocultar botón submit
+				var submitButton = form.querySelector('button[id="enviar"]');
+				var submitButton2 = form.querySelector('button[id="enviar2"]');
+				if (submitButton && submitButton2) {
+					submitButton.style.display = 'none';     // Oculta el primer botón submit
+					submitButton2.style.display = 'inline';  // Muestra el segundo botón submit
+				}
+			});
+		</script>	
+	{% endif %} 
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const selectElement = document.querySelector('#textoIngresados');
+			const choices = new Choices(selectElement, {
+				removeItemButton: true,  // Muestra el botón de eliminar las opciones seleccionadas
+				searchEnabled: true,     // Habilita la búsqueda en el menú desplegable
+				placeholderValue: 'Seleccione una opción...',
+				itemSelectText: '',      // Elimina el texto 'Selecciona un elemento'
+			});
+			//formateo de la fecha
+			flatpickr("#date_birth", {dateFormat: "m/d/Y", });
+			flatpickr("#effectiveDateSupp", {dateFormat: "m/d/Y",  }); 
+			flatpickr("[id^='dateBirthDependent']", {dateFormat: "m/d/Y",  }); 
+			flatpickr("#date_effective_coverage", {dateFormat: "m/d/Y",  }); 
+			flatpickr("#date_effective_coverage_end", {dateFormat: "m/d/Y",  }); 
+		});
+	</script>
+
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Creation Quality</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">CREATION REPORT QUALITY</h6>
+<hr/>
+<div class="row">
+	<div class="col-xl-10 mx-auto">
+		<div class="card">
+			<div class="card-header px-4 py-3">
+				<h5 class="mb-0">Date information</h5>
+			</div>
+			<div class="card-body p-4">
+				<form class="row g-3 needs-validation" method="POST" >
+					<div class="col-md-12">
+						<label for="agent" class="form-label">Agent</label>
+						<input hidden name="Action" value="Quality">						
+						<select class="form-select" id="agent"  name="agent" required> 
+							<option value="" disabled selected>Please Select</option>            
+							{% for user in users %}
+								<option value="{{user.id}}"  >{{user.first_name}} {{user.last_name}}</option>                      
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-4">
+						<label for="category" class="form-label">Category</label>
+						<select id="inputState" class="form-select" id="category" name="category" >
+							<option value="" disabled selected>Please Select</option> 
+							<option value="A"> A </option>
+							<option Value="B"> B - BUZON</option>
+							<option Value="CI"> CI - CLIENTE INTERESADO</option>
+							<option Value="CNO"> CNO - CLIENTE NO INTERESADO </option>
+							<option Value="GH"> GH - GESTION HECHA</option>
+							<option Value="INCALL"> INCALL</option>
+							<option value="LA"> LA - LLAMADA EN INGLES</option>
+							<option value="LE"> LE </option>
+							<option value="LC"> LC </option>
+							<option value="LO"> LO - Linea Ocupada </option>
+							<option value="LR"> LR - LLAMAR DE VUELTA</option>
+							<option value="S"> S - SILENCIO</option>
+							<option value="MDC"> MDC - MEDICARE </option>
+							<option value="NA"> NA</option>
+							<option value="NC"> NC - CLIENTE NO CONTESTA SIN BUZON</option>
+							<option value="NL"> NL - NO LLAMAR</option>
+							<option Value="NI"> NI</option>		
+							<option Value="NR"> NR - NO RESPONDE</option>											
+							<option value="NOA"> NOA - NO APLICA</option>
+							<option value="NAC"> NAC </option>                                              
+							<option Value="NHC"> NHC - NO HAY COBERTURA</option>
+							<option Value="NE"> NE - NUMERO EQUIVOCADO</option>
+							<option value="VH"> VH - VENTA HECHA</option>
+							<option value="VEN"> VEN - VENTA</option>
+							<option value="YAT"> YAT - YA TIENE SEGURO</option>
+						</select>
+					</div>
+					<div class="col-md-4">
+						<label for="amount" class="form-label">Amount</label>
+						<input type="number"  class="form-control" id="amount" name="amount" >
+					</div>
+					<div class="col-md-4">
+						<label for="date" class="form-label">Date</label>
+						<input type="date" class="form-control" id="date" name="date" required>
+					</div>
+					<div class="col-md-6">
+						<label for="findings" class="form-label">Findings</label>
+						<textarea class="form-control" id="findings" name="findings" rows="3" required></textarea>
+					</div>
+					<div class="col-md-6">
+						<label for="observation" class="form-label">Observation</label>
+						<textarea class="form-control" id="observation" name="observation" rows="3" ></textarea>
+					</div>
+					<div class="col-md-12">
+						<div class="d-md-flex d-grid align-items-center gap-3">
+							<button type="submit" class="btn btn-primary px-4">Submit</button>
+						</div>
+					</div>
+					{% csrf_token %}
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<HR>
+
+<div class="row">
+	<div class="col-xl-10 mx-auto">
+		<div class="card">
+			<div class="card-header px-4 py-3">
+				<h5 class="mb-0">Date information Call</h5>
+			</div>
+			<div class="card-body p-6">
+				<form class="row g-3 needs-validation" method="POST" >
+					<div class="col-md-6">
+						<label for="agent" class="form-label">Agent</label>
+						<input hidden name="Action" value="Call">	
+						<select class="form-select" id="agent"  name="agent" required> 
+							<option value="" disabled selected>Please Select</option>            
+							{% for user in users %}
+								<option value="{{user.id}}" >{{user.first_name}} {{user.last_name}}</option>                      
+							{% endfor %}
+						</select>
+					</div>	
+					<div class="col-md-6">
+						<label for="date" class="form-label">Date</label>
+						<input type="date" class="form-control" id="date" name="date" required>
+					</div>				
+					<div class="col-md-4">
+						<label for="daily" class="form-label">Number of daily calls</label>
+						<input type="number" min="1" class="form-control" id="daily" name="daily" required>
+					</div>			
+					<div class="col-md-4">
+						<label for="answered" class="form-label">Calls answered</label>
+						<input type="number" min="0" class="form-control" id="answered" name="answered" required>
+					</div>	
+					<div class="col-md-4">
+						<label for="mins" class="form-label">Calls over 3mins</label>
+						<input type="number" min="0" class="form-control" id="mins" name="mins" required >
+					</div>			
+					<div class="col-md-12">
+						<div class="d-md-flex d-grid align-items-center gap-3">
+							<button type="submit" class="btn btn-primary px-4">Submit</button>
+						</div>
+					</div>
+					{% csrf_token %}
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+
+	
+
+{% endblock %}

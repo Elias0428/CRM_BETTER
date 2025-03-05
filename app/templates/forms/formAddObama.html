@@ -1,0 +1,173 @@
+{% extends "dashboard/index.html" %}
+<!doctype html>
+<html lang="en">
+
+{% load static %}
+
+{% block head %}
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--favicon-->
+	<link rel="icon" href="{% static "assets/images/favicon-32x32.png" %}" type="image/png" />
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+
+	<!-- Agregar el estilo de Flatpickr -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+	<title>Add Obamacare</title>
+{% endblock %}
+
+{% block page_content %}
+<!--end breadcrumb-->
+<div class="card">
+	<div class="card-body">
+		<h5 class="mb-1">Add Obamacare</h5>
+		<p class="mb-4">Information about the Obamacare</p>
+		<hr/>
+		<div id="editor">
+			<form method="POST">
+			{% csrf_token %}
+				<div class="row g-3">
+					<div class="col-12 col-lg-6">
+						<label for="agent_usa" class="form-label font-weight-bold">Agente USA</label>
+						<select class="form-select" id="agent_usa" aria-label="Default select example" name="agent_usa">
+							<option disabled selected value="">Please Select</option>
+							<option value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
+							<option value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
+							<option value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
+							<option value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
+							<option value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
+							<option value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
+							<option value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
+							<option value="BORJA G CANTON HERRERA - NPN 20673324">BORJA G CANTON HERRERA - NPN 20673324</option>
+							<option value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
+							<option value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-6">
+						<label for="taxes" class="form-label">Income</label>
+						<input type="number" class="form-control" id="taxes" name="taxes" >
+					</div>
+					<div class="col-12 col-lg-6">
+						<label for="plan_name" class="form-label">Plan Name</label>
+						<input type="text" class="form-control" id="plan_name"  name="plan_name" >
+					</div>
+					<div class="col-12 col-lg-6">	
+						<label for="work" class="form-label font-weight-bold">Work</label>
+						<select class="form-select" id="work" aria-label="Default select example"  name="work"   >
+							<option disabled selected value="">Please Select</option>
+							<option value="W2"  >W2</option>
+							<option value="1099" >1099</option>
+							<option value="Other" >Other</option> 
+						</select>
+					</div>
+					<div class="col-12 col-lg-6">
+						<label for="subsidy" class="form-label">Subsidy</label>
+						<input type="number" class="form-control" id="subsidy" step="0.01" name="subsidy">
+					</div>								
+					<div class="col-12 col-lg-6">
+						<label for="carrier" class="form-label">Carrier</label>
+						<select class="form-select" id="carrier"  name="carrier"  >
+							<option disabled selected value="">Please Select</option>
+							<option value="AETNA" >AETNA</option>
+							<option value="AMBETTER" >AMBETTER</option>
+							<option value="ANTHEM" >ANTHEM</option>
+							<option value="AVMED" >AVMED</option>
+							<option value="BLUE CROSS" >BLUE CROSS</option>
+							<option value="BRIGHT" >BRIGHT</option>
+							<option value="CARE SOURCE" >CARE SOURCE</option>
+							<option value="CIGNA"  >CIGNA</option>
+							<option value="FLORIDA BLUE" >FLORIDA BLUE</option>
+							<option value="FRIDAY" >FRIDAY</option>
+							<option value="MEDICA" >MEDICA</option>
+							<option value="MOLINA" >MOLINA</option>
+							<option value="OSCAR" >OSCAR</option>
+							<option value="UNITED" >UNITED</option>
+							<option value="CHRISTUS HEALTH" >CHRISTUS HEALTH</option>
+							<option value="US HEALTH AND LIFE" >US HEALTH AND LIFE</option>
+							<option value="MODA" >MODA</option>
+							<option value="PROVIDENCE">PROVIDENCE</option>
+							<option value="AERIHEALTH CARITAS">AERIHEALTH CARITAS</option>
+							<option value="HEALTH FRIST" >HEALTH FRIST</option>
+						</select>
+					</div>								
+					<div class="col-12 col-lg-4">
+						<label for="doc_income" class="form-label">Income document</label>
+						<select class="form-select" id="doc_income"  name="doc_income">
+							<option value ="" disabled selected>Please Select</option>
+							<option value = True>Yes</option>
+							<option value = False>No</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="doc_migration" class="form-label">Migration document</label>
+						<select class="form-select" id="doc_migration" name="doc_migration">
+							<option value = "" disabled selected>Please Select</option>
+							<option value = True >Yes</option>
+							<option value = False >No</option>
+						</select>
+					</div>
+					<div class="col-12 col-lg-4">
+						<label for="premium" class="form-label">Premium</label>
+						<input type="number" class="form-control" id="premium" step="0.00" value="{{aca_plan_data.premium}}"  name="premium" required >
+					</div>
+					<div class="col-12 col-lg-12">
+						<label for="observationObama" class="form-label">Observation</label>
+						<textarea class="form-control" id="observationObama" name="observationObama" rows="3" placeholder="Obamacare plan observation" style="resize: none">{{aca_plan_data.observation}}</textarea>
+					</div><!---end row-->
+					<div class="col-md-12">
+						<div class="d-md-flex d-grid align-items-center gap-3">
+							<button type="submit" class="btn btn-primary px-4">Submit</button>
+						</div>
+					</div>				
+				</div>	
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block end_js %}
+	<!--end switcher-->
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+	<script src="{% static "assets/js/validationFormCreateClient.js" %}"></script>
+
+	<!-- Agregar la librería de Flatpickr -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+	<script>
+		// Usar Flatpickr para formatear el campo de fecha
+		document.addEventListener('DOMContentLoaded', function () {
+			flatpickr("#date_birth", {
+				dateFormat: "m/d/Y", // Formato MM/DD/YYYY
+			});
+		});
+	</script>
+
+{% endblock %}

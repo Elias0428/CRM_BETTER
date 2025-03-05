@@ -1,0 +1,217 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Table Typification</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">typification</h6>
+<hr/>
+<div class="card">
+    <div class="card-header">
+        <form method="POST" class="row">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label for="start_date">Start date:</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date">End date:</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="agent">Agent:</label>
+                <select class="form-select" name="agent" id="agent" required>
+                    <option value="" disabled selected>Select Please</option>
+                    {% for agent in agents %}
+                        <option value="{{ agent.id }}" >{{ agent.first_name }} {{ agent.last_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="typification">Typification:</label>
+                <select class="form-select" id="typification" name="typification" required>
+                    <option value="" disabled selected>Select Please</option>
+                    <option value="1095-A">1095-A</option>
+                    <option value="AUDITED">Audited</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="CANCEL">Cancel</option>
+                    <option value="PLAN CHANGE">Plan Change</option>
+                    <option value="AGENT CHANGE">Agent Change</option>
+                    <option value="T/C CHANGE">T/C Change</option>
+                    <option value="CARRIER">Carrier</option>
+                    <option value="APPOINTMENTS">Appointments</option>
+                    <option value="SATISFIED CUSTOMER">Satisfied Customer</option>
+                    <option value="CORRECTION">Correction</option>
+                    <option value="PAYMENT ERROR CORRECTION">Payment Error Correction</option>
+                    <option value="PORTAL CREATION">Portal/Member ID/Brochure Creation</option>
+                    <option value="DEMOGRAPHIC DATA">Demographic Data</option>
+                    <option value="DOCUMENTS IN SHERPA">Documents in Sherpa</option>
+                    <option value="DOCUMENTS RECEIVED">Documents Received</option>
+                    <option value="ID SHIPMENT">ID Shipment</option>
+                    <option value="DENTIST SHIPMENT">Dentist Shipment</option>
+                    <option value="OPTOMETRIST SHIPMENT">Optometrist Shipment</option>
+                    <option value="PLAN EXPLANATION">Plan Explanation</option>
+                    <option value="OUT OF SERVICE">Out of Service</option>
+                    <option value="HEALTHSAFE ID">HEALTHSAFE ID</option>
+                    <option value="ID MEMBER">ID Member</option>
+                    <option value="ID SUPERVISOR">ID Supervisor</option>
+                    <option value="CARRIER SUP CALL">Carrier Supervisor Call</option>
+                    <option value="EFFECTIVE MANAGEMENT">Effective Management</option>
+                    <option value="WELCOME MESSAGE">Welcome Message</option>
+                    <option value="INFORMATIVE MESSAGE">Informative Message</option>
+                    <option value="NO ANSWER">No Answer</option>
+                    <option value="OTHER PARTY">Other Party</option>
+                    <option value="DENTAL PAYMENT UHC">Dental Payment via UHC</option>
+                    <option value="VISION PAYMENT UHC">Vision Payment via UHC</option>
+                    <option value="CARRIER ACA PORTAL">Carrier ACA Portal</option>
+                    <option value="CARD RECEIPT">Card Receipt</option>
+                    <option value="RECOVERED">Recovered</option>
+                    <option value="REFERRALS">Referrals</option>
+                    <option value="ROLLED OVER">Rolled Over</option>
+                    <option value="PREMIUM PAYMENT">Premium Payment</option>
+                    <option value="PCP">PCP</option>
+                    <option value="REQUEST DOCUMENTS">Request Documents</option>
+                    <option value="SUPPLEMENTAL">Supplemental</option>
+                    <option value="TRANSFER">Transfer</option>
+                    <option value="UHC ID READY">UHC ID Ready</option>
+                    <option value="CALL BACK">Call Back</option>
+                    <option value="INFORMATIVE CALLS ACA SUP">Informative Calls ACA/Supplementaries</option>
+                    <option value="HANGS UP">Hangs Up</option>
+                </select>
+            </div>
+            <div class="col-md-4 align-self-end mt-2">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'typification' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table" >
+            <table id="tableTypification" width="100%" cellspacing="0" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Name Client</th>
+						<th>Date</th>
+						<th>T. Call</th>
+						<th>Observation</th>
+						<th>typification</th>
+						<th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for typifications in typification %}
+                    <tr>
+                        <td>{{typifications.agent.first_name}} {{typifications.agent.last_name}}</td>
+                        <td>{{typifications.client.first_name}} {{typifications.client.last_name}}</td>
+                        <td>{{typifications.created_at}}</td>
+						<td>{{typifications.typeCall}}</td>
+						<td>{{typifications.content}}</td>
+						<td>{{typifications.typification}}</td>
+						<td>
+							<div class="d-flex order-actions">
+								<a href="" class="view-observation" data-id="{{ typifications.id }}"><i class='bx bxs-edit'></i></a>
+								{% if request.user.is_superuser %}
+								<a href="{% url 'toggleTypification' typifications.id %}" class="ms-3"><i class='bx bxs-trash'></i></a>
+								{% endif %}
+							</div>
+						</td> 
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal de Detalles -->
+<div class="modal fade" id="observationDetailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registration Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Agent:</strong>
+                        <p id="modal-agent-name"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Client:</strong>
+                        <p id="modal-client-name"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Type of Policy:</strong>
+                        <p id="modal-type-police"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Type of Call:</strong>
+                        <p id="modal-type-call"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Date of Creation:</strong>
+                        <p id="modal-created-at"></p>
+                    </div>
+                    <div class="col-md-12">
+                        <strong>Typification:</strong>
+                        <p id="modal-typification"></p>
+                    </div>
+                    <div class="col-md-12">
+                        <strong>Observation:</strong>
+                        <p id="modal-content"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	<script src="{% static "assets/js/modalTypification.js" %}"></script>
+
+	<script>	
+		$(document).ready(function() {
+			var table = $('#tableTypification').DataTable( {
+				lengthChange: false,
+				buttons: [ 'excel',  'print']
+			} );
+		 
+			table.buttons().container()
+				.appendTo( '#tableTypification_wrapper .col-md-6:eq(0)' );
+		} );
+	</script>
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+
+
+{% endblock %}

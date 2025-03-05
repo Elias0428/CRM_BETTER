@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" class="dark-theme">
+
+{% load static %}
+
+
+<!-- Mirrored from codervent.com/syndron/demo/vertical/index2.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 29 Jul 2023 03:51:49 GMT -->
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--favicon-->
+	<link rel="icon" href="{% static "assets/images/icons/LogoB.jpg" %}" type="image/png" />
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+
+	{% block head %}
+	<!--plugins-->
+	<link href="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" %}" rel="stylesheet"/>
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/highcharts/css/highcharts.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+
+	<title>Home {{request.user.role}}</title>
+	{% endblock %}
+</head>
+
+
+<body>
+	<!--wrapper-->
+	<div class="wrapper">
+		<!--sidebar wrapper -->
+		<div class="sidebar-wrapper" data-simplebar="true">
+			<div class="sidebar-header">
+				<div>
+					<h4 class="logo-text">CRM RD</h4>
+				</div>
+				<div class="toggle-icon ms-auto">
+					<i class="fadeIn animated bx bx-menu"></i>
+				</div>
+			 </div>
+			<!--navigation-->
+			<ul class="metismenu" id="menu">
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-home-alt'></i></div>
+						<div class="menu-title">Dashboard</div>
+					</a>
+					<ul>						
+						<li> <a href="{% url "index" %}"><i class='bx bx-radio-circle'></i>Home</a>
+						</li>
+						{% if request.user.role == 'Admin' or request.user.role == 'S' or request.user.role == 'TV' %}
+						{% if toggle %}
+						<li> <a href="{% url "monthLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+						{% else %}
+						<li> <a href="{% url "weeklyLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+						{% endif %}
+						{% endif %}
+					</ul>
+				</li>
+				<li class="menu-label">enter data</li>
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class="fadeIn animated bx bx-user-plus"></i></div>
+						<div class="menu-title">New Sale</div>
+					</a>
+					<ul>
+						<li> <a href="{% url "formCreateClient" %}"><i class='bx bx-radio-circle'></i>New Client</a>
+						</li>
+						<li> <a href="{% url "select_client" %}"><i class='bx bx-radio-circle'></i>Existing Client</a>
+						</li>
+						<li> <a href="{% url "formCreateAlert" %}"><i class='bx bx-radio-circle'></i>Create Alert</a>
+						</li>
+					</ul>
+				</li>
+				<li class="menu-label">Tables</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="fadeIn animated bx bx-task"></i></div>
+						<div class="menu-title">Information Client</div>
+					</a>
+					<ul>
+						<li> <a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
+						</li>
+						<li> <a href="{% url "clientSupp" %}"><i class='bx bx-radio-circle'></i>Client Supp</a>
+						</li>
+						<li> <a href="{% url "alert" %}"><i class='bx bx-radio-circle'></i>Alert</a>
+						</li>
+					</ul>
+				</li>
+				{% if request.user.role == 'Admin' or request.user.role == 'S'  %}
+				<li class="menu-label">Reports</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="fadeIn animated bx bx-spreadsheet"></i></div>
+						<div class="menu-title">Sales Reports</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'typification' %}"><i class='bx bx-radio-circle'></i>Typification</a>
+						</li>
+						<li> <a href="{% url 'sale' %}"><i class='bx bx-radio-circle'></i>Sale</a>
+						</li>
+						<li> <a href="{% url 'averageSales' %}"><i class='bx bx-radio-circle'></i>Average Sales</a>
+						</li>
+						<li> <a href="{% url 'customerTypification' %}"><i class='bx bx-radio-circle'></i>Typification customer</a>
+						</li>
+					</ul>
+				</li>
+				<li class="menu-label">Chart</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="fadeIn animated bx bx-line-chart"></i></div>
+						<div class="menu-title">Graphical reports</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'averageCustomer' %}"><i class='bx bx-radio-circle'></i>Effective Calls</a>
+						</li>
+					</ul>
+				</li>
+				{% endif %}
+				{% if request.user.role == 'Admin' or request.user.role == 'AU' or request.user.role == 'S' %}
+				<li class="menu-label">Reports Quality</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="lni lni-checkbox"></i> </div>
+						<div class="menu-title">Quality</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'formCreateControl' %}"><i class='bx bx-radio-circle'></i>Add Quality</a>
+						</li>
+						<li> <a href="{% url 'control' %}"><i class='bx bx-radio-circle'></i>View quality</a>
+						</li>
+						<li> <a href="{% url 'createQuality' %}"><i class='bx bx-radio-circle'></i>Generate pdf</a>
+						</li>
+					</ul>
+				</li>
+				{% endif %}
+				
+				<li class="menu-label">BD Excel</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="lni lni-folder"></i> </div>
+						<div class="menu-title">Add BD</div>
+					</a>
+					<ul>
+						{% if request.user.role == 'Admin'  %}
+							<li> <a href="{% url "upload_excel" %}"><i class='bx bx-radio-circle'></i>Add Excel</a>
+							</li>
+							<li> <a href="{% url "manage_agent_assignments" %}"><i class='bx bx-radio-circle'></i>Assign BD to agents</a>
+							</li>
+							<li> <a href="{% url "reportBd" %}"><i class='bx bx-radio-circle'></i>Report BD</a>
+							</li>
+						{% endif %}
+						<li> <a href="{% url "bd" %}"><i class='bx bx-radio-circle'></i>View BD</a>
+						</li>
+					</ul>
+				</li>
+				{% if request.user.role == 'Admin'  %}
+				<li class="menu-label">User</li>
+				<li>
+					<li> <a href="{% url "formCreateUser" %}"><i class='bx bx-radio-circle'></i>View User</a>
+					</li>
+				</li>
+				{% endif %}
+				
+			</ul>
+			<!--end navigation-->
+		</div>
+		<!--end sidebar wrapper -->
+		<!--start header -->
+		<header>
+			<div class="topbar d-flex align-items-center">
+				<nav class="navbar navbar-expand gap-3">
+					<div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
+					</div>
+
+					<h4 class="mb-3 mb-md-0">Dashboard</h4>
+
+					  <div class="top-menu ms-auto">
+						<ul class="navbar-nav align-items-center gap-1">
+						
+							
+							<li class="nav-item dark-mode d-none d-sm-flex">
+								<a class="nav-link dark-mode-icon" href="javascript:;"><i class='bx bx-moon'></i>
+								</a>
+							</li>
+
+							<li class="nav-item dropdown dropdown-app">
+								<div class="dropdown-menu dropdown-menu-end p-0">
+									<div class="app-container p-2 my-2">								  
+				
+									</div>
+								</div>
+							</li>
+
+							<li class="nav-item dropdown dropdown-large">
+								<a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" data-bs-toggle="dropdown">
+									{% if alertCount > 0 %}
+										<span class="alert-count">{{ alertCount }}</span>  <!-- Mostrar contador de alertas -->
+									{% endif %}
+									<i class="bx bx-bell"></i>
+								</a>
+								<div class="dropdown-menu dropdown-menu-end">
+									<a href="javascript:;">
+										<div class="msg-header">
+											<p class="msg-header-title">Notifications</p>
+											<p class="msg-header-badge">{{ alertCount }} New</p>
+										</div>
+									</a>
+									<div class="header-notifications-list">
+										{% if expiredAlerts %}
+											{% for alert in expiredAlerts %}
+											<a class="dropdown-item" href="javascript:;">
+												<div class="d-flex align-items-center">
+													<div class="flex-grow-1">
+														<h6 class="msg-name">{{ alert.name_client }} <span class="msg-time float-end">{{ alert.datetime }}</span></h6>
+														<p class="msg-info">{{ alert.content }}</p>
+													</div>
+												</div>
+											</a>
+											{% endfor %}
+										{% else %}
+											<p>No expired alerts</p>  <!-- Si no hay alertas vencidas -->
+										{% endif %}
+									</div>
+									<a href="{% url 'alert' %}">
+										<div class="text-center msg-footer">
+											<button class="btn btn-primary w-100">View All Notifications</button>
+										</div>
+									</a>
+								</div>
+							</li>										
+							
+							<li class="nav-item dropdown dropdown-large">
+								<div class="dropdown-menu dropdown-menu-end">
+									<div class="header-message-list">										
+									</div>
+								</div>
+							</li>
+							
+						</ul>
+					</div>
+					<div class="user-box dropdown px-3">
+						<a class="d-flex align-items-center nav-link dropdown-toggle gap-3 dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user text-primary">
+								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+							<div class="user-info">
+								<p class="user-name mb-0">{{request.user.first_name}} {{request.user.last_name}}</p>
+								<p class="designattion mb-0">{{request.user}}</p>
+							</div>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li><a class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}"><i class="bx bx-log-out-circle"></i><span>Logout</span></a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</header>
+		<!--end header -->
+		<!--start page wrapper -->
+		<div class="page-wrapper">
+			<div class="page-content">
+				{% block page_content %}
+			
+				<h5>Sales Obama</h5>
+				<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">					
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Total Sales</p>
+										<h5 class="mb-0">{{obama.all}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-chart-line"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Good</p>
+										<h5 class="mb-0">{{obama.active}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-check-circle"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Proccess</p>
+										<h5 class="mb-0">{{obama.process}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-hourglass-half"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Cancell</p>
+										<h5 class="mb-0">{{obama.cancell}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-times-circle"></i> 
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr>
+				<h5>Sales Supp</h5>
+				{{chartSale}}
+				<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">					
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Total Sales</p>
+										<h5 class="mb-0">{{supp.all}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-chart-line"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Good</p>
+										<h5 class="mb-0">{{supp.active}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-check-circle"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Proccess</p>
+										<h5 class="mb-0">{{supp.process}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-hourglass-half"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div>
+										<p class="mb-0">Sales Cancell</p>
+										<h5 class="mb-0">{{supp.cancell}}</h5>
+									</div>
+									<div class="dropdown ms-auto">
+										<i class="fas fa-times-circle"></i> 
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!--end row-->
+                
+				<div class="row row-cols-1 row-cols-md-2 row-cols-xl-1">
+					<div class="col">
+						<div class="card radius-10">
+							<div class="card-body">
+								<div id="chartIndex"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr>
+
+				<!--Tablet Status -->
+				<div class="row row-cols-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2">
+
+					<div class="col">
+						<div class="card mb-3">
+							<div class="card-body">
+								<h5>Status Poliza Obama</h5>
+								<div class="table-responsive">
+									<table id="tableProfiling" class="table table-striped table-bordered">
+										<thead>
+											<tr>
+												<th>COL</th>
+												<th>Amount Client</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for result in tableStatusObama %}
+											
+											<tr>
+												<td>{{result.profiling}} </td>
+												<td>{{result.count}}</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col">
+						<div class="card mb-3">
+							<div class="card-body">
+								<h5>Status Poliza Supp</h5>
+								<div class="table-responsive">
+									<table id="tableProfilingSupp" class="table table-striped table-bordered">
+										<thead>
+											<tr>
+												<th>COL</th>
+												<th>Amount Client</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for resultSupp in tableStatusSup %}											
+											<tr>
+												<td>{{resultSupp.status}} </td>
+												<td>{{resultSupp.count}}</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+								
+				{% endblock %}
+			</div>
+		</div>
+		<!--end page wrapper -->
+		<!--start overlay-->
+		<div class="overlay toggle-icon"></div>
+		<!--end overlay-->
+		<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+		<!--End Back To Top Button-->
+		<footer class="page-footer">
+			<p class="mb-0">Copyright © {% now "Y" %}. All rights reserved to Lapeira & Associates.</p>
+		</footer>
+	</div>
+	<!--end wrapper-->
+
+	
+
+	<script src="{% static 'assets/js/sessionTimeout.js' %}"></script>
+
+	<!--end switcher-->
+	{% block end_js %}
+	<!-- Bootstrap JS -->
+    <script src="{% static "assets/js/bootstrap.bundle.min.js"  %}"></script> 
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js"%}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js"%}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js"%}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"%}"></script>
+	<!-- Vector map JavaScript -->
+	<script src="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.min.js"%}"></script>
+	<script src="{% static "assets/plugins/vectormap/jquery-jvectormap-world-mill-en.js"%}"></script>
+	<!-- highcharts js -->
+	<script src="{% static "assets/plugins/highcharts/js/highcharts.js"%}"></script>
+	<script src="{% static "assets/plugins/apexcharts-bundle/js/apexcharts.min.js"%}"></script>
+	<script src="{% static "assets/js/index2.js"%}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js"%}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+	<script>
+		$(document).ready(function() {
+			$('#tableProfiling').DataTable();
+		} );
+
+		$(document).ready(function() {
+			$('#tableProfilingSupp').DataTable();
+		} );
+
+	</script>
+
+	<!-- Coloca los datos de Django en un script dentro del HTML -->
+	<script id="chartData" type="application/json">
+		{{ chartOne|safe }}
+	</script>
+	
+	<script src="{% static "assets/js/chart/index.js" %}"></script>	
+
+	{% endblock %}
+
+	
+
+</body>
+
+
+<!-- Mirrored from codervent.com/syndron/demo/vertical/index2.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 29 Jul 2023 03:52:27 GMT -->
+</html>

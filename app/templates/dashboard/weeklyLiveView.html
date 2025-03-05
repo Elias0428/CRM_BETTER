@@ -1,0 +1,99 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Table Sales Week</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" %}" rel="stylesheet"/>
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/highcharts/css/highcharts.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+{% endblock %}
+{% block page_content %}
+<div class="row">					
+    <div class="col-12">
+        <div class="card radius-10">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <table class="table table-primary table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Username</th>
+                                <th class="text-center">Monday</th>
+                                <th class="text-center">Tuesday</th>
+                                <th class="text-center">Wednesday</th>
+                                <th class="text-center">Thursday</th>
+                                <th class="text-center">Friday</th>
+                                <th class="text-center">Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user, sales in weeklySales.items %}
+                            <tr>
+                                <td>{{ user }}</td>
+                                <td class="text-center"><span class="text-success">{{ sales.lunes.obama }} - {{ sales.lunes.obamaActive }}</span> | <span class="text-warning">{{ sales.lunes.supp }} - {{ sales.lunes.suppActive }}</span> </td>
+                                <td class="text-center"><span class="text-success">{{ sales.martes.obama }} - {{ sales.martes.obamaActive }}</span> | <span class="text-warning">{{ sales.martes.supp }} - {{ sales.martes.suppActive }}</span> </td>
+                                <td class="text-center"><span class="text-success">{{ sales.miercoles.obama }} - {{ sales.miercoles.obamaActive }}</span> | <span class="text-warning">{{ sales.miercoles.supp }} - {{ sales.miercoles.suppActive }}</span> </td>
+                                <td class="text-center"><span class="text-success">{{ sales.jueves.obama }} - {{ sales.jueves.obamaActive }}</span> | <span class="text-warning">{{ sales.jueves.supp }} - {{ sales.jueves.suppActive }}</span> </td>
+                                <td class="text-center"><span class="text-success">{{ sales.viernes.obama }} - {{ sales.viernes.obamaActive }}</span> | <span class="text-warning">{{ sales.viernes.supp }} - {{ sales.viernes.suppActive }}</span> </td>
+                                <td class="text-center"><span class="text-success">{{ sales.sabado.obama }} - {{ sales.sabado.obamaActive }}</span> | <span class="text-warning">{{ sales.sabado.supp }} - {{ sales.sabado.suppActive }}</span> </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if toggle %}
+                <a class="btn btn-outline-primary" href="{% url "weeklyLiveView" %}">View Daily</a>
+                {% else %}
+                <a class="btn btn-outline-primary" href="{% url "monthLiveView" %}">View Month</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+	
+
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js"  %}"></script> 
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js"%}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js"%}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js"%}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"%}"></script>
+	<!-- Vector map JavaScript -->
+	<script src="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.min.js"%}"></script>
+	<script src="{% static "assets/plugins/vectormap/jquery-jvectormap-world-mill-en.js"%}"></script>
+	<!-- highcharts js -->
+	<script src="{% static "assets/plugins/highcharts/js/highcharts.js"%}"></script>
+	<script src="{% static "assets/plugins/apexcharts-bundle/js/apexcharts.min.js"%}"></script>
+	<script src="{% static "assets/js/index2.js"%}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js"%}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script src="{% static 'assets/js/chart/viewTv.js'%}"></script>
+
+    <script>
+        startRedirectTimer("{% url 'monthLiveView' %}");
+    </script>
+{% endblock %}

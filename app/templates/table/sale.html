@@ -1,0 +1,731 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Table Sale</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">Sales</h6>
+<hr/>
+
+<h4>Filter Data</h4>
+<div class="card">
+    <div class="card-header">
+        <form method="POST" class="row">
+            <div class="col-md-4">
+				<label for="start_date">Start date:</label>
+				<input type="date" name="start_date" id="start_date" 
+					   class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="end_date">End date: </label>
+                <input type="date" name="end_date" id="end_date" 
+                       class="form-control" value="{{ end_date}}">
+            </div>
+            <div class="col-md-4 align-self-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'sale' %}" class="btn btn-secondary">Reset</a>
+            </div>
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+			{% csrf_token %}
+        </form>
+    </div>
+</div>
+<hr>
+<div class="card radius-10">
+	<div class="card-body">
+		<div>
+			<h5 class="card-title">Clients by status ObamaCare</h5>
+		</div>
+		<hr/>
+		<div  class="row row-cols-1 row-cols-md-1 row-cols-lg-5 row-cols-xl-4">
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#registered" >Registered: {{countRegistered}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#processing" >Processing: {{countProccsing}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#profiling" >Profiling: {{countProfiling}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#canceled" >Canceled: {{countCanceled}}</button>
+			</div>
+		</div>
+		<!--end row-->
+	</div>
+</div>
+<h4>Obamacare</h4>
+<div class="row row-cols-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2">
+
+	<div class="col">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5>Status </h5>
+				<div class="table-responsive">
+					<table id="tableSaleObama" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Agent</th>
+								<th>Registered</th>
+								<th>Processing</th>
+								<th>Profiling</th>
+								<th>Canceled</th>
+								<th>All</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for agent, data in saleACA.items %}
+								<tr>
+									<td>{{ agent }}</td>
+									<td>{{ data.status_color_1 }}</td>
+									<td>{{ data.status_color_2 }}</td>
+									<td>{{ data.status_color_3 }}</td>
+									<td>{{ data.status_color_4 }}</td>
+									<td>{{ data.total_sales }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5>Status USA</h5>
+				<div class="table-responsive">
+					<table id="tableSaleObamaUsa" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Agent</th>
+								<th>Registered</th>
+								<th>Processing</th>
+								<th>Profiling</th>
+								<th>Canceled</th>
+								<th>All</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for agent, sales in saleACAUsa.items %}
+								<tr>
+									<td>{{ agent }}</td>
+									<td>{{ sales.status_color_1 }}</td>
+									<td>{{ sales.status_color_2 }}</td>
+									<td>{{ sales.status_color_3 }}</td>
+									<td>{{ sales.status_color_4 }}</td>
+									<td>{{ sales.total_sales }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<hr>
+<div class="card radius-10">
+	<div class="card-body">
+		<div>
+			<h5 class="card-title">Clients by status Supplemental</h5>
+		</div>
+		<hr/>
+		<div  class="row row-cols-1 row-cols-md-1 row-cols-lg-5 row-cols-xl-4">
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#registeredSupp" >Registered: {{countRegisteredSupp}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#processingSupp" >Processing: {{countProccsingSupp}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#activeSupp" >Active: {{countActiveSupp}}</button>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-outline-dark px-5 rounded-0" data-bs-toggle="modal" data-bs-target="#canceledSupp" >Canceled: {{countCanceledSupp}}</button>
+			</div>
+		</div>
+		<!--end row-->
+	</div>
+</div>
+<h4>Supplemental</h4>
+<div class="row row-cols-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2">
+
+	<div class="col">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5>Status</h5>
+				<div class="table-responsive">
+					<table id="tableSaleSupp" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Agent</th>
+								<th>Registered</th>
+								<th>Processing</th>
+								<th>Active</th>
+								<th>Canceled</th>
+								<th>All</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for agent, sales in saleSupp.items %}
+								<tr>
+									<td>{{ agent }}</td>
+									<td>{{ sales.status_color_1 }}</td>
+									<td>{{ sales.status_color_2 }}</td>
+									<td>{{ sales.status_color_3 }}</td>
+									<td>{{ sales.status_color_4 }}</td>
+									<td>{{ sales.total_sales }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5>Status USA</h5>
+				<div class="table-responsive">
+					<table id="tableSaleSuppUsa" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Agent</th>
+								<th>Registered</th>
+								<th>Processing</th>
+								<th>Active</th>
+								<th>Canceled</th>
+								<th>All</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for agent, sales in saleSuppUsa.items %}
+								<tr>
+									<td>{{ agent }}</td>
+									<td>{{ sales.status_color_1 }}</td>
+									<td>{{ sales.status_color_2 }}</td>
+									<td>{{ sales.status_color_3 }}</td>
+									<td>{{ sales.status_color_4 }}</td>
+									<td>{{ sales.total_sales }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<hr>
+<h4>All Bonus </h4>
+<div class="row row-cols-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-1">
+
+	<div class="col">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5>Status Bonus</h5>
+				<div class="table-responsive">
+					<table id="tableBonus" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Agent</th>
+								<th>No Profiled</th>
+								<th>Profiled</th>
+								<th>No Pay</th>
+								<th>Pay</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for agent_id, data in sales_data.items %}
+							<tr>
+							  <td class="ver-detalles" data-id="{{ data.id }}" style="cursor: pointer;">{{ data.full_name }}</td>
+							  <td>{{ data.status_color_1_2_obama }}</td>
+							  <td>{{ data.status_color_3_obama }}</td>
+							  <td>{{ data.status_color_1_2_supp }}</td>
+							  <td>{{ data.status_color_3_supp }}</td>
+							  <td>{{ data.total_sales }}</td>
+							</tr>
+							{% endfor %}
+						  </tbody>
+						<tfoot>
+							<tr>
+								<td><strong>Total</strong></td>
+								<td><strong>{{ total_status_color_1_obama }}</strong></td>
+								<td><strong>{{ total_status_color_3_obama }}</strong></td>
+								<td><strong>{{ total_status_color_1_supp }}</strong></td>
+								<td><strong>{{ total_status_color_3_supp }}</strong></td>
+								<td><strong>{{ total_sales }}</strong></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<!--modal-->
+<div class="col-12 col-lg-12">
+
+	<div class="modal fade" id="registered" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Registered</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if registered %}
+						<table id="tableStatus" class="table table-striped table-bordered" >
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for registereds in registered %}
+									<tr>
+										<td style="vertical-align: middle;">{{ registereds.agent.first_name }} {{registereds.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ registereds.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ registereds.client.first_name }} {{registereds.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ registereds.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ registereds.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>	
+					{% else %}
+						<p> No information  </p>
+					{% endif %}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="processing" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Processing</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if proccessing %}
+						<table id="tableStatus1" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">Status</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for proccessings in proccessing %}
+									<tr>
+										<td style="vertical-align: middle;">{{ proccessings.agent.first_name }} {{proccessings.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ proccessings.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ proccessings.client.first_name }} {{proccessings.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ proccessings.profiling }}</td>
+										<td style="vertical-align: middle;">{{ proccessings.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ proccessings.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}
+						<p> No information  </p>
+					{% endif %}	
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="profiling" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Profiling</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if profiling  %}
+						<table id="tableStatus2" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">Profiling</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for profiling in profiling %}
+									<tr>
+										<td	style="vertical-align: middle;">{{ profiling.agent.first_name }} {{profiling.agent.last_name }}</td>
+										<td	style="vertical-align: middle;">{{ profiling.truncated_agent_usa }}</td>
+										<td	style="vertical-align: middle;">{{ profiling.client.first_name }} {{profiling.client.last_name }}</td>									
+										<td	style="vertical-align: middle;">{{ profiling.profiling}}</td>
+										<td	style="vertical-align: middle;">{{ profiling.created_at|date:'m-d-Y' }}</td>
+										<td	style="vertical-align: middle;">{{ profiling.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}	
+						<p> No information  </p>
+					{% endif %}
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="canceled" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Canceled</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if canceled %}
+						<table id="tableStatus3" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for canceleds in canceled %}
+									<tr>
+										<td style="vertical-align: middle;">{{ canceleds.agent.first_name }} {{canceleds.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ canceleds.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ canceleds.client.first_name }} {{canceleds.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ canceleds.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ canceleds.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}		
+						<p> No information  </p>
+					{% endif %}		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="registeredSupp" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Registered</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if registeredSupp %}
+						<table id="tableStatus4" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">Type of Policy</th>
+									<th style="vertical-align: middle;">Company</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for registeredSupps in registeredSupp %}
+									<tr>
+										<td	style="vertical-align: middle;">{{ registeredSupps.agent.first_name }} {{registeredSupps.agent.last_name }}</td>
+										<td	style="vertical-align: middle;">{{ registeredSupps.truncated_agent_usa }}</td>
+										<td	style="vertical-align: middle;">{{ registeredSupps.client.first_name }} {{registeredSupps.client.last_name }}</td>									
+										<td	style="vertical-align: middle;">{{ registeredSupps.created_at|date:'m-d-Y' }}</td>
+										<td	style="vertical-align: middle;">{{ registeredSupps.policy_type }}</td>
+										<td	style="vertical-align: middle;">{{ registeredSupps.company }}</td>
+										<td	style="vertical-align: middle;">{{ registeredSupps.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>	
+					{% else %}
+						<p> No information  </p>
+					{% endif %}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="processingSupp" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Processing</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if proccessingSupp %}
+						<table id="tableStatus5" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">Status</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">Type of Policy</th>
+									<th style="vertical-align: middle;">Company</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for proccessingSupps in proccessingSupp %}
+									<tr>
+										<td style="vertical-align: middle;">{{ proccessingSupps.agent.first_name }} {{proccessingSupps.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.client.first_name }} {{proccessingSupps.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ proccessingSupps.status }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.policy_type }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.company }}</td>
+										<td style="vertical-align: middle;">{{ proccessingSupps.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}
+						<p> No information  </p>
+					{% endif %}	
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="activeSupp" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Profiling</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if activeSupp  %}
+						<table id="tableStatus6" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">Type of Policy</th>
+									<th style="vertical-align: middle;">Company</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for activeSupps in activeSupp %}
+									<tr>
+										<td style="vertical-align: middle;">{{ activeSupps.agent.first_name }} {{activeSupps.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ activeSupps.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ activeSupps.client.first_name }} {{activeSupps.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ activeSupps.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ activeSupps.policy_type }}</td>
+										<td style="vertical-align: middle;">{{ activeSupps.company }}</td>
+										<td style="vertical-align: middle;">{{ activeSupps.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}	
+						<p> No information  </p>
+					{% endif %}
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="canceledSupp" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Client Canceled</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{% if canceledSupp %}
+						<table id="tableStatus7" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="vertical-align: middle;">Agent</th>
+									<th style="vertical-align: middle;">Agent USA</th>
+									<th style="vertical-align: middle;">Name</th>
+									<th style="vertical-align: middle;">create At</th>
+									<th style="vertical-align: middle;">Type of Policy</th>
+									<th style="vertical-align: middle;">Company</th>
+									<th style="vertical-align: middle;">observation</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for canceledSupps in canceledSupp %}
+									<tr>
+										<td style="vertical-align: middle;">{{ canceledSupps.agent.first_name }} {{canceledSupps.agent.last_name }}</td>
+										<td style="vertical-align: middle;">{{ canceledSupps.truncated_agent_usa }}</td>
+										<td style="vertical-align: middle;">{{ canceledSupps.client.first_name }} {{canceledSupps.client.last_name }}</td>									
+										<td style="vertical-align: middle;">{{ canceledSupps.created_at|date:'m-d-Y' }}</td>
+										<td style="vertical-align: middle;">{{ canceledSupps.policy_type }}</td>
+										<td style="vertical-align: middle;">{{ canceledSupps.company }}</td>
+										<td style="vertical-align: middle;">{{ canceledSupps.observation }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% else %}		
+						<p> No information  </p>
+					{% endif %}		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Primer Modal -->
+	<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title" id="infoModalLabel">Customer details:</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			<div class="d-flex justify-content-center">
+				<button id="openObamaCare" class="btn btn-primary me-2">View client ObamaCare</button>
+				<button id="openSupp" class="btn btn-secondary">View client Supp</button>
+			</div>
+			</div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+		</div>
+	</div>
+	
+	<!-- Segundo Modal de bonus -->
+	<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title" id="tableModalLabel"></h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			<div id="tableContainer" class="table-responsive">
+				<!-- Aquí se generará dinámicamente la tabla -->
+			</div>
+			</div>
+			<div class="modal-footer">
+			<button id="backToInfoModal" class="btn btn-secondary">Atrás</button>
+			<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+			</div>
+		</div>
+		</div>
+	</div>	
+
+</div>
+
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+	<script>
+		$(document).ready(function() {$('#tableSaleObamaUsa').DataTable();} );
+		$(document).ready(function() {$('#tableSaleObama').DataTable();	} );
+		$(document).ready(function() {$('#tableSaleSupp').DataTable();} );
+		$(document).ready(function() {$('#tableSaleSuppUsa').DataTable();} );
+		$(document).ready(function() {$('#tableBonus').DataTable();} );
+		$(document).ready(function() {$('#tableStatus').DataTable();} );
+		$(document).ready(function() {$('#tableStatus1').DataTable();} );
+		$(document).ready(function() {$('#tableStatus2').DataTable();} );
+		$(document).ready(function() {$('#tableStatus3').DataTable();} );
+		$(document).ready(function() {$('#tableStatus4').DataTable();} );
+		$(document).ready(function() {$('#tableStatus5').DataTable();} );
+		$(document).ready(function() {$('#tableStatus6').DataTable();} );
+		$(document).ready(function() {$('#tableStatus7').DataTable();} );
+		$(document).ready(function() {$('#tableClient').DataTable();} );
+	</script>
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+	<script src="{% static "assets/js/modalSale.js" %}"></script>
+	
+
+{% endblock %}
