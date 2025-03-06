@@ -850,6 +850,16 @@ def editClientObama(request, obamacare_id):
     else: 
         newLetterCard = False
 
+    if letterCard and letterCard.letters: 
+        banderaLetters = True
+    else: 
+        banderaLetters = False
+
+    if letterCard and  letterCard.card: 
+        banderaCard = True
+    else: 
+        banderaCard = False
+
     #Obtener todos los registros de meses pagados de la poliza
     monthsPaid = Payments.objects.filter(obamaCare_id=obamacare.id)
 
@@ -1023,24 +1033,22 @@ def editClientObama(request, obamacare_id):
                 observation=cleaned_obamacare_data['observationObama']
             )
            
-            #obtener informacion para guardarla en modelo de cartas y tarjetas del cliente
-            lettersPost = request.POST.get('letters', 'false').lower() == "true"
-            cardsPost = request.POST.get('card', 'false').lower() == "true"
-            idPost = request.POST.get('letterCardID') 
-
-            if lettersPost: 
-                dateLetters = letterCard.dateLetters
-                letters = letterCard.letters
-            else:
-                dateLetters = timezone.now().date() 
-                letters = request.POST.get('letters')
-
-            if cardsPost: 
+            if banderaCard:
                 dateCard = letterCard.dateCard
-                cards = letterCard.card
+                cards = letterCard.card                
             else:
                 dateCard = timezone.now().date()
-                cards = request.POST.get('cards')  
+                cards = json.loads(request.POST.get('card', 'false').lower())  
+
+            if banderaLetters:
+                dateCard = letterCard.dateLetters
+                cards = letterCard.letters 
+            else:
+                dateLetters = timezone.now().date() 
+                letters = json.loads(request.POST.get('letters', 'false').lower())
+
+            if not banderaCard or banderaLetters:
+                idPost = request.POST.get('letterCardID')    
 
             if idPost:
 
