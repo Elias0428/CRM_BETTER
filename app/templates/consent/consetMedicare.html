@@ -1,0 +1,243 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope of Appointment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        .signature-pad {
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Floating Container */
+
+        .floating-container {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #f8f9fa;
+            padding: 6px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .copy-button {
+            background-color: #00ff08;
+            color: white;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .copy-button:hover {
+            background-color: #48aa4d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        .success-message {
+            color: #00ff08;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .input-verde-sombra {
+            border: 2px solid rgb(0, 255, 0);
+            color: rgb(0, 255, 0);
+            box-shadow: 0 0 8px rgb(22, 107, 1); /* Sombra negra alrededor del input */
+        }
+
+    </style>
+
+</head>
+
+{% if temporalyURL %}
+    <!-- Div flotante -->
+    <div class="floating-container">
+        <button class="copy-button" onclick="copyCurrentURL()">
+            <i class="fas fa-link"></i>
+            Copy Link
+        </button>
+        <div class="success-message">¡Link copiado!</div>
+    </div>
+{% endif %}
+
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="card shadow p-4">
+            <h2 class="text-center mb-4">Scope of Appointment Spanish</h2>
+            
+            
+            <form id="signatureForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p class="text-justify">
+                    {% blocktrans %} Los Centros de Servicios de Medicare y Medicaid exigen que los agentes documenten el alcance de una cita de marketing antes de CUALQUIER reunión de ventas para garantizar la comprensión de lo que se discutirá entre el agente y el beneficiario de Medicare (o su representante autorizado). Toda la información provista en este formulario es confidencial y debe ser completada por cada beneficiario de Medicare o su representante autorizado. Los agentes deben tener licencia, contrato y certificación, cuando corresponda, para poder hablar de los productos que se enumeran a continuación. Favor marcar en las siguientes casillas lo que desea hablar durante la reunión con el Agente Licenciado.{% endblocktrans %}
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Seleccione los planes a discutir" %}</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="prescripcion" name="prescripcion"  {% if contact.prescripcion %}checked{% endif %}>
+                        <label class="form-check-label" for="prescripción">{% blocktrans %} Planes de Prescripción de Medicare Parte D {% endblocktrans %}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="advantage" name="advantage"  {% if contact.advantage %}checked{% endif %}>
+                        <label class="form-check-label" for="advantage">{% blocktrans %} Planes de Medicare Advantage (Parte C) y Planes de Costo {% endblocktrans %}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="dental" name="dental"  {% if contact.dental %}checked{% endif %}>
+                        <label class="form-check-label" for="dental">{% blocktrans %} Productos Dental-Visión-Oescucha {% endblocktrans %}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="complementarios" name="complementarios"  {% if contact.complementarios %}checked{% endif %}>
+                        <label class="form-check-label" for="complementarios">{% blocktrans %} Productos de Complementarios de Hospitalización {% endblocktrans %}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="suplementarios" name="suplementarios"  {% if contact.suplementarios %}checked{% endif %}>
+                        <label class="form-check-label" for="suplementarios">{% blocktrans %}Planes Suplementarios de Medicare (Medigap) {% endblocktrans %}</label>
+                    </div>
+                </div>
+
+                <p class="text-justify">
+                    {% blocktrans %}Al enviar este formulario, acepta una reunión telefónica con un agente de seguros de salud con licencia de Lapeira & Associates LLC para analizar el tipo de productos que puso sus iniciales arriba. Tenga en cuenta que la persona que hablará sobre los productos es un agente con licencia empleado o contratado por un plan de Medicare. No trabajan directamente para el gobierno federal. Al proporcionar su información en el formulario anterior, usted acepta expresamente recibir información de Lapeira & Associates LLC a través de una llamada telefónica, correo electrónico y/o mensaje de texto/SMS (incluso mediante el uso de un sistema de marcación telefónica automática o voz artificial/pregrabada, SMS o MMS (mensajes de texto), incluso si su(s) número(s) de teléfono está(n) actualmente incluido(s) en alguna lista de No llamar estatal, federal o corporativa). Se pueden aplicar tarifas estándar de mensajes de texto y cargos por datos móviles. El agente de seguros de salud con licencia también puede recibir un pago en función de su inscripción en un plan. Su consentimiento en este formulario NO lo obliga a inscribirse en un plan, no afecta su inscripción actual ni lo inscribe en un plan de Medicare.{% endblocktrans %}
+                </p>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6">
+                        <label for="nombreBeneficiario" class="form-label">{% trans "Nombre del Beneficiario" %}</label>
+                        <input type="text" class="form-control" value="{{medicare.first_name}} {{medicare.last_name}}" id="nombreBeneficiario" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="firmaBeneficiario" class="form-label">{% trans "Firma del beneficiario o persona autorizada" %}</label>
+                        {% if not request.user.is_authenticated %}
+                            <div class="col-12 container-fluid" >
+                                <canvas width="330px" id="drawingCanvas" class="signature-pad"></canvas>
+                                <input type="hidden" id="signatureInput" name="signature">
+                            </div>                        
+                            <button type="button" id="clearCanvas" class="btn btn-secondary btn-sm">{% trans "Limpiar firma" %}</button>
+                        {% endif %}
+                    </div>
+            
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="nombreAutorizado" class="form-label">{% trans "Nombre de la persona Autorizada" %}</label>
+                        <input type="text" class="form-control" id="nombreAutorizado" value= "{{medicare.nameAutorized}}" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="relacionBeneficiario" class="form-label">{% trans "Su relacion con el beneficiario" %}</label>
+                        <input type="text" class="form-control" id="nombreAutorizado" value= "{{medicare.relationship}}" disabled>
+                    </div>
+
+                    <div class="col-12 col-lg-3">
+                        <label for="agent_usa" class="form-label">{% trans "Nombre de Agente" %}</label>
+                        <input type="text" class="form-control" id="agent_usa" value= "{{medicare.agent_usa}}" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="insuranceAgency" class="form-label">{% trans "Nombre de agencia" %}</label>
+                        <input type="text" class="form-control" id="insuranceAgency" value= "{{company}}" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="direccion" class="form-label">{% blocktrans %}Dirección (Para encontrar opciones de planes de salud en su área) {% endblocktrans %}</label>
+                        <input type="text" class="form-control" id="direccion" value="{{medicare.address}} - {{medicare.zipcode}} - {{medicare.city}} - {{medicare.state}} - {{medicare.county}}" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="telefono" class="form-label">{% trans "Telefono" %}</label>
+                        <input type="text" class="form-control" id="telefono" value="+ {{medicare.phone_number}}" disabled>
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="fechaCita" class="form-label">{% trans "Fecha de la cita (Medicare)" %}</label>
+                        <input type="datetime-local" class="form-control" id="fechaCita"   value="{{ medicare.dateMedicare|date:'Y-m-d\TH:i' }}" disabled>
+                    </div>
+                </div>
+
+                <br><br>
+                <h4>Medicare Advantage Plans (Part C) and Cost Plans</h4>
+                <hr>
+                <p>Medicare Health Maintenance Organization (HMO) — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. In most HMOs, you can only get your care from doctors or hospitals in the plan’s network (except in emergencies) </p>
+                <p>Medicare HMO Point-of-Service (HMO-POS) — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. HMO-POS plans may allow you to get some services out of network for a higher copayment or coinsurance. </p>
+                <p>Medicare Preferred Provider Organization (PPO) Plan — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. PPOs have network doctors, providers and hospitals but you can also use out-of- network providers, usually at a higher cost. </p>
+                <p>Medicare Private Fee-For-Service (PFFS) Plan — A Medicare Advantage Plan in which you may go to any Medicare-approved doctor, hospital and provider that accepts the plan’s payment, terms and conditions and agrees to treat you — not all providers will. If you join a PFFS Plan that has a network, you can see any of the network providers who have agreed to always treat plan members. You will usually pay more to see out-of-network providers. </p>
+                <p>Medicare Special Needs Plan (SNP) — A Medicare Advantage Plan that has a benefit package designed for people with special health care needs. Examples of the specific groups served include people who have both Medicare and Medicaid, people who reside in nursing homes, and people who have certain chronic medical conditions. </p>
+                <p>Medicare Medical Savings Account (MSA) Plan — MSA Plans combine a high deductible health plan with a bank account. The plan deposits money from Medicare into the account. You can use it to pay your medical expenses until your deductible is met. </p>
+                <p>Medicare Cost Plan — In a Medicare Cost Plan, you can go to providers both in and out of network. If you get services outside of the plan’s network, your Medicare-covered services will be paid for under Original Medicare but you will be responsible for Medicare coinsurance and deductibles. </p>
+                <h4>Stand-alone Medicare Prescription Drug Plans (Part D) </h4>
+                <hr>
+                <p>Medicare Prescription Drug Plan (PDP) — A stand-alone drug plan that adds prescription drug coverage to Original Medicare, some Medicare Cost Plans, some Medicare Private-Fee-For-Service Plans, and Medicare Medical Savings Account Plans. </p>
+                <h4>Other Related Products </h4>
+                <hr>
+                <p>Medicare Supplement (Medigap) Products— Insurance plans that help pay some of the out-of- pocket costs not paid by Original Medicare (Parts A and B) such as deductibles and co-insurance amounts for Medicare approved services. </p>
+                <p>Dental/Vision/Hearing Products — Plans offering additional benefits for consumers who are looking to cover needs for dental, vision, or hearing. These plans are not affiliated or connected to Medicare. </p>
+                <p>Hospital Indemnity Products— Plans offering additional benefits; payable to consumers based upon their medical utilization; sometimes used to defray copays/coinsurance. These plans are not affiliated or connected to Medicare. </p>
+
+                
+                {% if not temporalyURL %}
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success">{% trans "Enviar" %}</button>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/assets/js/consent/medicare.js"></script>
+    {% if temporalyURL %}
+    <script>
+        function copyCurrentURL() {
+            // Obtener la URL actual
+            const URL = '{{temporalyURL|safe}}';
+            
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(URL).then(() => {
+                // Mostrar mensaje de éxito
+                const successMessage = document.querySelector('.success-message');
+                successMessage.style.display = 'block';
+                
+                // Cambiar el texto del botón temporalmente
+                const button = document.querySelector('.copy-button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> {% trans "Copiado!" %}';
+                
+                // Restaurar después de 2 segundos
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    button.innerHTML = originalContent;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('{% trans "No se pudo copiar el link. Por favor, inténtalo de nuevo." %}');
+            });
+        }
+    </script>
+{% endif %}
+</body>
+</html>

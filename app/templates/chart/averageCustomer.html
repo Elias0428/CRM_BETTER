@@ -30,11 +30,11 @@
             {% csrf_token %}
             <div class="col-md-3">
                 <label for="start_date">Start date:</label>
-                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d'|default:'' }}">
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}" required>
             </div>
             <div class="col-md-3">
                 <label for="end_date">End date:</label>
-                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d'|default:'' }}">
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}" required>
             </div>
             <div class="col-md-4 align-self-end mt-2">
                 <button type="submit" class="btn btn-primary">Filter</button>
@@ -46,9 +46,7 @@
 
 <div class="card">
     <div class="card-body">
-        <div class="table-responsive">
-			<div id="average"></div>
-        </div>
+        <div id="average"></div>
     </div>
 </div>
 
@@ -74,7 +72,7 @@
        const data = {{ data|safe }}; // Asegúrate de que sea JSON válido
 
            // Extraer nombres de agentes y valores
-           const agentes = data.map(item => item.agent__username || "Desconocido");
+           const agentes = data.map(item => item.agent__first_name + " " + item.agent__last_name || "Desconocido");
            const llamadas = data.map(item => item.total_llamadas || 0);
 
            // Configuración de ApexCharts
@@ -104,16 +102,46 @@
                     }
                    },
                },
+               tooltip: {
+                theme: "dark",
+                enabled: true,
+                shared: true,
+                intersect: false
+                },
                title: {
                    text: 'Total effective calls',
                    align: 'center',
                },
+               
                colors: ['#008FFB'], // Personaliza los colores
            };
 
   
         var chart = new ApexCharts(document.querySelector("#average"), options);
         chart.render();
+
+        // Estilos CSS para asegurar visibilidad en fondo oscuro
+			const style = document.createElement('style');
+			style.innerHTML = `
+				/* Cambiar color del ícono de los tres puntos */
+				.apexcharts-menu-icon {
+					color: white !important;
+				}
+				/* Fondo oscuro para el menú */
+				.apexcharts-menu {
+					background-color: #333 !important;
+					color: white !important;
+				}
+				/* Cambiar color de los ítems del menú */
+				.apexcharts-menu .apexcharts-menu-item {
+					color: white !important;
+				}
+				/* Resaltar ítems al pasar el mouse */
+				.apexcharts-menu .apexcharts-menu-item:hover {
+					background-color: #444 !important;
+				}
+			`;
+			document.head.appendChild(style);
 
 	</script>
 {% endblock %}

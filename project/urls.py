@@ -28,6 +28,9 @@ urlpatterns = [
     path('weeklyLiveView/',views.weeklyLiveView,name='weeklyLiveView'),
     path('monthLiveView/',views.monthLiveView,name='monthLiveView'),
 
+    path('weeklyLiveViewTV/',views.weeklyLiveView,name='weeklyLiveViewTV'),
+    path('monthLiveViewTV/',views.monthLiveView,name='monthLiveViewTV'),
+
     path('formCreateClient/', views.formCreateClient, name='formCreateClient'),
     path('formEditClient/<client_id>/', views.formEditClient, name='formEditClient'),
 
@@ -47,12 +50,15 @@ urlpatterns = [
     path('save-customer-observation-supp/', views.saveCustomerObservationSupp, name='saveCustomerObservationSupp'),
 
     path('typification/', views.typification, name='typification'),
+    path('customerPerformance/', views.customerPerformance, name='customerPerformance'),
     path('get-observation-detail/<observation_id>/', views.get_observation_detail, name='get_observation_detail'),
     path('toggleTypification/<typifications_id>/', views.toggleTypification, name='toggleTypification'),
 
     path('sale/', views.sale, name='sale'),
 
     path('editClientObama/<obamacare_id>/', views.editClientObama, name='editClientObama'),
+    path('saveDocumentClient/<int:obamacare_id>/', views.saveDocumentClient, name='saveDocumentClient'),
+    path('saveAppointment/<int:obamacare_id>/', views.saveAppointment, name='saveAppointment'),
     path('editClientSupp/<supp_id>/', views.editClientSupp, name='editClientSupp'),
     
     path('formCreateAlert/', views.formCreateAlert, name='formCreateAlert'),
@@ -70,6 +76,8 @@ urlpatterns = [
     path('fetchSupp/<client_id>/', views.fetchSupp, name='fetchSupp'),
     path('fetchDependent/<client_id>/', views.fetchDependent, name='fetchDependent'),
 
+    path('fetchPaymentsMonth/', views.fetchPaymentsMonth, name='fetchPaymentsMonth'),
+
     path('formCreatePlan/deleteDependent/<int:dependent_id>/', views.delete_dependent, name='delete_dependent'),
     path('formCreatePlan/deleteSupp/<int:supp_id>/', views.delete_supp, name='delete_supp'),
 
@@ -84,7 +92,7 @@ urlpatterns = [
     path('control/', views.tableControl, name='control'),
     path('createQuality/', views.createQuality, name='createQuality'),
 
-    path('averageSales/', views.averageSales, name='averageSales'),
+    path('salesPerformance/', views.salesPerformance, name='salesPerformance'),
 
     path('viewConsent/<obamacare_id>/', views.consent, name='viewConsent'),
     path('viewIncomeLetter/<obamacare_id>/', views.incomeLetter, name='incomeLetter'),
@@ -97,7 +105,23 @@ urlpatterns = [
     path('formAddDepend/<client_id>', views.formAddDepend, name='formAddDepend'),
     path('addDepend/', views.addDepend, name='addDepend'),
     
-    path('detalle-agente/<agent_id>/', views.SaleModal, name='detalle_agente'),    
+    path('detalle-agente/<agent_id>/', views.SaleModal, name='detalle_agente'),  
+
+    path('sale6Week/', views.sales6WeekReport, name='sale6Week'),  
+    path('chart6Week/', views.chart6Week, name='chart6Week'), 
+
+    path('weekSalesWiew/',views.weekSalesWiew, name='weekSalesWiew'),
+    path('descargarPdf/<int:week_number>/', views.downloadPdf, name='downloadPdf'),
+
+    path('formCreateClientMedicare/', views.formCreateClientMedicare, name='formCreateClientMedicare'),
+    path('consetMedicare/<client_id>/<language>/', views.consetMedicare, name='consetMedicare'),
+    path('clientMedicare/', views.clientMedicare, name='clientMedicare'),
+    path('editClientMedicare/<medicare_id>/', views.editClientMedicare, name='editClientMedicare'),
+    path('save-customer-observation-medicare/', views.saveCustomerObservationMedicare, name='saveCustomerObservationMedicare'),
+    path('desactiveMedicare/<medicare_id>/', views.desactiveMedicare, name='desactiveMedicare'),
+    path('validarCita/', views.validarCita, name='validarCita'),
+
+    path('paymentClients/', views.paymentClients, name='paymentClients'),
 
     ##path('exportUsers/', views.exportUsers, name='exportUsers'),
     ##path('testImportDb/', views.testExportDB, name='testExportDB'),

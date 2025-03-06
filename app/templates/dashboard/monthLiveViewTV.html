@@ -1,7 +1,7 @@
-{% extends "dashboard/index.html" %}
+
 {% load static %}
 {% block head %}
-    <title>Table Sales Week</title>
+    <title>Table Sales Month TV</title>
 	<!--plugins-->
 	<link href="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" %}" rel="stylesheet"/>
 	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
@@ -26,38 +26,36 @@
 {% block page_content %}
 <div class="row">					
     <div class="col-12">
-        <div class="card radius-12">
+        <div class="card radius-10">
             <div class="card-body">
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th scope="col">Username</th>
-                            <th class="text-center">Monday</th>
-                            <th class="text-center">Tuesday</th>
-                            <th class="text-center">Wednesday</th>
-                            <th class="text-center">Thursday</th>
-                            <th class="text-center">Friday</th>
-                            <th class="text-center">Saturday</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user, sales in weeklySales.items %}
-                        <tr>
-                            <td>{{ user }}</td>
-                            <td class="text-center"><span class="text-success">{{ sales.lunes.obama }} - {{ sales.lunes.obamaActive }}</span> | <span class="text-warning">{{ sales.lunes.supp }} - {{ sales.lunes.suppActive }}</span> </td>
-                            <td class="text-center"><span class="text-success">{{ sales.martes.obama }} - {{ sales.martes.obamaActive }}</span> | <span class="text-warning">{{ sales.martes.supp }} - {{ sales.martes.suppActive }}</span> </td>
-                            <td class="text-center"><span class="text-success">{{ sales.miercoles.obama }} - {{ sales.miercoles.obamaActive }}</span> | <span class="text-warning">{{ sales.miercoles.supp }} - {{ sales.miercoles.suppActive }}</span> </td>
-                            <td class="text-center"><span class="text-success">{{ sales.jueves.obama }} - {{ sales.jueves.obamaActive }}</span> | <span class="text-warning">{{ sales.jueves.supp }} - {{ sales.jueves.suppActive }}</span> </td>
-                            <td class="text-center"><span class="text-success">{{ sales.viernes.obama }} - {{ sales.viernes.obamaActive }}</span> | <span class="text-warning">{{ sales.viernes.supp }} - {{ sales.viernes.suppActive }}</span> </td>
-                            <td class="text-center"><span class="text-success">{{ sales.sabado.obama }} - {{ sales.sabado.obamaActive }}</span> | <span class="text-warning">{{ sales.sabado.supp }} - {{ sales.sabado.suppActive }}</span> </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="d-flex align-items-center">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Username</th>
+                                {% for weekRange in weekRanges %}
+                                <th class="text-center">{{weekRange}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user, sales in monthSales.items %}
+                            <tr>
+                                <td>{{ user }}</td>
+                                <td class="text-center"><span class="text-success">{{ sales.Week1.obama }} - {{ sales.Week1.activeObama }}</span> | <span class="text-warning">{{ sales.Week1.supp }} - {{ sales.Week1.activeSupp }}</span></td>
+                                <td class="text-center"><span class="text-success">{{ sales.Week2.obama }} - {{ sales.Week2.activeObama }}</span> | <span class="text-warning">{{ sales.Week2.supp }} - {{ sales.Week2.activeSupp }}</span></td>
+                                <td class="text-center"><span class="text-success">{{ sales.Week3.obama }} - {{ sales.Week3.activeObama }}</span> | <span class="text-warning">{{ sales.Week3.supp }} - {{ sales.Week3.activeSupp }}</span></td>
+                                <td class="text-center"><span class="text-success">{{ sales.Week4.obama }} - {{ sales.Week4.activeObama }}</span> | <span class="text-warning">{{ sales.Week4.supp }} - {{ sales.Week4.activeSupp }}</span></td>
+                                <td class="text-center"><span class="text-success">{{ sales.Week5.obama }} - {{ sales.Week5.activeObama }}</span> | <span class="text-warning">{{ sales.Week5.supp }} - {{ sales.Week5.activeSupp }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% if toggle %}
-                <a class="btn btn-outline-primary" href="{% url "weeklyLiveView" %}">View Daily</a>
+                <a class="btn btn-outline-primary" href="{% url "weeklyLiveViewTV" %}">View Daily</a>
                 {% else %}
-                <a class="btn btn-outline-primary" href="{% url "monthLiveView" %}">View Month</a>
+                <a class="btn btn-outline-primary" href="{% url "monthLiveViewTV" %}">View Month</a>
                 {% endif %}
             </div>
         </div>
@@ -68,6 +66,10 @@
 
 {% endblock %}
 {% block end_js %}
+    <script>
+        let weekRanges = JSON.parse("{{weekRange|safe}}".replace(/'/g, '"'));
+    </script>
+
 	<!-- Bootstrap JS -->
 	<script src="{% static "assets/js/bootstrap.bundle.min.js"  %}"></script> 
 	<!--plugins-->
@@ -92,6 +94,6 @@
 	<script src="{% static 'assets/js/chart/viewTv.js'%}"></script>
 
     <script>
-        startRedirectTimer("{% url 'monthLiveView' %}");
+        startRedirectTimer("{% url 'weeklyLiveView' %}");
     </script>
 {% endblock %}

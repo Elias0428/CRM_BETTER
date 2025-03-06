@@ -92,13 +92,15 @@
                         <td>{{supp.client.first_name}} {{supp.client.last_name}}</td>
                         <td>+ {{supp.client.phone_number}}</td>
 						<td>{{supp.created_at|date:"m-d-Y"}}</td>
-						<td>{{supp.policy_type}}</td>
+						<td>{{supp.policy_type}} / {{supp.company}}</td>
 						<td>{% if supp.status_color == 1 or supp.status_color == None %}
 								<span class="badge rounded-pill bg-danger">{{supp.status}}</span>
 							{% elif supp.status_color == 2 %}
 								<span class="badge rounded-pill bg-warning text-dark">{{supp.status}}</span>
 							{% elif supp.status_color == 3 %}
 								<span class="badge rounded-pill bg-success">{{supp.status}}</span>
+							{% elif supp.status_color == 4 %}
+								<span class="badge rounded-pill bg-danger">{{supp.status}}</span>
 							{% endif  %}
 						</td>
 						{% if request.user.is_superuser %}

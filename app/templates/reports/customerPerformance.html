@@ -1,0 +1,234 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Customer Performance Report</title>
+	<!--plugins-->
+	<link href="{% static 'assets/plugins/simplebar/css/simplebar.css' %}" rel="stylesheet" />
+	<link href="{% static 'assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css' %}" rel="stylesheet" />
+	<link href="{% static 'assets/plugins/metismenu/css/metisMenu.min.css' %}" rel="stylesheet" />
+	<link href="{% static 'assets/plugins/datatable/css/dataTables.bootstrap5.min.css' %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static 'assets/css/pace.min.css' %}" rel="stylesheet" />
+	<script src="{% static 'assets/js/pace.min.js' %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+	<link href="{% static 'assets/css/bootstrap-extended.css' %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+	<link href="{% static 'assets/css/icons.css' %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static 'assets/css/dark-theme.css' %}" />
+	<link rel="stylesheet" href="{% static 'assets/css/semi-dark.css' %}" />
+	<link rel="stylesheet" href="{% static 'assets/css/header-colors.css' %}" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .report {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .section {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #eef;
+            border-left: 5px solid #007bff;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin: 0 0 5px 0;
+            color: #007bff;
+        }
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .note {
+            padding: 10px;
+            border-left: 5px solid;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .performance-perfect {
+            background: #e0f7fa;
+            border-left-color: #00acc1;
+            color: #006064;
+        }
+
+        .performance-excellent {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .performance-regular {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .performance-low {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+
+    </style>
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">Customer Service Performance Report</h6>
+<hr/>
+<div class="card">
+    <div class="card-header">
+        <form method="POST" class="row">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label for="start_date">Start date:</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date">End date:</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-4 align-self-end mt-2">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'customerPerformance' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="report">
+        <h2>📊 Customer Service Report</h2>
+
+        <div class="section">
+            <h3>Total Clientes Perfilados</h3>
+            <p><strong>{{totalObamacare}}</strong></p>
+        </div>
+
+        <div class="section">
+            <h3>📌 Enrolamiento</h3>
+            <ul>
+                <li><strong>Clientes enrolados:</strong> {{totalEnroled}} ({{percentageEnroled}}%)</li>
+                <li><strong>Clientes sin enrolar:</strong> {{totalNoEnroled}} ({{percentageNoEnroled}}%)</li>
+                <li><strong>Clientes en Other Party:</strong> {{totalOtherParty}} ({{percentageOtherParty}}%)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>📌 Activación en CMS</h3>
+            <ul>
+                <li><strong>Clientes activos en CMS:</strong> {{enroledActiveCms}} de {{totalEnroled}} ({{percentageEnroledActiveCms}}%)</li>
+                <li><strong>Clientes sin activar en Carrier:</strong> {{totalEnroledNoActiveCms}} de {{totalEnroled}} ({{percentageNoActiveCms}}%)</li>
+                <li><strong>Clientes activos en CMS respecto al total perfilado:</strong> {{totalActiveCms}} de {{totalObamacare}} ({{percentageTotalActiveCms}}%)</li>
+                <li><strong>Clientes sin activar en Carrier respecto al total perfilado:</strong> {{totalNoActiveCms}} de {{totalObamacare}} ({{percentageTotalNoActiveCms}}%)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>📌 Otros datos</h3>
+            <ul>
+                <li><strong>Cantidad total de documentos subidos:</strong> {{documentsTotal}}</li>
+                <li><strong>Cantidad total de citas medicas hechas:</strong> {{appointmentsTotal}}</li>
+                <li><strong>Cantidad total de pagos confirmados:</strong> {{paymentsTotal}}</li>
+            </ul>
+        </div>
+
+        {% if groupGoal == 1 %}
+        <div class="note performance-excellent">
+            ✅ <strong>Nota:</strong> ¡Felicidades! El equipo ha logrado un desempeño excepcional con más del 90% de enrolamiento y activación en CMS. Sigamos manteniendo este nivel de eficiencia y calidad en el servicio.
+        </div>
+        {% elif groupGoal == 2 %}
+        <div class="note performance-regular">
+            ⚠️ <strong>Nota:</strong> El equipo ha cumplido con la meta mínima establecida, pero hay oportunidad de mejora. Se recomienda analizar posibles optimizaciones en los procesos para aumentar la eficiencia.
+        </div>
+        {% else %}
+        <div class="note performance-low">
+            ❌ <strong>Nota:</strong> El equipo no ha cumplido con la meta establecida. Se recomienda revisar las estrategias de enrolamiento y activación, así como evaluar el desempeño del departamento de Customer Service para tomar acciones correctivas.
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    {% for name, details in agentPerformance.items %}
+    <div class="col-6 mb-3">
+        <div class="report">
+            <h2>📊 {{name}}'s PERFORMANCE</h2>
+
+            <div class="section">
+                <h3>📌 Enrolamiento</h3>
+                <ul>
+                    <li><strong>Clientes enrolados:</strong> {{details.totalEnroled}} ({{details.percentageEnroled}}%)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h3>📌 Activación en CMS</h3>
+                <ul>
+                    <li><strong>Clientes activos en CMS:</strong> {{details.enroledActiveCms}} de {{details.totalEnroled}} ({{details.percentageEnroledActiveCms}}%)</li>
+                    <li><strong>Clientes sin activar en Carrier:</strong> {{details.enroledNoActiveCms}} de {{details.totalEnroled}} ({{details.percentageEnroledNoActiveCms}}%)</li>
+                    <li><strong>Clientes activos en CMS respecto al total perfilado:</strong> {{details.enroledActiveCms}} de {{totalObamacare}} ({{details.percentageTotalActiveCms}}%)</li>
+                    <li><strong>Clientes sin activar en Carrier respecto al total perfilado:</strong> {{details.enroledNoActiveCms}} de {{totalObamacare}} ({{details.percentageTotalNoActiveCms}}%)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h3>📌 Otros datos</h3>
+                <ul>
+                    <li><strong>Cantidad total de documentos subidos:</strong> {{details.documents}}</li>
+                    <li><strong>Cantidad total de citas medicas hechas:</strong> {{details.appointments}}</li>
+                    <li><strong>Cantidad total de pagos confirmados:</strong> {{details.payments}}</li>
+                </ul>
+            </div>
+
+            {% if details.personalGoal == 1 %}
+                <div class="note performance-perfect">
+                    🏆 <strong>Nota:</strong> Desempeño impecable. Este agente ha logrado un <strong>100% de efectividad</strong>, demostrando un dominio absoluto de sus funciones. Se recomienda reconocer su rendimiento y analizar sus estrategias para replicarlas en el equipo. ¡Un verdadero referente!
+                </div>
+            {% elif details.personalGoal == 2 %}
+                <div class="note performance-excellent">
+                    ✅ <strong>Nota:</strong> Desempeño sobresaliente. Este agente ha superado el <strong>90% de efectividad</strong>, demostrando un alto nivel de compromiso y eficiencia. Se recomienda reconocer su esfuerzo y tomarlo como referencia para el equipo.
+                </div>
+            {% elif details.personalGoal == 3 %}
+                <div class="note performance-regular">
+                    ⚠️ <strong>Nota:</strong> Desempeño aceptable, pero con margen de mejora. El agente ha alcanzado la meta mínima, aunque aún hay oportunidades para optimizar su rendimiento. Se sugiere seguimiento para reforzar sus puntos débiles.
+                </div>
+            {% else %}
+                <div class="note performance-low">
+                    ❌ <strong>Nota:</strong> Bajo desempeño, requiere revisión. El agente no ha alcanzado el <strong>80% de efectividad</strong>. Es necesario analizar las causas y tomar acciones correctivas, ya sea con capacitación o ajuste de estrategias.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+
+
+{% endblock %}

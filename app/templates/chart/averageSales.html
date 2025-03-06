@@ -1,7 +1,7 @@
 {% extends "dashboard/index.html" %}
 {% load static %}
 {% block head %}
-    <title>Table Alert</title>
+    <title>Average Sale</title>
 	<!--plugins-->
 	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
 	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
@@ -22,41 +22,30 @@
 	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
 {% endblock %}
 {% block page_content %}
-<h6 class="mb-0 text-uppercase">Alert</h6>
+<h6 class="mb-0 text-uppercase">Sales Performance</h6>
 <hr/>
 <div class="card">
+    <div class="card-header">
+        <form method="POST" class="row">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label for="start_date">Start date:</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ startDate|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date">End date:</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ endDate|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-4 align-self-end mt-2">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'salesPerformance' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card">
     <div class="card-body">
-        <div class="table-responsive">
-            <table id="tableClient" class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Agent COL</th>
-                        <th>Name Client</th>
-						<th>Date</th>
-						<th>Obs</th>
-						{% if request.user.role == 'Admin' %} <th>Is Active</th> {% endif %}
-						<th>Option</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for alertClient in alertC %}
-                    <tr>
-                        <td>{{alertClient.agent.first_name}} {{alertClient.agent.last_name}}</td>
-                        <td>{{alertClient.name_client}}</td>
-                        <td>{{alertClient.datetime}}</td>
-						<td>{{alertClient.truncated_contect}}</td> 
-						{% if request.user.role == 'Admin' %} <td>{{alertClient.is_active}}</td> {% endif %}						
-						<td>
-							<div class="d-flex order-actions">
-								<a href="{% url 'editAlert' alertClient.id %}" class=""><i class='bx bxs-edit'></i></a>
-								<a href="{% url 'toggleAlert' alertClient.id %}" class="ms-3"><i class='bx bxs-trash'></i></a>
-							</div>
-						</td> 
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+		<div id="mainChart"></div>
     </div>
 </div>
 {% endblock %}
@@ -70,9 +59,21 @@
 	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
 	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
 	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
-	<script>
-		$(document).ready(function() {$('#tableClient').DataTable();} );
-	</script>
+	<script src="{% static "assets/plugins/apexcharts-bundle/js/apexcharts.min.js" %}"></script>
+	<script src="{% static "assets/plugins/apexcharts-bundle/js/apex-custom.js" %}"></script>
+
 	<!--app JS-->
-	<script src="{% static "assets/js/app.js" %}"></script>
+	<script src="{% static 'assets/js/app.js' %}"></script>
+	
+	{{ agents|json_script:"agents-data" }}
+	{{ obamacareSales|json_script:"obamacare-sales-data" }}
+	{{ suppSales|json_script:"supp-sales-data" }}
+	
+	<script>
+		var agents = JSON.parse(document.getElementById('agents-data').textContent);
+		var obamacareSales = JSON.parse(document.getElementById('obamacare-sales-data').textContent);
+		var suppSales = JSON.parse(document.getElementById('supp-sales-data').textContent);
+	</script>
+
+	<script src="{% static 'assets/js/chart/averageSales.js' %}"></script>
 {% endblock %}

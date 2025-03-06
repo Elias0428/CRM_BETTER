@@ -9,6 +9,7 @@ import csv
 import random
 from collections import defaultdict
 from datetime import timedelta
+import openpyxl
 
 import pandas as pd
 
@@ -34,6 +35,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import urlencode
 
 # Third-party libraries
@@ -46,6 +48,9 @@ from app.forms import *
 from app.models import *
 
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+from weasyprint import HTML
+from weasyprint.text.fonts import FontConfiguration
 
 
 # Create your views here.
@@ -146,7 +151,96 @@ def formCreateClient(request):
             return render(request, 'forms/formCreateClient.html', {'error_message': form.errors})
     else:
         return render(request, 'forms/formCreateClient.html')
+
+@login_required(login_url='/login') 
+def formCreateClientMedicare(request):
+    if request.method == 'POST':
+
+        date_births = request.POST.get('date_birth')
+        language = request.POST.get('language')
+        fecha_obj = datetime.strptime(date_births, '%m/%d/%Y').date()
+        fecha_formateada = fecha_obj.strftime('%Y-%m-%d')
+
+        date_medicare = request.POST.get('dateMedicare')
+        # Convertir a objeto datetime
+        fecha_medicare = datetime.strptime(date_medicare, '%m/%d/%Y %H')
+        # Asegurar compatibilidad con zona horaria
+        fecha_formateada_medicare = make_aware(fecha_medicare)
+
+        # Obtener la fecha actual
+        hoy = datetime.today().date()
+        # Calcular la edad
+        edad = hoy.year - fecha_obj.year - ((hoy.month, hoy.day) < (fecha_obj.month, fecha_obj.day))
+
+        social = request.POST.get('social_security')
+
+        if social: formatSocial = social.replace('-','')
+        else: formatSocial = None
+
+        form = ClientMedicareForm(request.POST)
+        if form.is_valid():
+            client = form.save(commit=False)
+            client.agent = request.user
+            client.is_active = 1
+            client.old = edad
+            client.date_birth = fecha_formateada
+            client.dateMedicare = fecha_formateada_medicare
+            client.social_security = formatSocial
+            client.save()
+
+            contact = OptionMedicare.objects.create(client=client,agent=request.user)
             
+            # Redirección a la nueva página en otra pestaña
+            new_page_url = reverse('consetMedicare', args=[client.id, language])
+            
+            # Redirección de la página actual al index
+            return render(request, 'redirect_template.html', {'new_page_url': new_page_url})
+        
+            
+        else:
+            return render(request, 'forms/formCreateClientMedicare.html', {'error_message': form.errors})
+    else:
+        return render(request, 'forms/formCreateClientMedicare.html')
+
+def consetMedicare(request, client_id, language):
+
+    medicare = Medicare.objects.get(id=client_id)
+    contact = OptionMedicare.objects.filter(client = medicare.id).first()
+    temporalyURL = None
+
+    typeToken = False
+
+    activate(language)
+    # Validar si el usuario no está logueado y verificar el token
+    if isinstance(request.user, AnonymousUser):
+        result = validateTemporaryToken(request, typeToken)
+        is_valid_token, *note = result
+        if not is_valid_token:
+            return HttpResponse(note)
+    elif request.user.is_authenticated:
+        temporalyURL = f"{request.build_absolute_uri('/consetMedicare/')}{client_id}/{language}/?token={generateTemporaryToken(medicare, typeToken)}"
+        print('Usuario autenticado')
+    else:
+        # Si el usuario no está logueado y no hay token válido
+        return HttpResponse('Acceso denegado. Por favor, inicie sesión o use un enlace válido.')
+    
+    if request.method == 'POST':
+        
+        # Usamos la nueva función para guardar los checkboxes en ContactClient
+        objectContact = save_contact_medicare_checkboxes(request.POST, contact)
+
+        return generateMedicarePdf(request, medicare ,language)
+
+
+    context = {
+        'medicare':medicare,
+        'contact':contact,
+        'company':getCompanyPerAgent(medicare.agent_usa),
+        'temporalyURL': temporalyURL
+    }
+
+    return render(request, 'consent/consetMedicare.html',context)
+
 @login_required(login_url='/login') 
 def formEditClient(request, client_id):
     
@@ -254,6 +348,17 @@ def fetchAca(request, client_id):
                 'status':'IN PROGRESS'
             }
         )
+
+        # Enviar alerta por WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'product_alerts',
+            {
+                'type': 'send_alert',
+                'message': f'New product Obamacare added',
+            }
+        )
+
     return JsonResponse({'success': True, 'aca_plan_id': aca_plan.id})
 
 @login_required(login_url='/login') 
@@ -314,6 +419,17 @@ def fetchSupp(request, client_id):
                     status_color = 1
                 )
                 updated_supp_ids.append(new_supp.id)  # Agregar el ID creado a la lista
+
+                # Enviar alerta por WebSocket
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    'product_alerts',
+                    {
+                        'type': 'send_alert',
+                        'message': f'New product Supplemental added',
+                    }
+                )
+
     return JsonResponse({'success': True,  'supp_ids': updated_supp_ids})
 
 @login_required(login_url='/login')      
@@ -556,7 +672,6 @@ def addDepend(request):
 @login_required(login_url='/login')
 def clientObamacare(request):
     
-    roleAuditar = ['S', 'C',  'AU']
 
     borja = 'BORJA G CANTON HERRERA - NPN 20673324'
     daniel = 'DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958'
@@ -565,28 +680,29 @@ def clientObamacare(request):
     evelyn = 'EVELYN BEATRIZ HERRERA - NPN 20671818'
     danieska = 'DANIESKA LOPEZ SEQUEIRA - NPN 20134539'
     rodrigo = 'RODRIGO G CANTON - NPN 20670005'
+    zohira = 'ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295'
+    vladimir = 'VLADIMIR DE LA HOZ FONTALVO - NPN 19915005'
     
-    if request.user.role in roleAuditar:
-       
+    if request.user.role == 'Admin':       
         obamaCare = ObamaCare.objects.select_related('agent','client').annotate(
-            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True).order_by('-created_at')
-
-    elif request.user.role == 'Admin':
-
-        obamaCare = ObamaCare.objects.select_related('agent', 'client').annotate(
             truncated_agent_usa=Substr('agent_usa', 1, 8)).order_by('-created_at')
-        
-    elif request.user.role in ['A', 'SUPP']:
+    elif request.user.username == 'zohiraDuarte':
+       obamaCare = ObamaCare.objects.select_related('agent','client').annotate(
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True, agent_usa = zohira).order_by('-created_at') 
+    elif request.user.username == 'vladimirDeLaHoz':
         obamaCare = ObamaCare.objects.select_related('agent','client').annotate(
-            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(agent = request.user.id, is_active = True ).order_by('-created_at')
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True, agent_usa = vladimir).order_by('-created_at')
+    else:
+        obamaCare = ObamaCare.objects.select_related('agent', 'client').annotate(
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True).order_by('-created_at')      
 
-    
+
     return render(request, 'table/clientObamacare.html', {'obamacares':obamaCare})
 
 @login_required(login_url='/login')
 def clientSupp(request):
 
-    roleAuditar = ['S', 'SUPP',  'AU']
+    roleAuditar = ['S', 'C','SUPP', 'AU']
     
     if request.user.role in roleAuditar:
         supp = Supp.objects.select_related('agent','client').filter(is_active = True).exclude(status_color = 1).annotate(
@@ -725,6 +841,41 @@ def editClient(request,client_id):
 def editClientObama(request, obamacare_id):
     obamacare = ObamaCare.objects.select_related('agent', 'client').filter(id=obamacare_id).first()
     dependents = Dependent.objects.select_related('obamacare').filter(obamacare=obamacare)
+    letterCard = LettersCard.objects.filter(obama = obamacare_id).first()
+    apppointment = AppointmentClient.objects.select_related('obama','agent_create').filter(obama = obamacare_id)
+    userCarrier = UserCarrier.objects.filter(obama = obamacare_id).first()
+
+    if letterCard and letterCard.letters and letterCard.card: 
+        newLetterCard = True
+    else: 
+        newLetterCard = False
+
+    #Obtener todos los registros de meses pagados de la poliza
+    monthsPaid = Payments.objects.filter(obamaCare_id=obamacare.id)
+
+    #calculo de Status
+    obamaStatus = True if obamacare.status == 'ACTIVE' else False
+
+    #Obtener todo los meses en ingles
+    monthInEnglish = [calendar.month_name[i] for i in range(1, 13)]
+
+    newApppointment = True if apppointment else False
+    
+    RoleAuditar = [
+        obamacare.policyNumber, 
+        obamaStatus, 
+        obamacare.doc_migration, 
+        userCarrier,
+        newLetterCard,
+        newApppointment
+    ]
+
+    c = 0
+    for item in RoleAuditar: 
+        if item and item != 'None':
+            c += 1
+
+    percentage = int(c/6*100)
 
     if obamacare and obamacare.client:
         social_number = obamacare.client.social_security  # Campo real del modelo
@@ -741,24 +892,21 @@ def editClientObama(request, obamacare_id):
         action = request.POST.get('action')
         if action == 'validate_key':
             provided_key = request.POST.get('key')
-            correct_key = 'Astro9525$'  # Cambia por tu lógica segura
+            correct_key = 'Sseguros22@'  # Cambia por tu lógica segura
 
             if provided_key == correct_key and social_number:
                 return JsonResponse({'status': 'success', 'social': social_number})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Clave incorrecta o no hay número disponible'})
     
-
-    obsObama = ObservationAgent.objects.filter(id_obamaCare=obamacare_id)
-  
+    obsObama = ObservationAgent.objects.filter(id_obamaCare=obamacare_id)  
     users = User.objects.filter(role='C')
     list_drow = DropDownList.objects.filter(profiling_obama__isnull=False)
-
     obsCus = ObservationCustomer.objects.select_related('agent').filter(client_id=obamacare.client.id)
-
     consent = Consents.objects.filter(obamacare = obamacare_id )
     income = IncomeLetter.objects.filter(obamacare = obamacare_id)
     document = DocumentsClient.objects.filter(client = obamacare.client)
+    documentObama = DocumentObama.objects.filter(obama = obamacare_id)
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -768,13 +916,13 @@ def editClientObama(request, obamacare_id):
             editClient(request, obamacare.client.id)
             dependents= editDepentsObama(request, obamacare_id)
 
+            usernameCarrier(request, obamacare.id)
 
             # Campos de ObamaCare
             obamacare_fields = [
                 'taxes', 'planName', 'carrierObama', 'profiling', 'subsidy', 'ffm', 'required_bearing',
                 'doc_income', 'doc_migration', 'statusObama', 'work', 'date_effective_coverage',
-                'date_effective_coverage_end', 'observationObama', 'agent_usa_obamacare','usernameCarrier',
-                'passwordCarrier','policyNumber','premium'
+                'date_effective_coverage_end', 'observationObama', 'agent_usa_obamacare','policyNumber','premium'
             ]
             
             # Limpiar los campos de ObamaCare convirtiendo los vacíos en None
@@ -807,7 +955,6 @@ def editClientObama(request, obamacare_id):
             else:
                 date_effective_coverage_end_new = None
 
-
             # Recibir el valor seleccionado del formulario
             selected_profiling = request.POST.get('statusObama')
 
@@ -829,7 +976,10 @@ def editClientObama(request, obamacare_id):
                         break
             
             
-            if selected_profiling == 'CANCELED' or selected_profiling == 'SALE FALL' or selected_profiling == 'OTHER PARTY':
+            statusRed = ['CANCELED','SALE FALL','PRICING ISSUE','OTHER AGENT','CUSTOMER CANCELED','OTHER PARTY']
+
+            if selected_profiling in statusRed:
+                sw = False
                 color = 4     
 
             if cleaned_obamacare_data['profiling'] is not None:
@@ -848,8 +998,6 @@ def editClientObama(request, obamacare_id):
 
             if sw :
                 color = 1   
-
-
 
             # Actualizar ObamaCare
             ObamaCare.objects.filter(id=obamacare_id).update(
@@ -872,10 +1020,48 @@ def editClientObama(request, obamacare_id):
                 premium=cleaned_obamacare_data['premium'],
                 date_effective_coverage=date_effective_coverage_new,
                 date_effective_coverage_end=date_effective_coverage_end_new,
-                observation=cleaned_obamacare_data['observationObama'],
-                username_carrier=cleaned_obamacare_data['usernameCarrier'],
-                password_carrier=cleaned_obamacare_data['passwordCarrier']
+                observation=cleaned_obamacare_data['observationObama']
             )
+           
+            #obtener informacion para guardarla en modelo de cartas y tarjetas del cliente
+            lettersPost = request.POST.get('letters', 'false').lower() == "true"
+            cardsPost = request.POST.get('card', 'false').lower() == "true"
+            idPost = request.POST.get('letterCardID') 
+
+            if lettersPost: 
+                dateLetters = letterCard.dateLetters
+                letters = letterCard.letters
+            else:
+                dateLetters = timezone.now().date() 
+                letters = request.POST.get('letters')
+
+            if cardsPost: 
+                dateCard = letterCard.dateCard
+                cards = letterCard.card
+            else:
+                dateCard = timezone.now().date()
+                cards = request.POST.get('cards')  
+
+            if idPost:
+
+                LettersCard.objects.filter(id = idPost).update(
+                obama=obamacare,
+                agent_create=request.user,
+                letters=letters,
+                dateLetters = dateLetters,
+                card=cards,
+                dateCard = dateCard )
+
+            else:
+
+                LettersCard.objects.create(
+                obama=obamacare,
+                agent_create=request.user,
+                letters=letters,
+                dateLetters = dateLetters,
+                card=cards,
+                dateCard = dateCard )
+
 
             return redirect('clientObamacare')
 
@@ -912,10 +1098,85 @@ def editClientObama(request, obamacare_id):
         'dependents' : dependents,
         'consent': consent,
         'income': income,
-        'document' : document
+        'document' : document,
+        'documentObama' : documentObama,
+        'percentage': percentage,
+        'letterCard': letterCard,
+        'apppointment' : apppointment,
+        'userCarrier': userCarrier,
+        'c':c,
+        'monthInEnglish':monthInEnglish,
+        'monthsPaid':monthsPaid,
     }
 
     return render(request, 'edit/editClientObama.html', context)
+
+@csrf_exempt
+def fetchPaymentsMonth(request):
+    form = PaymentsForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.agent = request.user
+            payment.save()
+            return JsonResponse({'success': True, 'message': 'Payment creado correctamente', 'role': request.user.role})
+        else:
+            # Si el formulario no es válido, devolvemos los errores en formato JSON
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+    elif request.method == 'DELETE':
+        try:
+            data = json.loads(request.body)
+            obamaCare = data.get('obamaCare')
+            month = data.get('month')
+
+            # Buscar y eliminar el pago
+            payment = Payments.objects.filter(obamaCare=obamaCare, month=month).first()
+            if payment:
+                payment.delete()
+                return JsonResponse({'success': True, 'message': 'Payment eliminado correctamente'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Payment no encontrado'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+def usernameCarrier(request, obamacare):
+
+    obama = ObamaCare.objects.filter(id=obamacare).first()   
+    id = request.POST.get('usernameCarrierID') 
+    if id: userrCarrier = UserCarrier.objects.filter(id = id)
+    username_carrier = request.POST.get('usernameCarrier') 
+    password_carrier = request.POST.get('passwordCarrier')  
+
+    if username_carrier is not None and password_carrier is not None:
+
+        # Conversión solo si los valores no son nulos o vacíos
+        if username_carrier is not None and password_carrier is not None:
+            date = timezone.now().date()
+        else:
+            username_carrier = userrCarrier.username_carrier
+            password_carrier = userrCarrier.password_carrier
+            date = userrCarrier.dateUserCarrier
+
+        if id:
+            UserCarrier.objects.filter(id = id).update(
+            obama = obama,
+            agent_create=request.user,
+            username_carrier=username_carrier,
+            password_carrier = password_carrier,
+            dateUserCarrier=date )
+        
+        
+
+        else:
+
+            UserCarrier.objects.create(
+            obama=obama,
+            agent_create=request.user,
+            username_carrier=username_carrier,
+            password_carrier = password_carrier,
+            dateUserCarrier=date  )
 
 @login_required(login_url='/login')
 def editClientSupp(request, supp_id):
@@ -1007,6 +1268,12 @@ def editClientSupp(request, supp_id):
                     if selected_status == 'ACTIVE':
                         color = 3 
                         break  
+            
+            statusRed = ['BANK DRAFT CANCELLED - CUSTOMER REQUEST','TERM - INSURED REQUEST','TERM - LAPSE NON PAYMENT'
+                         ,'AUTOMATIC TERMINATION','TERM - INSURED REQUEST (PAYMENT ERROR)','WITHDRAWN (PAYMENT ERROR)']
+
+            if selected_status in statusRed:
+                color = 4   
 
 
             # Actualizar Supp
@@ -1217,7 +1484,7 @@ def editAlert(request, alertClient_id):
 @login_required(login_url='/login') 
 def formCreateUser(request):
 
-    users = User.objects.exclude(is_superuser = 1)
+    users = User.objects.all()
 
     roles = User.ROLES_CHOICES  # Obtén las opciones dinámicamente desde el modelo
 
@@ -1448,6 +1715,159 @@ def typification(request):
             'agents' : agent
         })
 
+def customerPerformance(request):
+
+    if request.method == 'POST':
+        # Convertir fechas a objetos datetime con zona horaria
+        start_date = timezone.make_aware(
+            datetime.strptime(request.POST.get('start_date'), '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        end_date = timezone.make_aware(
+            datetime.strptime(request.POST.get('end_date'), '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+        )
+    else:
+        now = datetime.now()
+
+        # Primer día del mes actual
+        start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        # Último día del mes actual
+        next_month = now.replace(day=28) + timedelta(days=4)  # Garantiza que pasamos al siguiente mes
+        end_date = next_month.replace(day=1, hour=23, minute=59, second=59, microsecond=999999) - timedelta(days=1)
+
+    obamacare = ObamaCare.objects.filter(created_at__range=(start_date, end_date), is_active=1)
+    totalEnroled = obamacare.exclude(profiling='NO')
+    totalNoEnroled = obamacare.filter(profiling='NO').count()
+    totalOtherParty = obamacare.filter(status__in=('OTHER PARTY', 'OTHER AGENT')).count()
+    enroledActiveCms = totalEnroled.filter(status='ACTIVE').count()
+    totalEnroledNoActiveCms = totalEnroled.exclude(status='ACTIVE').count()
+    totalActiveCms = obamacare.filter(status='ACTIVE').count()
+    totalNoActiveCms = obamacare.exclude(status='ACTIVE').count()
+
+    documents = DocumentObama.objects.select_related('agent_create').filter(created_at__range=(start_date, end_date))
+    appointments = AppointmentClient.objects.select_related('agent_create').filter(created_at__range=(start_date, end_date))
+    payments = Payments.objects.select_related('agent').filter(created_at__range=(start_date, end_date))
+
+    # Obtener agentes Customer, excluyendo a Maria Tinoco y Carmen Rodriguez
+    agents = User.objects.filter(role='C', is_active=1).exclude(username__in=('MariaCaTi', 'CarmenR'))
+    agent_performance = {}
+
+    for agent in agents:
+        full_name = f"{agent.first_name} {agent.last_name}".strip()
+        profilingAgent = obamacare.filter(profiling=full_name)
+        enroledActiveCmsPerAgent = profilingAgent.filter(status='ACTIVE').count()
+        enroledNoActiveCmsPerAgent = profilingAgent.exclude(status='ACTIVE').count()
+        percentageEnroledActiveCms = format_decimal(
+            (enroledActiveCmsPerAgent / profilingAgent.count()) * 100
+        ) if profilingAgent.count() else 0
+
+        # Inicializar la clave si no existe
+        if full_name not in agent_performance:
+            agent_performance[full_name] = {
+                'totalEnroled': 0,
+                'percentageEnroled': 0,
+                'enroledActiveCms': 0,
+                'percentageEnroledActiveCms': 0,
+                'enroledNoActiveCms': 0,
+                'percentageEnroledNoActiveCms': 0,
+                'percentageTotalActiveCms': 0,
+                'percentageTotalNoActiveCms': 0,
+                'documents': 0,
+                'appointments': 0,
+                'payments': 0,
+                'personalGoal': 0
+            }
+
+        # Asignar valores con validación de división por cero
+        agent_performance[full_name]['totalEnroled'] = profilingAgent.count()
+        agent_performance[full_name]['percentageEnroled'] = format_decimal(
+            (profilingAgent.count() / obamacare.count()) * 100
+        ) if obamacare.count() else 0
+        agent_performance[full_name]['enroledActiveCms'] = enroledActiveCmsPerAgent
+        agent_performance[full_name]['percentageEnroledActiveCms'] = percentageEnroledActiveCms
+        agent_performance[full_name]['enroledNoActiveCms'] = enroledNoActiveCmsPerAgent
+        agent_performance[full_name]['percentageEnroledNoActiveCms'] = format_decimal(
+            (enroledNoActiveCmsPerAgent / profilingAgent.count()) * 100
+        ) if profilingAgent.count() else 0
+        agent_performance[full_name]['percentageTotalActiveCms'] = format_decimal(
+            (enroledActiveCmsPerAgent / obamacare.count()) * 100
+        ) if obamacare.count() else 0
+        agent_performance[full_name]['percentageTotalNoActiveCms'] = format_decimal(
+            (enroledNoActiveCmsPerAgent / obamacare.count()) * 100
+        ) if obamacare.count() else 0
+
+        agent_performance[full_name]['documents'] = documents.filter(agent_create=agent).count()
+        agent_performance[full_name]['appointments'] = appointments.filter(agent_create=agent).count()
+        agent_performance[full_name]['payments'] = payments.filter(agent=agent).count()
+
+        #Meta personal
+        if percentageEnroledActiveCms == 100 and percentageEnroledActiveCms == 100:
+            agent_performance[full_name]['personalGoal'] = 1
+        elif percentageEnroledActiveCms > 89.9 and percentageEnroledActiveCms > 89.9:
+            agent_performance[full_name]['personalGoal'] = 2
+        elif percentageEnroledActiveCms > 79.9 and percentageEnroledActiveCms > 79.9:
+            agent_performance[full_name]['personalGoal'] = 3
+        else:
+            agent_performance[full_name]['personalGoal'] = 4
+            
+
+
+    # Evitar divisiones por cero en todos los cálculos
+    obamacare_count = obamacare.count() if obamacare.exists() else 1
+    totalEnroled_count = totalEnroled.count() if totalEnroled.exists() else 1
+
+    #Verificacion de bono:
+    percentageEnroled = (totalEnroled.count() / obamacare_count) * 100
+    percentageEnroledActiveCms = (enroledActiveCms / totalEnroled_count) * 100
+    if percentageEnroled > 89.9 and percentageEnroledActiveCms > 89.9:
+        groupGoal = 1
+    elif percentageEnroled > 79.9 and percentageEnroledActiveCms > 79.9:
+        groupGoal = 2
+    else:
+        groupGoal = 3
+
+    #Diferencia entre total
+    totalAgentsPayments = 0
+    for agent, details in agent_performance.items():
+        totalAgentsPayments += details['payments']
+
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'totalObamacare': obamacare.count(),
+        'totalEnroled': totalEnroled.count(),
+        'percentageEnroled': format_decimal(percentageEnroled),
+        'totalNoEnroled': format_decimal(totalNoEnroled),
+        'percentageNoEnroled': format_decimal((totalNoEnroled / obamacare_count) * 100),
+        'totalOtherParty': totalOtherParty,
+        'percentageOtherParty': format_decimal((totalOtherParty / obamacare_count) * 100),
+        'enroledActiveCms': enroledActiveCms,
+        'percentageEnroledActiveCms': format_decimal(percentageEnroledActiveCms),
+        'totalEnroledNoActiveCms': totalEnroledNoActiveCms,
+        'percentageNoActiveCms': format_decimal((totalEnroledNoActiveCms / totalEnroled_count) * 100),
+        'totalActiveCms': totalActiveCms,
+        'percentageTotalActiveCms': format_decimal((totalActiveCms / obamacare_count) * 100),
+        'totalNoActiveCms': totalNoActiveCms,
+        'percentageTotalNoActiveCms': format_decimal((totalNoActiveCms / obamacare_count) * 100),
+        'appointmentsTotal':appointments.count(),
+        'documentsTotal': documents.count(),
+        'paymentsTotal':payments.count(),
+        'agentPerformance': agent_performance,
+
+        #Messages
+        'totalAgentsPayments':totalAgentsPayments,
+        'groupGoal':groupGoal
+    }
+    return render(request, 'reports/customerPerformance.html', context)
+
+def format_decimal(number):
+    # Revisa si el numero es entero y lo devuelve entero
+    if number.is_integer():
+        return int(number)
+    
+    # Si es decimal lo devuelve con dos numeros despues del punto
+    return round(number, 2)
+
 def get_observation_detail(request, observation_id):
     try:
         # Obtener el registro específico
@@ -1584,6 +2004,7 @@ def chartSaleIndex(request):
 
     # Roles con acceso ampliado
     roleAuditar = ['S', 'Admin']
+    excludeUsername = ['admin','Calidad01','Calidad02','mariluz','MariaCaTi','StephanieMkt']
 
     # Construcción de la consulta basada en el rol del usuario
     if request.user.role in roleAuditar:
@@ -1611,7 +2032,7 @@ def chartSaleIndex(request):
                 agent_sale_supp__created_at__lt=end_of_month,
                 agent_sale_supp__is_active=True
             ), distinct=True), 0)
-        ).filter(is_active = True).exclude(username = 'mariluz').values('first_name', 'obamacare_count', 'obamacare_count_total', 'supp_count', 'supp_count_total')
+        ).filter(is_active = True).exclude(username__in=excludeUsername).values('first_name', 'obamacare_count', 'obamacare_count_total', 'supp_count', 'supp_count_total')
 
     elif request.user.role not in roleAuditar:
         # Para usuarios con rol 'A': consultar datos solo para el usuario actual
@@ -2307,7 +2728,8 @@ def weeklyLiveView(request):
     context = {
         'weeklySales': getSalesForWeekly(),
     }
-    return render(request, 'dashboard/weeklyLiveView.html', context)
+    if request.user.role == 'TV': return render(request, 'dashboard/weeklyLiveViewTV.html', context)
+    else: return render(request, 'dashboard/weeklyLiveView.html', context)
 
 def getSalesForWeekly():
     # Obtener la fecha de hoy y calcular el inicio de la semana (asumiendo que empieza el lunes)
@@ -2425,11 +2847,15 @@ def getSalesForWeekly():
     return finalCounts
 
 def monthLiveView(request):
+    monthSales, weekRanges = getSalesForMonth()
     context = {
-        'monthSales': getSalesForMonth(),
+        'monthSales': monthSales,
+        'weekRanges': weekRanges,
         'toggle': True
     }
-    return render(request, 'dashboard/monthLiveView.html', context)
+    
+    if request.user.role == 'TV': return render(request, 'dashboard/monthLiveViewTV.html', context)
+    else: return render(request, 'dashboard/monthLiveView.html', context)
 
 from django.utils.timezone import make_aware
 
@@ -2449,6 +2875,20 @@ def getSalesForMonth():
     
     # Número total de semanas en el mes actual
     numWeeks = (lastDay + 6) // 7  # Aproximación para incluir semanas parciales
+
+    # Calcular los rangos de las semanas
+    weekRanges = []
+    for i in range(numWeeks):
+        weekStart = startDate + timedelta(weeks=i)
+        weekEnd = weekStart + timedelta(days=6)
+        
+        # Asegurarse de que la fecha final no sea después del último día del mes
+        if weekEnd > endDate:
+            weekEnd = endDate
+        
+        # Formatear las fechas en "dd/mm"
+        weekRange = f"{weekStart.strftime('%d/%m')} - {weekEnd.strftime('%d/%m')}"
+        weekRanges.append(weekRange)
     
     # Inicializar diccionario de ventas con todos los usuarios
     users = User.objects.filter(role__in=userRoles, is_active=True).exclude(username__in=excludedUsernames)  # Lista completa de usuarios
@@ -2511,7 +2951,7 @@ def getSalesForMonth():
         fullName = f"{user.first_name} {user.last_name}".strip()
         finalSummary[fullName] = salesSummary[user.username]
     
-    return finalSummary
+    return finalSummary, weekRanges
 
 #Websocket
 def notify_websocket(user_id):
@@ -2533,7 +2973,7 @@ def notify_websocket(user_id):
 @login_required(login_url='/login')   
 def formCreateControl(request):
 
-    userRole = [ 'A' , 'C']
+    userRole = [ 'A' , 'C', 'SUPP']
     users = User.objects.filter(role__in = userRole)
 
     if request.method == 'POST':
@@ -2976,17 +3416,18 @@ def consent(request, obamacare_id):
     obamacare = ObamaCare.objects.select_related('client').get(id=obamacare_id)
     temporalyURL = None
 
-    if request.method == 'GET':
-        language = request.GET.get('lenguaje', 'es')  # Idioma predeterminado si no se pasa
-        activate(language)
+    typeToken = True
+   
+    language = request.GET.get('lenguaje', 'es')  # Idioma predeterminado si no se pasa
+    activate(language)
     # Validar si el usuario no está logueado y verificar el token
     if isinstance(request.user, AnonymousUser):
-        result = validateTemporaryToken(request)
+        result = validateTemporaryToken(request, typeToken)
         is_valid_token, *note = result
         if not is_valid_token:
             return HttpResponse(note)
     elif request.user.is_authenticated:
-        temporalyURL = f"{request.build_absolute_uri('/viewConsent/')}{obamacare_id}?token={generateTemporaryToken(obamacare)}&lenguaje={language}"
+        temporalyURL = f"{request.build_absolute_uri('/viewConsent/')}{obamacare_id}?token={generateTemporaryToken(obamacare.client , typeToken)}&lenguaje={language}"
         print('Usuario autenticado')
     else:
         # Si el usuario no está logueado y no hay token válido
@@ -3031,7 +3472,8 @@ def consent(request, obamacare_id):
 def incomeLetter(request, obamacare_id):
     # Validar si el usuario no está logueado y verificar el token
     if isinstance(request.user, AnonymousUser):
-        result = validateTemporaryToken(request)
+        typeToken = True #Aqui le indico si buscar el token temporal por el medicare o client_id
+        result = validateTemporaryToken(request, typeToken)
         is_valid_token, *note = result
         if not is_valid_token:
             return HttpResponse(note)
@@ -3046,6 +3488,7 @@ def incomeLetter(request, obamacare_id):
     language = request.GET.get('lenguaje', 'es')  # Idioma predeterminado si no se pasa
     activate(language)
     
+  
     context = {
         'obamacare': obamacare,
         'signed' : signed,
@@ -3056,6 +3499,8 @@ def incomeLetter(request, obamacare_id):
         generateIncomeLetterPDF(request, objectObamacare, language)
         deactivateTemporaryToken(request)
         return render(request, 'consent/endView.html')
+    
+        
 
     return render(request, 'consent/incomeLetter.html', context)
 
@@ -3105,7 +3550,6 @@ def generateConsentPdf(request, obamacare, dependents, supps, language):
     }
 
     activate(language)
-
     # Renderiza la plantilla HTML a un string
     html_content = render_to_string('consent/templatePdfConsent.html', context)
 
@@ -3122,10 +3566,70 @@ def generateConsentPdf(request, obamacare, dependents, supps, language):
     consent.pdf.save(pdf_name, ContentFile(pdf_io.read()), save=True)
 
     base_url = reverse('incomeLetter', args=[obamacare.id])
-    query_params = urlencode({'token': token, 'lenguaje': language})
+    query_params = urlencode({'token': token,'lenguaje': language})
     url = f'{base_url}?{query_params}'
 
     return redirect(url)
+
+def generateMedicarePdf(request, medicare ,language):
+    token = request.GET.get('token')
+
+    current_date = datetime.now().strftime("%A, %B %d, %Y %I:%M")
+
+    contact = OptionMedicare.objects.filter(client = medicare.id).first()
+
+    # Obtener los campos con valor True
+    true_fields = []
+
+    if contact.prescripcion: true_fields.append('Planes de Prescripción de Medicare Parte D')
+    if contact.advantage: true_fields.append('Planes de Medicare Advantage (Parte C) y Planes de Costo')
+    if contact.dental: true_fields.append('Productos Dental-Visión-Oescucha')
+    if contact.complementarios: true_fields.append('Productos de Complementarios de Hospitalización')
+    if contact.suplementarios: true_fields.append('Planes Suplementarios de Medicare (Medigap)')
+
+    # Variable con los nombres de los campos
+    var = ", ".join(true_fields)    
+
+    consent = Consents.objects.create(
+        medicare=medicare,
+    )
+
+    signature_data = request.POST.get('signature')
+    format, imgstr = signature_data.split(';base64,')
+    ext = format.split('/')[-1]
+    image = ContentFile(base64.b64decode(imgstr), name=f'firma.{ext}')
+
+    consent.signature = image
+    consent.save()
+
+    context = {
+        'medicare':medicare,
+        'consent':consent,
+        'company':getCompanyPerAgent(medicare.agent_usa),
+        'ip':getIPClient(request),
+        'current_date':current_date,
+        'var':var
+    }
+
+    activate(language)
+    # Renderiza la plantilla HTML a un string
+    html_content = render_to_string('consent/templatePdfConsentMedicare.html', context)
+
+    # Genera el PDF
+    pdf_file = HTML(string=html_content).write_pdf()
+
+    # Usa BytesIO para convertir el PDF en un archivo
+    pdf_io = io.BytesIO(pdf_file)
+    pdf_io.seek(0)  # Asegúrate de que el cursor esté al principio del archivo
+
+    # Guarda el PDF en el modelo usando un ContentFile
+    pdf_name = f'Consent-medicare{medicare.first_name}_{medicare.last_name}#{medicare.phone_number} {datetime.now().strftime("%m-%d-%Y-%H:%M")}.pdf'  # Nombre del archivo
+
+    consent.pdf.save(pdf_name, ContentFile(pdf_io.read()), save=True)
+
+
+
+    return render(request, 'consent/endView.html')
 
 def generateIncomeLetterPDF(request, obamacare, language):
     current_date = datetime.now().strftime("%A, %B %d, %Y %I:%M")
@@ -3228,6 +3732,30 @@ def save_contact_client_checkboxes(post_data, contact_instance):
     contact_instance.save()  # Guardar la instancia actualizada
     return contact_instance
 
+def save_contact_medicare_checkboxes(post_data, contact_instance):
+    """
+    Guarda o actualiza los campos de tipo checkbox en ContactClient (phone, email, sms, whatsapp).
+    
+    Args:
+        post_data (QueryDict): Datos enviados en el request.POST.
+        contact_instance (ContactClient): Instancia de ContactClient a actualizar.
+
+    Returns:
+        ContactClient: Instancia de ContactClient actualizada.
+    """
+    checkbox_fields = ['prescripcion', 'advantage', 'dental', 'complementarios','suplementarios']
+    
+    # Asegúrate de que solo los campos seleccionados se marquen como True
+    for field in checkbox_fields:
+        # Si el checkbox está marcado (enviará 'on'), lo asignamos como True
+        if post_data.get(field) == 'on':
+            setattr(contact_instance, field, True)
+        else:
+            setattr(contact_instance, field, False)
+    
+    contact_instance.save()  # Guardar la instancia actualizada
+    return contact_instance
+
 def getCompanyPerAgent(agent):
     agent_upper = agent.upper()
 
@@ -3250,124 +3778,237 @@ def getIPClient(request):
     return ip
 
 @login_required(login_url='/login')
-def averageSales(request):
-    agents = User.objects.filter(is_active=True, role__in=['A', 'C'])
-    nameChart = 'Select filter data'
-    weeks = ["Semana 1", "Semana 2", "Semana 3", "Semana 4", "Semana 5"]
-    counts_obamacare = [0, 0, 0, 0, 0]
-    counts_supp = [0, 0, 0, 0, 0]
-    counts_total = [0, 0, 0, 0, 0]
+def salesPerformance(request):
+    # Obtener la fecha actual
+    now = timezone.now()
 
-    if request.method == "POST":
-        start_date = request.POST.get("month")  # Obtén el mes enviado
-        agentReport = request.POST.get('agent')
-        if start_date:
-            try:
-                # Convertir el mes seleccionado en un rango de fechas
-                year = datetime.now().year
-                month = int(start_date)
-                first_day = datetime(year, month, 1)
-                if month == 12:
-                    last_day = datetime(year + 1, 1, 1) - timedelta(days=1)
-                else:
-                    last_day = datetime(year, month + 1, 1) - timedelta(days=1)
+    # Si se proporcionan fechas, filtrar por el rango de fechas
+    if request.method == 'POST':
+        startDatePost = request.POST['start_date']
+        endDatePost = request.POST['end_date']
+        startDate = timezone.make_aware(
+            datetime.strptime(startDatePost, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        endDate = timezone.make_aware(
+            datetime.strptime(endDatePost, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+        )
+    else:
+        startDate = timezone.make_aware(
+            datetime(now.year, now.month, 1, 0, 0, 0, 0)
+        )
+        endDate = timezone.make_aware(
+            datetime(now.year, now.month + 1, 1, 0, 0, 0, 0) - timezone.timedelta(microseconds=1)
+        )
 
-                # Filtro de ObamaCare
-                obamacare_records = ObamaCare.objects.filter(
-                    created_at__range=(first_day, last_day),
-                    status_color=3, 
-                    agent = agentReport,
-                    is_active = True
-                )
 
-                # Filtro de Supp
-                supp_records = Supp.objects.filter(
-                    created_at__range=(first_day, last_day),
-                    status_color=3,
-                    agent = agentReport,
-                    is_active = True
-                )
+    salesData = get_agent_sales(startDate, endDate)
 
-                nameAgentChart = User.objects.filter(id = agentReport).first()
-                nameChart = nameAgentChart.first_name, nameAgentChart.last_name
+    # Preparar datos para la gráfica con nombres completos
+    agents = list(salesData.keys())
+    obamacareSales = [salesData[agent]['obamas'] for agent in agents]
+    suppSales = [salesData[agent]['supp'] for agent in agents]
 
-                # Función para calcular la semana correcta dentro del mes
-                def get_week_of_month(date):
-                    # Primer día del mes
-                    first_day_of_month = date.replace(day=1)
-                    
-                    # Calculamos la diferencia en días entre la fecha y el primer día del mes
-                    days_since_first_day = (date - first_day_of_month).days
+    users = User.objects.all()
+    for user in users:
+        print(f'{user.username} {get_weekly_counts(user)}')
 
-                    # Calcular la semana del mes: Dividimos los días por 7
-                    week_of_month = days_since_first_day // 7
-
-                    # Asegurarse de no exceder 5 semanas (en algunos meses puede haber 5 semanas)
-                    if week_of_month >= 4:
-                        week_of_month = 4
-
-                    return week_of_month
-
-                # Mostrar los días asignados a cada semana para verificación
-                week_days = {week: [] for week in weeks}  # Diccionario para almacenar los días asignados a cada semana
-
-                # Contar registros por semana y mostrar los días asignados
-                for record in obamacare_records:
-                    week_number = get_week_of_month(record.created_at.date())
-                    if 0 <= week_number < 5:  # Validar que la semana esté en el rango
-                        counts_obamacare[week_number] += 1
-                        week_days[weeks[week_number]].append(record.created_at.date())
-
-                for record in supp_records:
-                    week_number = get_week_of_month(record.created_at.date())
-                    if 0 <= week_number < 5:  # Validar que la semana esté en el rango
-                        counts_supp[week_number] += 1
-                        week_days[weeks[week_number]].append(record.created_at.date())
-
-                # Calcular el total combinado
-                counts_total = [
-                    counts_obamacare[i] + counts_supp[i] for i in range(len(weeks))
-                ]
-
-            except ValueError as e:
-                print("Error al procesar la fecha:", e)
+    context = {
+        'agents': agents,
+        'obamacareSales': obamacareSales,
+        'suppSales': suppSales,
+        'startDate':startDate,
+        'endDate':endDate,
+    }
 
     # Renderizar la respuesta
-    return render(request, 'table/averageSales.html', {
-        'agents': agents,
-        'weeks': weeks,
-        'counts_obamacare': counts_obamacare,
-        'counts_supp': counts_supp,
-        'counts_total': counts_total,
-        'nameChart' : nameChart
-    })
+    return render(request, 'chart/averageSales.html', context)
+
+def get_weekly_counts(user):
+    # Obtener la fecha actual
+    noww = timezone.now()
+
+    # Primer día del mes anterior
+    now = noww.replace(day=1) - relativedelta(months=1)
+    
+    # Obtener el primer día del mes actual
+    first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    # Obtener el último día del mes actual
+    if now.month == 12:
+        next_month = now.replace(year=now.year + 1, month=1, day=1)
+    else:
+        next_month = now.replace(month=now.month + 1, day=1)
+    last_day_of_month = next_month - timedelta(days=1)
+    
+    # Calcular las fechas de inicio de cada semana
+    week1_start = first_day_of_month
+    week2_start = week1_start + timedelta(days=7)
+    week3_start = week2_start + timedelta(days=7)
+    week4_start = week3_start + timedelta(days=7)
+    
+    # Inicializar el diccionario de resultados
+    result = {
+        "week1obama": 0,
+        "week2obama": 0,
+        "week3obama": 0,
+        "week4obama": 0,
+        "week1supp": 0,
+        "week2supp": 0,
+        "week3supp": 0,
+        "week4supp": 0,
+    }
+    
+    # Conteo de ObamaCare
+    obamacare_counts = ObamaCare.objects.filter(agent=user, created_at__range=(first_day_of_month, last_day_of_month))
+    for obamacare in obamacare_counts:
+        if week1_start <= obamacare.created_at < week2_start:
+            result["week1obama"] += 1
+        elif week2_start <= obamacare.created_at < week3_start:
+            result["week2obama"] += 1
+        elif week3_start <= obamacare.created_at < week4_start:
+            result["week3obama"] += 1
+        elif week4_start <= obamacare.created_at <= last_day_of_month:
+            result["week4obama"] += 1
+    
+    # Conteo de Supp
+    supp_counts = Supp.objects.filter(agent=user, created_at__range=(first_day_of_month, last_day_of_month))
+    for supp in supp_counts:
+        if week1_start <= supp.created_at < week2_start:
+            result["week1supp"] += 1
+        elif week2_start <= supp.created_at < week3_start:
+            result["week2supp"] += 1
+        elif week3_start <= supp.created_at < week4_start:
+            result["week3supp"] += 1
+        elif week4_start <= supp.created_at <= last_day_of_month:
+            result["week4supp"] += 1
+    
+    return result
+
+def get_agent_sales(start_date, end_date):
+    """
+    Obtiene el conteo de ObamaCare y Supp vendidos por cada agente en un rango de fechas.
+    
+    Parámetros:
+        start_date (date): Fecha de inicio del rango.
+        end_date (date): Fecha de fin del rango.
+    
+    Retorna:
+        dict: Un diccionario con el conteo de ventas por agente (nombre completo).
+    """
+
+    userExcludes = ['CarmenR', 'MariaCaTi']
+
+    # Obtener todos los agentes activos con roles 'A' y 'C'
+    allAgents = User.objects.filter(is_active=True, role__in=['A', 'C']).exclude(username__in=userExcludes).values('username', 'first_name', 'last_name')
+
+    # Crear un diccionario para mapear username a nombre completo
+    agentNameMap = {agent['username']: f"{agent['first_name']} {agent['last_name']}".strip() for agent in allAgents}
+
+    # Obtener todos los agentes que tienen ventas
+    obamaCareAgents = set(ObamaCare.objects.filter(
+        created_at__range=[start_date, end_date],
+        is_active=True
+    ).values_list('agent__username', flat=True))
+
+    suppAgents = set(Supp.objects.filter(
+        created_at__range=[start_date, end_date],
+        is_active=True
+    ).values_list('agent__username', flat=True))
+
+    # Unir todos los agentes que tienen ventas con los agentes filtrados inicialmente
+    allUsernames = set(agentNameMap.keys())
+    allUsernames.update(obamaCareAgents)
+    allUsernames.update(suppAgents)
+
+    # Obtener el conteo de ObamaCare dentro del rango de fechas
+    obamaCareCount = ObamaCare.objects.filter(
+        created_at__range=[start_date, end_date],
+        is_active=True
+    ).values('agent__username').annotate(obama_count=Count('id'))
+
+    # Obtener el conteo de Supp dentro del rango de fechas
+    suppCount = Supp.objects.filter(
+        created_at__range=[start_date, end_date],
+        is_active=True
+    ).values('agent__username').annotate(supp_count=Count('id'))
+
+    # Diccionario para almacenar los resultados con nombres completos
+    agentSales = {}
+
+    # Incluir a todos los agentes de allAgents, incluso si no tienen ventas
+    for agent in allAgents:
+        fullName = f"{agent['first_name']} {agent['last_name']}".strip()
+        agentSales[fullName] = {'obamas': 0, 'supp': 0}
+
+    # Agregar conteos de ObamaCare
+    for entry in obamaCareCount:
+        username = entry['agent__username']
+        if username not in agentNameMap:
+            # Si el agente no está en agentNameMap, obtener su nombre completo directamente
+            agent = User.objects.filter(username=username).values('first_name', 'last_name').first()
+            if agent:
+                fullName = f"{agent['first_name']} {agent['last_name']}".strip()
+            else:
+                fullName = username
+        else:
+            fullName = agentNameMap[username]
+        
+        if fullName not in agentSales:
+            agentSales[fullName] = {'obamas': 0, 'supp': 0}
+        agentSales[fullName]['obamas'] = entry['obama_count']
+
+    # Agregar conteos de Supp
+    for entry in suppCount:
+        username = entry['agent__username']
+        if username not in agentNameMap:
+            # Si el agente no está en agentNameMap, obtener su nombre completo directamente
+            agent = User.objects.filter(username=username).values('first_name', 'last_name').first()
+            if agent:
+                fullName = f"{agent['first_name']} {agent['last_name']}".strip()
+            else:
+                fullName = username
+        else:
+            fullName = agentNameMap[username]
+        
+        if fullName not in agentSales:
+            agentSales[fullName] = {'obamas': 0, 'supp': 0}
+        agentSales[fullName]['supp'] = entry['supp_count']
+
+    return agentSales
 
 # View para generar solo el token
-def generateTemporaryToken(obamacare):
+def generateTemporaryToken(client, typeToken):
     signer = Signer()
 
     expiration_time = timezone.now() + timedelta(minutes=90)
 
     # Crear el token con la fecha de expiración usando JSON
     data = {
-        'client_id': obamacare.client.id,
+        'client_id': client.id,
         'expiration': expiration_time.isoformat(),
     }
     signed_data = signer.sign(json.dumps(data))  # Firmar los datos serializados
     token = urlsafe_base64_encode(force_bytes(signed_data))  # Codificar seguro para URL
 
     # Guardar solo el token en la base de datos
-    TemporaryToken.objects.create(
-        client=obamacare.client,
-        token=token,
-        expiration=expiration_time
-    )
+    if typeToken:
+        TemporaryToken.objects.create(
+            client=client,
+            token=token,
+            expiration=expiration_time
+        )
+    else:
+        TemporaryToken.objects.create(
+            medicare = client,
+            token=token,
+            expiration=expiration_time
+        )
 
     # Retornar solo el token (no se genera ni guarda la URL temporal)
     return token
 
 # Vista para verificar y procesar la URL temporal
-def validateTemporaryToken(request):
+def validateTemporaryToken(request, typeToken):
     token = request.POST.get('token') or request.GET.get('token')
 
     if not token:
@@ -3379,10 +4020,16 @@ def validateTemporaryToken(request):
         signed_data = force_str(urlsafe_base64_decode(token))
         data = json.loads(signer.unsign(signed_data))
 
-        client_id = data.get('client_id')
-        expiration_time = timezone.datetime.fromisoformat(data['expiration'])
-        # Verificar si el token está activo y no ha expirado
-        tempToken = TemporaryToken.objects.get(token=token, client_id=client_id)
+        if typeToken:
+            client_id = data.get('client_id')
+            expiration_time = timezone.datetime.fromisoformat(data['expiration'])
+            # Verificar si el token está activo y no ha expirado
+            tempToken = TemporaryToken.objects.get(token=token, client_id=client_id)
+        else:
+            medicare_id = data.get('client_id')
+            expiration_time = timezone.datetime.fromisoformat(data['expiration'])
+            # Verificar si el token está activo y no ha expirado
+            tempToken = TemporaryToken.objects.get(token=token, medicare_id=medicare_id)
 
         if not tempToken.is_active:
             return False, 'Enlace desactivado. Link deactivated.'
@@ -3390,8 +4037,6 @@ def validateTemporaryToken(request):
         if tempToken.is_expired():
             return False, 'Enlace ha expirado. Link expired.'
 
-        # Procesar si la URL es válida
-        client = tempToken.client
         
         return True, 'Success'
     
@@ -3506,30 +4151,66 @@ def downloadBdExcelByCategory(filterBd, content_label):
 
 @login_required(login_url='/login')
 def averageCustomer(request):
+
     data = list(ObservationCustomer.objects.filter(
         typification__icontains="EFFECTIVE MANAGEMENT"
     ).values('agent__first_name', 'agent__last_name').annotate(total_llamadas=Count('id')).order_by('-total_llamadas'))
-
-    # Si se proporcionan fechas, filtrar por el rango de fechas
-    if request.method == 'POST':
-        start_date = timezone.make_aware(
-            datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
-        )
-        end_date = timezone.make_aware(
-            datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
-        )
-
-        data = data.filter(created_at__range=[start_date, end_date])
 
     context = {
         'data': json.dumps(data)  # Convertir los datos a JSON válido
     }
 
+    # Si se proporcionan fechas, filtrar por el rango de fechas
+    if request.method == 'POST':
+
+        # Obtener parámetros de fecha del request
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+
+        start_date_new = timezone.make_aware(
+            datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        end_date_new = timezone.make_aware(
+            datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+        )
+
+        data = list(ObservationCustomer.objects.filter(created_at__range=[start_date_new, end_date_new],
+            typification__icontains="EFFECTIVE MANAGEMENT" ).values('agent__first_name', 'agent__last_name')
+            .annotate(total_llamadas=Count('id')).order_by('-total_llamadas'))
+
+        context = {
+            'data': json.dumps(data),  # Convertir los datos a JSON válido
+            'start_date': start_date,
+            'end_date': end_date
+        }    
+
     return render(request, 'chart/averageCustomer.html', context)
 
 @login_required(login_url='/login')
 def customerTypification(request) :
-    agents = ObservationCustomer.objects.values('agent__username', 'agent__first_name', 'agent__last_name').distinct().filter(is_active = True)
+
+    # Obtener la fecha actual
+    now = timezone.now()
+
+    # Si se proporcionan fechas, filtrar por el rango de fechas
+    if request.method == 'POST':
+        startDatePost = request.POST['start_date']
+        endDatePost = request.POST['end_date']
+        startDate = timezone.make_aware(
+            datetime.strptime(startDatePost, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        endDate = timezone.make_aware(
+            datetime.strptime(endDatePost, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+        )
+    else:
+        startDate = timezone.make_aware(
+            datetime(now.year, now.month, 1, 0, 0, 0, 0)
+        )
+        endDate = timezone.make_aware(
+            datetime(now.year, now.month + 1, 1, 0, 0, 0, 0) - timezone.timedelta(microseconds=1)
+        )
+            
+    agents = ObservationCustomer.objects.values('agent__username', 'agent__first_name', 'agent__last_name').distinct().filter(created_at__range=[startDate, endDate],is_active = True)
     agent_data = []
 
     for agent in agents:
@@ -3556,9 +4237,15 @@ def customerTypification(request) :
             'typifications': type_count,
             'total': total
         })
+
+    context = {
+        'agent_data':agent_data,
+        'startDate':startDate,
+        'endDate':endDate
+    }   
     
     
-    return render(request, 'table/customerTypification.html', {'agent_data': agent_data})
+    return render(request, 'table/customerTypification.html', context)
 
 def redirect_with_token(request, view_name, *args, **kwargs):
     token = request.GET.get('token')
@@ -3566,3 +4253,642 @@ def redirect_with_token(request, view_name, *args, **kwargs):
     query_params = urlencode({'token': token})
     return redirect(f'{url}?{query_params}')
 
+def table6Week():
+
+    # Obtener la fecha actual
+    today = datetime.today()
+
+    # Calcular el domingo anterior (inicio de la semana actual)
+    startOfCurrentWeek = today - timedelta(days=today.weekday() + 1)
+
+    # Calcular el domingo siguiente (fin de la semana actual)
+    endOfCurrentWeek = startOfCurrentWeek + timedelta(days=6)
+
+    # Calcular el inicio de las 6 semanas (domingo anterior a 6 semanas atrás)
+    startDate = startOfCurrentWeek - timedelta(weeks=5)  # 5 semanas atrás desde el inicio de la semana actual
+
+    # Convertir las fechas a "offset-aware"
+    startDate = make_aware(startDate)
+    endOfCurrentWeek = make_aware(endOfCurrentWeek)
+
+    # Número total de semanas (6 semanas, incluyendo la semana actual)
+    numWeeks = 6
+
+    # Calcular los rangos de las semanas
+    weekRanges = []
+    for i in range(numWeeks):
+        weekStart = startDate + timedelta(weeks=i)
+        weekEnd = weekStart + timedelta(days=6)
+        weekRange = f"{weekStart.strftime('%d/%m')} - {weekEnd.strftime('%d/%m')}"
+        weekRanges.append(weekRange)
+
+    # Inicializar diccionario de ventas para las últimas 6 semanas
+    excludedUsernames = ['Calidad01', 'mariluz', 'MariaCaTi','StephanieMkt','CarmenR']  # Excluimos a gente que no debe aparecer en la vista
+    userRoles = ['A', 'C', 'S']
+
+    users = User.objects.filter(role__in=userRoles, is_active=True).exclude(username__in=excludedUsernames)
+
+    salesSummary = {
+        user.username: {
+            f"Week{i + 1}": {
+                "obama": 0, 
+                "activeObama": 0, 
+                "totalObama": 0,  # Total Obama = obama + activeObama
+                "supp": 0, 
+                "activeSupp": 0, 
+                "totalSupp": 0,   # Total Supp = supp + activeSupp
+                "total": 0        # Total General = totalObama + totalSupp
+            }
+            for i in range(numWeeks)
+        } for user in users
+    }
+
+    # Filtrar todas las ventas realizadas en las últimas 6 semanas
+    obamaSales = ObamaCare.objects.filter(created_at__range=[startDate, endOfCurrentWeek])
+    suppSales = Supp.objects.filter(created_at__range=[startDate, endOfCurrentWeek])
+
+    # Procesar las ventas de Obamacare y Supp para las últimas 6 semanas
+    for sale in obamaSales:
+        agentName = sale.agent.username
+        if sale.agent.is_active:
+            if agentName not in excludedUsernames:
+                saleWeek = (sale.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= saleWeek < numWeeks:
+                    try:
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["obama"] += 1
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["totalObama"] += 1
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["total"] += 1
+                    except KeyError:
+                        pass
+
+    for sale in suppSales:
+        agentName = sale.agent.username
+        if sale.agent.is_active:
+            if agentName not in excludedUsernames:
+                saleWeek = (sale.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= saleWeek < numWeeks:
+                    try:
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["supp"] += 1
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["totalSupp"] += 1
+                        salesSummary[agentName][f"Week{saleWeek + 1}"]["total"] += 1
+                    except KeyError:
+                        pass
+
+    # Agregar el conteo de pólizas activas para las últimas 6 semanas
+    activeObamaPolicies = ObamaCare.objects.filter(status='Active', created_at__range=[startDate, endOfCurrentWeek],is_active = True)
+    activeSuppPolicies = Supp.objects.filter(status='Active', created_at__range=[startDate, endOfCurrentWeek], is_active = True)
+
+    for policy in activeObamaPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active:
+            if agentName not in excludedUsernames:
+                policyWeek = (policy.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= policyWeek < numWeeks:
+                    try:
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["activeObama"] += 1
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["totalObama"] += 1
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["total"] += 1
+                    except KeyError:
+                        pass
+
+    for policy in activeSuppPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active:
+            if agentName not in excludedUsernames:
+                policyWeek = (policy.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= policyWeek < numWeeks:
+                    try:
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["activeSupp"] += 1
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["totalSupp"] += 1
+                        salesSummary[agentName][f"Week{policyWeek + 1}"]["total"] += 1
+                    except KeyError:
+                        pass
+
+    # Convertir el diccionario para usar "first_name last_name" como clave
+    finalSummary = {}
+
+    for user in users:
+        fullName = f"{user.first_name} {user.last_name}".strip()
+        finalSummary[fullName] = salesSummary[user.username]
+
+    return finalSummary, weekRanges
+
+def chart6WeekSale():
+
+    # Obtener la fecha actual
+    today = datetime.today()
+
+    # Calcular el domingo anterior (inicio de la semana actual)
+    startOfCurrentWeek = today - timedelta(days=today.weekday() + 1)
+
+    # Calcular el inicio de las 6 semanas (domingo anterior a 6 semanas atrás)
+    startDate = startOfCurrentWeek - timedelta(weeks=5)  # 5 semanas atrás desde el inicio de la semana actual
+
+    # Convertir las fechas a "offset-aware"
+    startDate = make_aware(startDate)
+    endOfCurrentWeek = make_aware(startOfCurrentWeek + timedelta(days=6))
+
+    # Número total de semanas (6 semanas, incluyendo la semana actual)
+    numWeeks = 6
+
+    # Calcular los rangos de las semanas
+    weekRanges = []
+    for i in range(numWeeks):
+        weekStart = startDate + timedelta(weeks=i)
+        weekEnd = weekStart + timedelta(days=6)
+        weekRange = f"{weekStart.strftime('%d/%m')} - {weekEnd.strftime('%d/%m')}"
+        weekRanges.append(weekRange)
+
+    # Obtener los datos de pólizas activas para las últimas 6 semanas
+    activeObamaPolicies = ObamaCare.objects.filter(status='Active', created_at__range=[startDate, endOfCurrentWeek],is_active = True)
+    activeSuppPolicies = Supp.objects.filter(status='Active', created_at__range=[startDate, endOfCurrentWeek], is_active= True)
+
+    # Inicializar diccionario de ventas para las últimas 6 semanas
+    excludedUsernames = ['Calidad01', 'mariluz', 'MariaCaTi','StephanieMkt','CarmenR']  # Excluimos a gente que no debe aparecer en la vista
+
+    # Inicializar diccionario para almacenar los datos de la gráfica por agente
+    chart_data = {
+        "labels": weekRanges,  # Etiquetas de las semanas
+        "series": {}  # Diccionario para almacenar series por agente
+    }
+
+    # Procesar las pólizas activas de ObamaCare
+    for policy in activeObamaPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active:
+            if agentName not in excludedUsernames:
+                agentName = f"{policy.agent.first_name} {policy.agent.last_name}".strip()        
+                policyWeek = (policy.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= policyWeek < numWeeks:
+                    if agentName not in chart_data["series"]:
+                        chart_data["series"][agentName] = {
+                            "activeObama": [0] * numWeeks,
+                            "activeSupp": [0] * numWeeks
+                        }
+                    chart_data["series"][agentName]["activeObama"][policyWeek] += 1
+
+    # Procesar las pólizas activas de Supp
+    for policy in activeSuppPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active:
+            if agentName not in excludedUsernames:
+                agentName = f"{policy.agent.first_name} {policy.agent.last_name}".strip()        
+                policyWeek = (policy.created_at - startDate).days // 7  # Calcular la semana (0 a 5)
+                if 0 <= policyWeek < numWeeks:
+                    if agentName not in chart_data["series"]:
+                        chart_data["series"][agentName] = {
+                            "activeObama": [0] * numWeeks,
+                            "activeSupp": [0] * numWeeks
+                        }
+                    chart_data["series"][agentName]["activeSupp"][policyWeek] += 1
+
+    return chart_data
+
+@login_required(login_url='/login')
+def sales6WeekReport(request):
+    # Obtener el resumen de ventas para las últimas 6 semanas
+    finalSummary, weekRanges = table6Week()
+
+    # Obtener los datos para la gráfica
+    chart_data = chart6WeekSale()
+
+    # Pasar los datos a la plantilla
+    context = {
+        'finalSummary': finalSummary,  # Resumen de ventas de las últimas 6 semanas
+        'weekRanges': weekRanges,      # Rangos de fechas de las últimas 6 semanas
+        'chart_data': chart_data,      # Datos para la gráfica
+    }
+
+    # Renderizar la plantilla con los datos
+    return render(request, 'table/sale6Week.html', context)
+
+@login_required(login_url='/login')
+def chart6Week(request):
+
+    # Obtener los datos para la gráfica
+    chart_data = chart6WeekSale()
+
+    # Pasar los datos a la plantilla
+    context = {
+        'chart_data': chart_data   # Datos para la gráfica
+    }
+
+    # Renderizar la plantilla con los datos
+    return render(request, 'chart/chart6Week.html', context)
+
+def weekSalesSummary(week_number):
+    # Obtener el año actual
+    current_year = datetime.today().year
+
+    # Calcular el lunes de la semana seleccionada
+    startOfWeek = datetime.fromisocalendar(current_year, week_number, 1)  # 1 = Lunes
+    # Calcular el sábado de la semana seleccionada
+    endOfWeek = startOfWeek + timedelta(days=5)  # Lunes + 5 días = Sábado
+
+    # Convertir las fechas a "offset-aware" (si es necesario)
+    startOfWeek = make_aware(startOfWeek)
+    endOfWeek = make_aware(endOfWeek)
+
+    # Inicializar variables de totales generales
+    total_aca = 0
+    total_supp = 0
+    totalActiveAca = 0
+    totalActiveSupp = 0
+
+    # Inicializar diccionario de ventas para la semana seleccionada
+    excludedUsernames = ['Calidad01', 'mariluz', 'MariaCaTi', 'StephanieMkt', 'CarmenR','admin','tv','zohiraDuarte']  # Excluimos a gente que no debe aparecer en la vista
+    userRoles = ['A', 'C', 'S','SUPP']
+
+    users = User.objects.exclude(username__in=excludedUsernames).filter(role__in=userRoles, is_active=True)
+
+    salesSummary = {
+        user.username: {
+            "obama": 0,
+            "activeObama": 0,
+            "supp": 0,
+            "activeSupp": 0,
+            "total": 0,       # Total General = totalObama + totalSupp
+            "clientes_obama": [],  # Lista de clientes de ObamaCare
+            "clientes_supp": []    # Lista de clientes de Supp
+        } for user in users
+    }
+
+    # Filtrar todas las ventas realizadas en la semana seleccionada
+    obamaSales = ObamaCare.objects.filter(created_at__range=[startOfWeek, endOfWeek])
+    suppSales = Supp.objects.filter(created_at__range=[startOfWeek, endOfWeek])
+
+    # Procesar las ventas de Obamacare para la semana seleccionada
+    for sale in obamaSales:
+        agentName = sale.agent.username
+        if sale.agent.is_active and agentName not in excludedUsernames:
+            salesSummary[agentName]["obama"] += 1
+            salesSummary[agentName]["total"] += 1
+            total_aca += 1  # Incrementar total general de ACA
+
+            # Agregar detalles del cliente
+            cliente_info = {
+                "nombre": f"{sale.client.first_name} {sale.client.last_name}",
+                "fecha_poliza": sale.created_at.strftime('%d/%m/%Y'),
+                "estatus": sale.status,
+                "estatus_color": sale.status_color
+            }
+            salesSummary[agentName]["clientes_obama"].append(cliente_info)
+
+    # Procesar las ventas de Supp para la semana seleccionada
+    for sale in suppSales:
+        agentName = sale.agent.username
+        if sale.agent.is_active and agentName not in excludedUsernames:
+            salesSummary[agentName]["supp"] += 1
+            salesSummary[agentName]["total"] += 1
+            total_supp += 1  # Incrementar total general de SUPP
+
+            # Agregar detalles del cliente
+            cliente_info = {
+                "nombre": f"{sale.client.first_name} {sale.client.last_name}",
+                "fecha_poliza": sale.created_at.strftime('%d/%m/%Y'),
+                "estatus": sale.status,
+                "estatus_color": sale.status_color
+            }
+            salesSummary[agentName]["clientes_supp"].append(cliente_info)
+
+    # Agregar el conteo de pólizas activas para la semana seleccionada
+    activeObamaPolicies = ObamaCare.objects.filter(status='Active', created_at__range=[startOfWeek, endOfWeek], is_active=True)
+    activeSuppPolicies = Supp.objects.filter(status='Active', created_at__range=[startOfWeek, endOfWeek], is_active=True)
+
+    for policy in activeObamaPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active and agentName not in excludedUsernames:
+            salesSummary[agentName]["activeObama"] += 1
+            totalActiveAca += 1  # Incrementar total general de ACA
+
+    for policy in activeSuppPolicies:
+        agentName = policy.agent.username
+        if policy.agent.is_active and agentName not in excludedUsernames:
+            salesSummary[agentName]["activeSupp"] += 1
+            totalActiveSupp += 1  # Incrementar total general de SUPP
+
+    # Convertir el diccionario para usar "first_name last_name" como clave
+    finalSummary = {}
+    for user in users:
+        fullName = f"{user.first_name} {user.last_name}".strip()
+        finalSummary[fullName] = salesSummary[user.username]
+
+    # Agregar los totales generales al resumen
+    finalSummary["TOTAL_GENERAL"] = {
+        "total_aca": total_aca,
+        "total_supp": total_supp,
+        "totalActiveAca": totalActiveAca,
+        "totalActiveSupp": totalActiveSupp,
+        "total_general": total_aca + total_supp
+    }
+
+    # Rango de fechas de la semana seleccionada
+    weekRange = f"{startOfWeek.strftime('%d/%m')} - {endOfWeek.strftime('%d/%m')}"
+
+    return finalSummary, weekRange
+
+def downloadPdf(request, week_number):
+    # Obtener el resumen de la semana seleccionada
+    resumen_semana, rango_fechas = weekSalesSummary(week_number)
+
+    # Renderizar la plantilla específica para el PDF
+    html_string = render_to_string('pdf/reportePdf.html', {
+        'resumen_semana': resumen_semana,
+        'rango_fechas': rango_fechas,
+        'week_number': week_number
+    })
+
+    # Crear un objeto HTML de WeasyPrint
+    font_config = FontConfiguration()
+    html = HTML(string=html_string)
+    
+    # Generar el PDF
+    pdf = html.write_pdf(font_config=font_config)
+
+    # Crear una respuesta HTTP con el PDF
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="reporte_semana_{week_number}.pdf"'
+    return response
+
+@login_required(login_url='/login')
+def weekSalesWiew(request):
+    if request.method == 'POST':
+        # Obtener el número de la semana del formulario
+        week_number = int(request.POST.get('week_number'))
+
+        # Llamar a la función de lógica para obtener el resumen
+        resumen_semana, rango_fechas = weekSalesSummary(week_number)
+
+        # Renderizar la plantilla con los resultados
+        return render(request, 'table/weekSalesWiew.html', {
+            'resumen_semana': resumen_semana,
+            'rango_fechas': rango_fechas,
+            'week_number': week_number
+        })
+
+    # Si no es POST, mostrar el formulario vacío
+    return render(request, 'table/weekSalesWiew.html')
+
+@login_required(login_url='/login')
+def clientMedicare(request):
+    
+    roleAuditor = ['S','AU']
+    
+    if request.user.role == 'Admin':       
+        medicare = Medicare.objects.select_related('agent').annotate(
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).order_by('-created_at')
+    elif request.user.role in roleAuditor:
+        medicare = Medicare.objects.select_related('agent').annotate(
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True).order_by('-created_at')   
+    else:
+        medicare = Medicare.objects.select_related('agent').annotate(
+            truncated_agent_usa=Substr('agent_usa', 1, 8)).filter(is_active = True, agent_id = request.user.id).order_by('-created_at')   
+
+
+    return render(request, 'table/clientMedicare.html', {'medicares':medicare})
+
+@login_required(login_url='/login')
+def editClientMedicare(request, medicare_id):
+    
+    medicare = Medicare.objects.select_related('agent').filter(id=medicare_id).first()
+
+    if medicare and medicare:
+        social_number = medicare.social_security  # Campo real del modelo
+        # Asegurarse de que social_number no sea None antes de formatear
+        if social_number:
+            formatted_social = f"xxx-xx-{social_number[-4:]}"  # Obtener el formato deseado
+        else:
+            formatted_social = "N/A"  # Valor predeterminado si no hay número disponible
+    else:
+        formatted_social = "N/A"
+        social_number = None
+
+    obsCus = ObservationCustomerMedicare.objects.select_related('agent').filter(medicare=medicare.id)
+    list_drow = DropDownList.objects.filter(profiling_supp__isnull=False)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        action = request.POST.get('action')
+        if action == 'validate_key':
+            provided_key = request.POST.get('key')
+            correct_key = 'Sseguros22@'  # Cambia por tu lógica segura
+
+            if provided_key == correct_key and social_number:
+                return JsonResponse({'status': 'success', 'social': social_number})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Clave incorrecta o no hay número disponible'})
+    
+
+    consent = Consents.objects.filter(medicare = medicare_id )
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # Campos de Client
+        client_fields = [
+            'agent_usa', 'first_name', 'last_name', 'phone_number', 'email', 'address', 'zipcode',
+            'city', 'state', 'county', 'sex', 'migration_status', 'statusMedicare'
+        ]        
+        
+        #formateo de fecha para guardalar como se debe en BD ya que la obtengo USA
+        fecha_str = request.POST.get('date_birth')  # Formato MM/DD/YYYY
+        # Conversión solo si los valores no son nulos o vacíos
+        if fecha_str not in [None, '']:
+            dateNew = datetime.strptime(fecha_str, '%m/%d/%Y').date()
+        else:
+            dateNew = None
+        
+
+        # Limpiar los campos de Client convirtiendo los vacíos en None
+        cleaned_client_data = clean_fields_to_null(request, client_fields)
+
+        # Convierte a mayúsculas los campos necesarios
+        fields_to_uppercase = ['first_name', 'last_name', 'address', 'city', 'county']
+        for field in fields_to_uppercase:
+            if field in cleaned_client_data and cleaned_client_data[field]:
+                cleaned_client_data[field] = cleaned_client_data[field].upper()
+
+        # Actualizar Client
+        client = Medicare.objects.filter(id=medicare_id).update(
+            agent_usa=cleaned_client_data['agent_usa'],
+            first_name=cleaned_client_data['first_name'],
+            last_name=cleaned_client_data['last_name'],
+            phone_number=cleaned_client_data['phone_number'],
+            email=cleaned_client_data['email'],
+            address=cleaned_client_data['address'],
+            zipcode=cleaned_client_data['zipcode'],
+            city=cleaned_client_data['city'],
+            state=cleaned_client_data['state'],
+            county=cleaned_client_data['county'],
+            sex=cleaned_client_data['sex'],
+            date_birth=dateNew,
+            migration_status=cleaned_client_data['migration_status'],
+            status=cleaned_client_data['statusMedicare']
+        )
+
+        return redirect('clientMedicare')   
+
+    context = {
+        'medicare': medicare,
+        'formatted_social':formatted_social,
+        'consent': consent,
+        'obsCustomer': obsCus,
+        'list_drow': list_drow,
+
+    }
+
+    return render(request, 'edit/editClientMedicare.html', context)
+
+@login_required(login_url='/login') 
+def saveCustomerObservationMedicare(request):
+    if request.method == "POST":
+        content = request.POST.get('textoIngresado')
+        medicare_id = request.POST.get('plan_id')
+        typeCall = request.POST.get('typeCall')        
+
+        # Obtenemos las observaciones seleccionadas
+        observations = request.POST.getlist('observaciones[]')  # Lista de valores seleccionados
+        
+        # Convertir las observaciones a una cadena (por ejemplo, separada por comas o saltos de línea)
+        typification_text = ", ".join(observations)  # Puedes usar "\n".join(observations) si prefieres saltos de línea
+
+        medicare = Medicare.objects.filter(id = medicare_id).first()
+
+        if content.strip():  # Validar que el texto no esté vacío
+            ObservationCustomerMedicare.objects.create(
+                medicare=medicare,
+                agent=request.user,
+                typeCall=typeCall,
+                typification=typification_text, # Guardamos las observaciones en el campo 'typification'
+                content=content
+            )
+            messages.success(request, "Observación guardada exitosamente.")
+        else:
+            messages.error(request, "El contenido de la observación no puede estar vacío.")
+
+        return redirect('editClientMedicare', medicare_id)       
+        
+    else:
+        return HttpResponse("Método no permitido.", status=405)
+
+def desactiveMedicare(request, medicare_id):
+    # Obtener el cliente por su ID
+    medicare = get_object_or_404(Medicare, id=medicare_id)
+    
+    # Cambiar el estado de is_active (True a False o viceversa)
+    medicare.is_active = not medicare.is_active
+    medicare.save()  # Guardar los cambios en la base de datos
+    
+    # Redirigir de nuevo a la página actual con un parámetro de éxito
+    return redirect('clientMedicare')
+ 
+def validarCita(request):
+    fecha_str = request.GET.get('fecha')
+    agente = request.GET.get('agente')
+
+    try:
+        # Convertir la fecha recibida en un objeto datetime
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M")
+        fecha = make_aware(fecha)  # Asegurar que tenga zona horaria
+
+        # Verificar si ya hay una cita en esa fecha y hora para el mismo agente
+        cita_existente = Medicare.objects.filter(dateMedicare=fecha, agent_usa=agente).exists()
+
+        return JsonResponse({"ocupado": cita_existente})
+    
+    except ValueError:
+        return JsonResponse({"error": "Fecha no válida"}, status=400)
+
+@login_required(login_url='/login')
+def saveDocumentClient(request, obamacare_id):
+    if request.method == "POST":
+        obama = get_object_or_404(ObamaCare, id=obamacare_id)
+        documents = request.FILES.getlist("documents")  # 📌 Recibe la lista de archivos
+        filenames = request.POST.getlist("filenames")  # 📌 Recibe la lista de nombres
+
+        if not documents:
+            return JsonResponse({"success": False, "message": "No se han subido archivos."})
+
+        for index, document in enumerate(documents):
+            # ✅ Usa el nombre si existe, si no, asigna "Documento sin nombre"
+            document_name = filenames[index].strip() if index < len(filenames) and filenames[index].strip() else document.name
+
+            # ✅ Guarda el documento con el nombre en la BD
+            DocumentObama.objects.create(
+                file=document,
+                name=document_name,  # ✅ Guardar nombre del documento
+                obama=obama,
+                agent_create=request.user
+            )
+
+        messages.success(request, "Archivos subidos correctamente.")
+        return JsonResponse({"success": True, "message": "Archivos subidos correctamente.", "redirect_url": f"/editClientObama/{obamacare_id}/"})
+    
+    return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
+
+@login_required(login_url='/login')
+def saveAppointment(request, obamacare_id):
+    
+    obama = ObamaCare.objects.get(id = obamacare_id)
+    appointment = request.POST.get('appointment') 
+    dateAppointment = request.POST.get('dateAppointment') 
+    timeAppointment = request.POST.get('timeAppointment') 
+
+    # Conversión de date a la BD requerido
+    dateAppointmentNew = datetime.strptime(dateAppointment, '%m/%d/%Y').date()          
+
+    AppointmentClient.objects.create(
+        obama=obama,
+        agent_create=request.user,
+        appointment=appointment,
+        dateAppointment = dateAppointmentNew,
+        timeAppointment=timeAppointment,
+    )
+
+    return redirect('editClientObama', obamacare_id)   
+
+@login_required(login_url='/login')
+def paymentClients(request):
+
+    payments = Payments.objects.values('month').annotate(total=Count('id')).order_by('month')
+
+    if request.method == "POST":       
+
+        months = request.POST.getlist("months")  # Capturar lista de meses seleccionados
+        # Obtener pagos que correspondan a los meses seleccionados
+        clients = Payments.objects.select_related("obamaCare").filter(month__in=months)
+
+        # ✅ Crear un nuevo archivo Excel
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Clientes"
+
+        # ✅ Encabezados
+        headers = ["First Name", "Last Name", "Plan", "Carrier", "Profiling", "Date-Profiling", "Status", "Created At","Month","Date payment was marked"]
+        ws.append(headers)
+
+        # ✅ Agregar datos al archivo Excel
+        for client in clients:
+            if client.obamaCare.is_active:
+                ws.append([
+                    client.obamaCare.client.first_name,
+                    client.obamaCare.client.last_name,
+                    client.obamaCare.plan_name,
+                    client.obamaCare.carrier,
+                    client.obamaCare.profiling,
+                    client.obamaCare.profiling_date.strftime("%m-%d-%Y") if client.obamaCare.profiling_date else '',
+                    client.obamaCare.status,
+                    client.obamaCare.created_at.strftime("%m-%d-%Y") if client.obamaCare.created_at else '',  # Convertir fecha a string legible
+                    client.month,
+                    client.created_at.strftime("%m-%d-%Y")
+                ])
+
+        # ✅ Preparar la respuesta HTTP
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="clientes.xlsx"'
+        wb.save(response)
+
+        return response 
+
+    context = {'payments' : payments }
+
+    return render(request, 'table/paymentClients.html',context)

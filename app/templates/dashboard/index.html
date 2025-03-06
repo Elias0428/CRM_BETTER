@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark-theme">
+<html lang="en" >
 
 {% load static %}
 
@@ -10,7 +10,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--favicon-->
-	<link rel="icon" href="{% static "assets/images/icons/LogoB.jpg" %}" type="image/png" />
+	<link rel="icon" href="{% static "assets/images/icons/LogoB.png" %}" type="image/png" />
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
@@ -37,7 +37,7 @@
 	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
 	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
 
-	<title>Home {{request.user.role}}</title>
+	<title>Home </title>
 	{% endblock %}
 </head>
 
@@ -49,137 +49,173 @@
 		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
 				<div>
-					<h4 class="logo-text">CRM RD</h4>
+					<img src="{% static "assets/images/icons/LogoB.png" %}" class="logo-icon" alt="logo icon">
+				</div>
+				<div>
+					<h4 class="logo-text">CRM BETTER</h4>
 				</div>
 				<div class="toggle-icon ms-auto">
 					<i class="fadeIn animated bx bx-menu"></i>
 				</div>
 			 </div>
 			<!--navigation-->
-			<ul class="metismenu" id="menu">
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-home-alt'></i></div>
-						<div class="menu-title">Dashboard</div>
-					</a>
-					<ul>						
-						<li> <a href="{% url "index" %}"><i class='bx bx-radio-circle'></i>Home</a>
-						</li>
-						{% if request.user.role == 'Admin' or request.user.role == 'S' or request.user.role == 'TV' %}
-						{% if toggle %}
-						<li> <a href="{% url "monthLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
-						{% else %}
-						<li> <a href="{% url "weeklyLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
-						{% endif %}
-						{% endif %}
-					</ul>
-				</li>
-				<li class="menu-label">enter data</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class="fadeIn animated bx bx-user-plus"></i></div>
-						<div class="menu-title">New Sale</div>
-					</a>
-					<ul>
-						<li> <a href="{% url "formCreateClient" %}"><i class='bx bx-radio-circle'></i>New Client</a>
-						</li>
-						<li> <a href="{% url "select_client" %}"><i class='bx bx-radio-circle'></i>Existing Client</a>
-						</li>
-						<li> <a href="{% url "formCreateAlert" %}"><i class='bx bx-radio-circle'></i>Create Alert</a>
-						</li>
-					</ul>
-				</li>
-				<li class="menu-label">Tables</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class="fadeIn animated bx bx-task"></i></div>
-						<div class="menu-title">Information Client</div>
-					</a>
-					<ul>
-						<li> <a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
-						</li>
-						<li> <a href="{% url "clientSupp" %}"><i class='bx bx-radio-circle'></i>Client Supp</a>
-						</li>
-						<li> <a href="{% url "alert" %}"><i class='bx bx-radio-circle'></i>Alert</a>
-						</li>
-					</ul>
-				</li>
-				{% if request.user.role == 'Admin' or request.user.role == 'S'  %}
-				<li class="menu-label">Reports</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="fadeIn animated bx bx-spreadsheet"></i></div>
-						<div class="menu-title">Sales Reports</div>
-					</a>
-					<ul>
-						<li> <a href="{% url 'typification' %}"><i class='bx bx-radio-circle'></i>Typification</a>
-						</li>
-						<li> <a href="{% url 'sale' %}"><i class='bx bx-radio-circle'></i>Sale</a>
-						</li>
-						<li> <a href="{% url 'averageSales' %}"><i class='bx bx-radio-circle'></i>Average Sales</a>
-						</li>
-						<li> <a href="{% url 'customerTypification' %}"><i class='bx bx-radio-circle'></i>Typification customer</a>
-						</li>
-					</ul>
-				</li>
-				<li class="menu-label">Chart</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="fadeIn animated bx bx-line-chart"></i></div>
-						<div class="menu-title">Graphical reports</div>
-					</a>
-					<ul>
-						<li> <a href="{% url 'averageCustomer' %}"><i class='bx bx-radio-circle'></i>Effective Calls</a>
-						</li>
-					</ul>
-				</li>
-				{% endif %}
-				{% if request.user.role == 'Admin' or request.user.role == 'AU' or request.user.role == 'S' %}
-				<li class="menu-label">Reports Quality</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="lni lni-checkbox"></i> </div>
-						<div class="menu-title">Quality</div>
-					</a>
-					<ul>
-						<li> <a href="{% url 'formCreateControl' %}"><i class='bx bx-radio-circle'></i>Add Quality</a>
-						</li>
-						<li> <a href="{% url 'control' %}"><i class='bx bx-radio-circle'></i>View quality</a>
-						</li>
-						<li> <a href="{% url 'createQuality' %}"><i class='bx bx-radio-circle'></i>Generate pdf</a>
-						</li>
-					</ul>
-				</li>
-				{% endif %}
-				
-				<li class="menu-label">BD Excel</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="lni lni-folder"></i> </div>
-						<div class="menu-title">Add BD</div>
-					</a>
-					<ul>
-						{% if request.user.role == 'Admin'  %}
-							<li> <a href="{% url "upload_excel" %}"><i class='bx bx-radio-circle'></i>Add Excel</a>
+
+			{% if request.user.username != 'zohiraDuarte' and request.user.username != 'vladimirDeLaHoz' %} 
+				<ul class="metismenu" id="menu">					
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon"><i class='bx bx-home-alt'></i></div>
+							<div class="menu-title">Dashboard</div>
+						</a>
+						<ul>						
+							<li> <a href="{% url "index" %}"><i class='bx bx-radio-circle'></i>Home</a>
 							</li>
-							<li> <a href="{% url "manage_agent_assignments" %}"><i class='bx bx-radio-circle'></i>Assign BD to agents</a>
-							</li>
-							<li> <a href="{% url "reportBd" %}"><i class='bx bx-radio-circle'></i>Report BD</a>
-							</li>
-						{% endif %}
-						<li> <a href="{% url "bd" %}"><i class='bx bx-radio-circle'></i>View BD</a>
-						</li>
-					</ul>
-				</li>
-				{% if request.user.role == 'Admin'  %}
-				<li class="menu-label">User</li>
-				<li>
-					<li> <a href="{% url "formCreateUser" %}"><i class='bx bx-radio-circle'></i>View User</a>
+							{% if request.user.role == 'Admin' or request.user.role == 'S' or request.user.role == 'TV' %}
+								{% if toggle %}
+									<li> <a href="{% url "monthLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+								{% else %}
+									<li> <a href="{% url "weeklyLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+								{% endif %}
+							{% endif %}
+						</ul>
 					</li>
-				</li>
-				{% endif %}
+					<li class="menu-label">enter data</li>
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon"><i class="fadeIn animated bx bx-user-plus"></i></div>
+							<div class="menu-title">New Sale</div>
+						</a>
+						<ul>
+							<li> <a href="{% url "formCreateClient" %}"><i class='bx bx-radio-circle'></i>New Client</a>
+							</li>
+							<li> <a href="{% url "formCreateClientMedicare" %}"><i class='bx bx-radio-circle'></i>New Client Medicare</a>
+							</li>
+							<li> <a href="{% url "select_client" %}"><i class='bx bx-radio-circle'></i>Existing Client</a>
+							</li>
+							<li> <a href="{% url "formCreateAlert" %}"><i class='bx bx-radio-circle'></i>Create Alert</a>
+							</li>
+						</ul>
+					</li>
+					<li class="menu-label">Tables</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"><i class="fadeIn animated bx bx-task"></i></div>
+							<div class="menu-title">Information Client</div>
+						</a>
+						<ul>
+							<li> <a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
+							</li>
+							<li> <a href="{% url "clientSupp" %}"><i class='bx bx-radio-circle'></i>Clients Supp</a>
+							</li>
+							<li> <a href="{% url "clientMedicare" %}"><i class='bx bx-radio-circle'></i>Clients Medicare</a>
+							</li>
+							<li> <a href="{% url "alert" %}"><i class='bx bx-radio-circle'></i>Alert</a>
+							</li>
+						</ul>
+					</li>
+					{% if request.user.role == 'Admin' or request.user.role == 'S'  %}
+					<li class="menu-label">Reports</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"> <i class="fadeIn animated bx bx-spreadsheet"></i></div>
+							<div class="menu-title">Sales Reports</div>
+						</a>
+						<ul>
+							<li> <a href="{% url 'sale' %}"><i class='bx bx-radio-circle'></i>Sale</a>
+							</li>
+							<li> <a href="{% url 'sale6Week' %}"><i class='bx bx-radio-circle'></i>Sales for the last 6 weeks</a>
+							</li>
+							<li> <a href="{% url 'weekSalesWiew' %}"><i class='bx bx-radio-circle'></i>Sales Week</a>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"> <i class="fadeIn animated bx bx-user-pin"></i></div>
+							<div class="menu-title">Customer Reports</div>
+						</a>
+						<ul>
+							<li> <a href="{% url 'customerPerformance' %}"><i class='bx bx-radio-circle'></i>Customer performance</a>
+							</li>
+							<li> <a href="{% url 'typification' %}"><i class='bx bx-radio-circle'></i>Typification</a>
+							</li>
+							<li> <a href="{% url 'customerTypification' %}"><i class='bx bx-radio-circle'></i>Typification customer</a>
+							</li>
+						</ul>
+					</li>
+					<li class="menu-label">Chart</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"> <i class="fadeIn animated bx bx-line-chart"></i></div>
+							<div class="menu-title">Graphical reports</div>
+						</a>
+						<ul>
+							<li> <a href="{% url 'averageCustomer' %}"><i class='bx bx-radio-circle'></i>Effective Calls</a>
+							</li>
+							<li> <a href="{% url 'salesPerformance' %}"><i class='bx bx-radio-circle'></i>Sales Performance</a>
+							</li>
+							<li> <a href="{% url 'chart6Week' %}"><i class='bx bx-radio-circle'></i>Sale 6 Week</a>
+							</li>
+						</ul>
+					</li>
+					{% endif %}
+					{% if request.user.role == 'Admin' or request.user.role == 'AU' or request.user.role == 'S' %}
+					<li class="menu-label">Reports Quality</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"> <i class="lni lni-checkbox"></i> </div>
+							<div class="menu-title">Quality</div>
+						</a>
+						<ul>
+							<li> <a href="{% url 'formCreateControl' %}"><i class='bx bx-radio-circle'></i>Add Quality</a>
+							</li>
+							<li> <a href="{% url 'control' %}"><i class='bx bx-radio-circle'></i>View quality</a>
+							</li>
+							<li> <a href="{% url 'createQuality' %}"><i class='bx bx-radio-circle'></i>Generate pdf</a>
+							</li>
+						</ul>
+					</li>
+					{% endif %}
+					
+					<li class="menu-label">BD Excel</li>
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon"> <i class="lni lni-folder"></i> </div>
+							<div class="menu-title">Add BD</div>
+						</a>
+						<ul>
+							{% if request.user.role == 'Admin'  %}
+								<li> <a href="{% url "upload_excel" %}"><i class='bx bx-radio-circle'></i>Add Excel</a>
+								</li>
+								<li> <a href="{% url "manage_agent_assignments" %}"><i class='bx bx-radio-circle'></i>Assign BD to agents</a>
+								</li>
+								<li> <a href="{% url "reportBd" %}"><i class='bx bx-radio-circle'></i>Report BD</a>
+								</li>
+							{% endif %}
+							<li> <a href="{% url "bd" %}"><i class='bx bx-radio-circle'></i>View BD</a>
+							</li>
+						</ul>
+					</li>
+					{% if request.user.role == 'Admin'  %}
+					<li class="menu-label">User</li>
+					<li>
+						<li> <a href="{% url "formCreateUser" %}"><i class='bx bx-radio-circle'></i>View User</a>
+						</li>
+					</li>
+					{% endif %}					
+				</ul>
+			{% else %}
+				<ul class="metismenu" id="menu">	
+					<li class="menu-label">Information Client</li>
+					<li>
+						<li> 
+							<a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
+						</li>
+					</li>
+			{% endif %}
+
 				
-			</ul>
+
 			<!--end navigation-->
 		</div>
 		<!--end sidebar wrapper -->
@@ -494,7 +530,28 @@
 	</div>
 	<!--end wrapper-->
 
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	{% if request.user.role != 'A' or request.user.role != 'AU'  %}
 	
+		<script>
+
+			const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+			const socket = new WebSocket(protocol + window.location.host + '/ws/alerts/');
+
+			socket.onmessage = function(event) {
+				const data = JSON.parse(event.data);
+				Swal.fire({
+					title: 'New Client!',
+					text: data.message,
+					icon: 'success',
+					confirmButtonText: 'Aceptar',
+					timer: 5000
+				});
+			};
+		</script>
+
+	{% endif %}
 
 	<script src="{% static 'assets/js/sessionTimeout.js' %}"></script>
 
@@ -538,9 +595,7 @@
 	
 	<script src="{% static "assets/js/chart/index.js" %}"></script>	
 
-	{% endblock %}
-
-	
+	{% endblock %}	
 
 </body>
 

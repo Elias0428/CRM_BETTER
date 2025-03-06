@@ -53,7 +53,7 @@
                         <td>+ {{obamacare.client.phone_number}}</td>
 						<td>{{obamacare.created_at|date:"m-d-Y"}}</td>
 						<td>{% if obamacare.status_color == 1 or obamacare.status_color == None  %}
-							<span class="badge rounded-pill bg-danger">{{obamacare.status}}</span>
+								<span class="badge rounded-pill bg-danger">{{obamacare.status}}</span>
 							{% elif obamacare.status_color == 2 %}
 								{% if obamacare.status == 'ENROLLED' %}
 									<span class="badge rounded-pill bg-warning text-dark">{{obamacare.status}} / {{obamacare.profiling}}</span>

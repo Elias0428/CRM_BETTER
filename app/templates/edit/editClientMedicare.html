@@ -1,0 +1,366 @@
+{% extends "dashboard/index.html" %}
+{% load static %}
+{% block head %}
+    <title>Client Medicare</title>
+	<!--plugins-->
+	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/metismenu/css/metisMenu.min.css" %}" rel="stylesheet" />
+	<link href="{% static "assets/plugins/datatable/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet" />
+	<!-- loader-->
+	<link href="{% static "assets/css/pace.min.css" %}" rel="stylesheet" />
+	<script src="{% static "assets/js/pace.min.js" %}"></script>
+	<script src="{% static 'assets/js/sessionTimeout.js' %}"></script>
+	<!-- Bootstrap CSS -->
+	<link href="{% static "assets/css/bootstrap.min.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/bootstrap-extended.css" %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+	<link href="{% static "assets/css/app.css" %}" rel="stylesheet">
+	<link href="{% static "assets/css/icons.css" %}" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/dark-theme.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/semi-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
+	<!-- Choise Style CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/choiseFromEdit.css" %}" />
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+	
+{% endblock %}
+{% block page_content %}
+<h6 class="mb-0 text-uppercase">Client Medicare</h6>
+<hr/>
+<div class="row">
+    <div class="col-xl-10 mx-auto">
+        <div class="card">
+            <div class="card-body p-4">
+                <form class="row g-3 needs-validation" method="POST" Action="{% url 'editClientMedicare' medicare.id  %}">
+                    <h4>Client</h4>						
+						<div class="col-12 col-lg-4">
+							<label for="first_name" class="form-label">First Name</label>
+							<input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" value="{{medicare.first_name}}" required>
+							<input class="form-control" hidden name="id_client" id="id_client"  value="{{medicare.id}}">
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="last_name" class="form-label">Last Name</label>
+							<input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last Name" value="{{medicare.last_name}}" required>
+						</div>
+						<div class="col-12 col-lg-4">
+							<label for="phone_number" class="form-label">Phone Number</label>
+							<input type="number" class="form-control" name ="phone_number" id="phone_number" placeholder="Phone Number" value="{{medicare.phone_number}}" required>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="email" class="form-label">E-mail Address</label>
+							<input type="email" class="form-control" name="email" id="email" placeholder="Enter Email Address" value="{{medicare.email}}" required>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="address" class="form-label">Address</label>
+							<input type="text" class="form-control" name="address" id="address" placeholder="Address" value="{{medicare.address}}" required>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="zipcode" class="form-label">zipCode</label>
+							<input type="number" class="form-control" name ="zipcode" id="zipcode" placeholder="ZIP-CODE" value="{{medicare.zipcode}}" required>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="city" class="form-label">City</label>
+							<input type="text" class="form-control" name ="city" id="city" value="{{medicare.city}}" required>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="state" class="form-label font-weight-bold">State</label>
+							<input type="text" class="form-control" name ="state" id="state" value="{{medicare.state}}" required>							
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="county" class="form-label">County</label>
+							<input type="text" class="form-control" name ="county" id="county" value="{{medicare.county}}" required>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="sex" class="form-label">Sex</label>
+							<select class="form-select"  name="sex" id="sex" aria-label="Default select example" required>
+								<option value="" disabled selected>Please Select</option>
+								<option value="M" {% if medicare.sex == "M" %}selected{% endif %} >MALE</option>
+								<option value="F" {% if medicare.sex == "F" %}selected{% endif %} >FEMALE</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="old" class="form-label">Age</label>
+							<input type="number" nim="1" class="form-control" name ="old" id="old" placeholder="Old" value="{{medicare.old}}" disabled required>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="date_birth" class="form-label">Date Birth</label>
+							<input type="text" class="form-control" name="date_birth" id="date_birth" value="{{ medicare.date_birth|date:'m/d/Y' }}" required>
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="date_effective_coverage_end" class="form-label">Social Security</label>
+							<input type="text" class="form-control" name="social_security" id="social_security" value="{{formatted_social}}" disabled >
+						</div>  
+						<div class="col-12 col-lg-1">
+							<br>							
+							<button id="show-full-social" type="button" class="btn btn-secondary mt-2 "><i class="lni lni-eye"></i></button>
+							<button hidden type="button" id="block-social" class="btn btn-secondary mt-2">Bloquear Número</button>
+						</div>  
+						<div class="col-12 col-lg-6">
+							<label for="migration_status" class="form-label">Migration Status</label>
+							<select class="form-select" id="migration_status"  name="migration_status" required  >
+								<option value="" disabled selected>Please Select</option>
+								<option value="EMPLOYMENT AUTHORIZATION" {% if medicare.migration_status == "EMPLOYMENT AUTHORIZATION" %}selected{% endif %} >Employment Authorization</option>
+								<option value="NOTICE OF ACTION" {% if medicare.migration_status == "NOTICE OF ACTION" %}selected{% endif %} >Notice of Action (i-797)</option>
+								<option value="REFUGEE" {% if medicare.migration_status == "REFUGEE" %}selected{% endif %} >Refugee</option>
+								<option value="ASYLUM" {% if medicare.migration_status == "ASYLUM" %}selected{% endif %} >Asylum</option>
+								<option value="TPS" {% if medicare.migration_status == "TPS" %}selected{% endif %} >Temporary Protection Status (TPS)</option>
+								<option value="DOMESTIC VIOLENCE" {% if medicare.migration_status == "DOMESTIC VIOLENCE" %}selected{% endif %} >Domestic Violence</option>
+								<option value="PERMANENT RESIDENT" {% if medicare.migration_status == "PERMANENT RESIDENT" %}selected{% endif %} >Permanent Resident (Green Card)</option>
+								<option value="CONDITIONAL RESIDENT" {% if medicare.migration_status == "CONDITIONAL RESIDENT" %}selected{% endif %} >Conditional Resident</option>
+								<option value="PAROLE" {% if medicare.migration_status == "PAROLE" %}selected{% endif %} >Parole</option>
+								<option value="US CITIZEN" {% if medicare.migration_status == "US CITIZEN" %}selected{% endif %} >US Citizen (Driver's License)</option>
+								<option value="STUDENT VISA" {% if medicare.migration_status == "STUDENT VISA" %}selected{% endif %} >Student Visa (I-20)</option>
+								<option value="CURRENTLY IN PROCESS" {% if medicare.migration_status == "CURRENTLY IN PROCESS" %}selected{% endif %} >Currently In Process (this means the received an i-797)</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-6">
+							<label for="agent_usa" class="form-label font-weight-bold">Agente USA</label>
+							<select class="form-select" id="agent_usa" aria-label="Default select example" name="agent_usa" required >
+								<option value="" disabled selected>Please Select</option>
+								<option {% if medicare.agent_usa == "GINA PAOLA LAPEIRA - NPN 19944280" %}selected{% endif %} value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
+								<option {% if medicare.agent_usa == "LUIS EDUARDO LAPEIRA - NPN 20556081" %}selected{% endif %} value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
+								<option {% if medicare.agent_usa == "DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958" %}selected{% endif %} value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
+								<option {% if medicare.agent_usa == "ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295" %}selected{% endif %} value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
+								<option {% if medicare.agent_usa == "DANIESKA LOPEZ SEQUEIRA - NPN 20134539" %}selected{% endif %} value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
+								<option {% if medicare.agent_usa == "VLADIMIR DE LA HOZ FONTALVO - NPN 19915005" %}selected{% endif %} value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
+								<option {% if medicare.agent_usa == "FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603" %}selected{% endif %} value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
+								<option {% if medicare.agent_usa == "BORJA G CANTON HERRERA - NPN 20673324" %}selected{% endif %} >BORJA G CANTON HERRERA - NPN 20673324</option>
+								<option {% if medicare.agent_usa == "RODRIGO G CANTON - NPN 20670005" %}selected{% endif %} value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
+								<option {% if medicare.agent_usa == "EVELYN BEATRIZ HERRERA - NPN 20671818" %}selected{% endif %} value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-6">
+							<label for="statusMedicare" class="form-label font-weight-bold">Status</label>
+							<select class="form-select" id="statusMedicare"  name="statusMedicare"  aria-label="Default select example">
+								<option value="" disabled selected>Please Select</option>
+									{% for  list_drow in list_drow %}
+										<option value="{{list_drow.profiling_supp}}" {% if medicare.status == list_drow.profiling_supp %}selected{% endif %} >{{list_drow.profiling_supp}}</option>                      
+									{% endfor %}						
+							</select>
+						</div>
+						<div class="col-12 col-lg-6">
+							<label for="statusMedicare" class="form-label font-weight-bold">Status</label>
+							<input type="text" class="form-control" name="social_security" id="social_security" value="{{medicare.dateMedicare|date:"m/d/Y H:i"}}" disabled >
+						</div>
+						<hr>					            
+						<div class="col-md-12">
+							<div class="d-md-flex d-grid align-items-center gap-3">
+								<button type="submit" name="action" value="save_obamacare" id="enviar" class="btn btn-primary px-4"  >Submit</button>
+								<button type="submit" name="action" id="enviar2" value="save_observation_agent" class="btn btn-primary px-4" style="display: none;">Submits</button>
+								<a href="{% url 'clientObamacare' %}" class="btn btn-light px-4">Back</a>
+								{% if request.user.role != 'A' %}
+									<a href="{% url 'clientObamacare' %}" class="btn btn-light px-4" data-bs-toggle="modal" data-bs-target="#verConsent">View Consent</a>
+								{% endif %}
+							</div>
+						</div>
+                    {% csrf_token %}	
+                </form>
+				<hr>
+
+				<div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+					<div style=" padding: 20px; max-width: 400px; margin: 100px auto; border-radius: 8px; text-align: center;">
+						<h3>Ingresa la clave</h3>
+						<input type="password" id="password-input" class="form-control" placeholder="Clave" style="margin: 10px 0; width: 100%;">
+						<button id="submit-password" class="btn btn-primary">Enviar</button>
+						<button id="cancel-password" class="btn btn-secondary">Cancelar</button>
+					</div>
+				</div>
+				
+				{% if request.user.role != 'A' %}
+					<h5>Type Entry:</h5>
+					<div class="col-12 col-lg-12">
+						<!-- Botones para abrir los modales -->
+						<button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalIngresarTexto">
+							Enter Observation
+						</button>
+						<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalVerTexto">
+							See Observations
+						</button>
+				
+						<!-- Modal para ingresar texto -->
+						<div class="modal fade" id="modalIngresarTexto" tabindex="-1" aria-labelledby="modalIngresarTextoLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="modalIngresarTextoLabel">Enter Observation</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<form id="formIngresarTexto" action="{% url 'saveCustomerObservationMedicare' %}" method="POST">
+											{% csrf_token %}
+											<input type="hidden" name="plan_id" value="{{ medicare.id }}">
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Text:</label>
+												<textarea class="form-control" id="textoIngresado" name="textoIngresado" rows="4" required></textarea>
+											</div>
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Typification:</label>
+												<select class="form-select"  name="observaciones[]" id="textoIngresados" multiple required>
+													<option value="1095-A">1095-A</option>
+													<option value="AUDITED">Audited</option>
+													<option value="ACTIVE">Active</option>
+													<option value="CANCEL">Cancel</option>
+													<option value="PLAN CHANGE">Plan Change</option>
+													<option value="AGENT CHANGE">Agent Change</option>
+													<option value="T/C CHANGE">T/C Change</option>
+													<option value="CARRIER">Carrier</option>
+													<option value="APPOINTMENTS">Appointments</option>
+													<option value="SATISFIED CUSTOMER">Satisfied Customer</option>
+													<option value="CORRECTION">Correction</option>
+													<option value="PAYMENT ERROR CORRECTION">Payment Error Correction</option>
+													<option value="PORTAL CREATION">Portal/Member ID/Brochure Creation</option>
+													<option value="DEMOGRAPHIC DATA">Demographic Data</option>
+													<option value="DOCUMENTS IN SHERPA">Documents in Sherpa</option>
+													<option value="DOCUMENTS RECEIVED">Documents Received</option>
+													<option value="ID CARD SEND">ID Card Send</option>
+													<option value="DENTIST LISTING">Dentist listing</option>
+													<option value="OPTOMETER LISTING">Optometer Listing</option>
+													<option value="PLAN EXPLANATION">Plan Explanation</option>
+													<option value="OUT OF SERVICE">Out of Service</option>
+													<option value="HEALTHSAFE ID">HEALTHSAFE ID</option>
+													<option value="ID MEMBER">ID Member</option>
+													<option value="ID SUPERVISOR">ID Supervisor</option>
+													<option value="CARRIER SUP CALL">Carrier Supervisor Call</option>
+													<option value="EFFECTIVE MANAGEMENT">Effective Management</option>
+													<option value="WELCOME MESSAGE">Welcome Message</option>
+													<option value="FOLLOW-UP CALL">Follow-up call</option>
+													<option value="INFORMATIVE MESSAGE">Informative Message</option>
+													<option value="MARKET CALL">Market Call</option>
+													<option value="NO ANSWER">No Answer</option>
+													<option value="OTHER PARTY">Other Party</option>
+													<option value="DENTAL PAYMENT UHC">Dental Payment via UHC</option>
+													<option value="VISION PAYMENT UHC">Vision Payment via UHC</option>
+													<option value="CARRIER ACA PORTAL">Carrier ACA Portal</option>
+													<option value="CARD RECEIPT">Card Receipt</option>
+													<option value="RECOVERED">Recovered</option>
+													<option value="REFERAL">Referal</option>
+													<option value="ROLLED OVER">Rolled Over</option>
+													<option value="PREMIUM PAYMENT">Premium Payment</option>
+													<option value="PCP">PCP</option>
+													<option value="REQUEST DOCUMENTS">Request Documents</option>
+													<option value="SUPPLEMENTARY">Supplemental</option>
+													<option value="TRANSFER">Transfer</option>
+													<option value="UHC ID READY">UHC ID Ready</option>
+													<option value="CALL BACK">Call Back</option>
+													<option value="INFORMATIVE CALLS ACA SUP">Informative Calls ACA/Supplementaries</option>
+													<option value="HANGS UP">Hangs Up</option>
+												</select>
+											</div>
+											<div class="mb-3">
+												<label for="textoIngresado" class="form-label">Typification the Call:</label>
+												<select class="form-select"  name="typeCall" >
+													<option></option>
+													<option value="INBOUND" >Inbound </option>
+													<option value="OUTBOUND" >Outbound </option>
+													<option value="WHATSAPP" >WhatsApp</option>
+													<option value="TXT MESSAGE" >Txt Message</option>
+													<option value="SHERPA" >Sherpa</option>
+												</select>
+											</div>
+											<button type="submit" class="btn btn-primary">Guardar</button>
+										</form>
+										
+									</div>
+								</div>
+							</div>
+						</div>
+				
+						<!-- Modal para ver las observaciones -->
+						<div class="modal fade" id="modalVerTexto" tabindex="-1" aria-labelledby="modalVerTextoLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="modalVerTextoLabel">Saved Remarks</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										{% if obsCustomer %}
+											<ul class="list-group">
+												{% for observation in obsCustomer %}
+													<li class="list-group-item">
+														<strong>{{ observation.agent }}:</strong> {{ observation.content }} <strong>Date:</strong> {{ observation.created_at }}
+													</li>
+												{% endfor %}
+											</ul>
+										{% else %}
+											<p>No hay observaciones guardadas.</p>
+										{% endif %}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Modal para ver las consent -->
+						<div class="modal fade" id="verConsent" tabindex="-1" aria-labelledby="verConsentLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="verConsentLabel">Saved Consent</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										{% if consent %}
+											<ul class="list-group">
+												{% for consents in consent %}											
+													<li class="list-group-item">
+														<strong>Consent #{{forloop.counter}}:</strong> <a href="{{ consents.pdf.url }} " target="_blank" >View  <i class="lni lni-display"></i></a> 
+													</li>
+												{% endfor %}
+											</ul>
+										{% else %}
+											<p>No consent.</p>
+										{% endif %}
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				{% endif %} 
+				</div>				
+            </div>			
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block end_js %}
+	<!-- Bootstrap JS -->
+	<script src="{% static "assets/js/bootstrap.bundle.min.js" %}"></script>
+	<!--plugins-->
+	<script src="{% static "assets/js/jquery.min.js" %}"></script>
+	<script src="{% static "assets/plugins/simplebar/js/simplebar.min.js" %}"></script>
+	<script src="{% static "assets/plugins/metismenu/js/metisMenu.min.js" %}"></script>
+	<script src="{% static "assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
+
+	<!-- Agregar Flatpickr -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+	<!-- Incluir JS de Choices.js -->
+	<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+	<!--app JS-->
+	<script src="{% static "assets/js/app.js" %}"></script>
+	<script src="{% static "assets/js/blockSocial.js" %}"></script>
+
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const selectElement = document.querySelector('#textoIngresados');
+			const choices = new Choices(selectElement, {
+				removeItemButton: true,  // Muestra el botón de eliminar las opciones seleccionadas
+				searchEnabled: true,     // Habilita la búsqueda en el menú desplegable
+				placeholderValue: 'Seleccione una opción...',
+				itemSelectText: '',      // Elimina el texto 'Selecciona un elemento'
+			});
+			//formateo de la fecha
+			flatpickr("#date_birth", {dateFormat: "m/d/Y", });
+		});	
+	</script>
+
+{% endblock %}

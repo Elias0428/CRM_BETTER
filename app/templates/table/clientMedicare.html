@@ -1,7 +1,7 @@
 {% extends "dashboard/index.html" %}
 {% load static %}
 {% block head %}
-    <title>Table Alert</title>
+    <title>Client Medicare</title>
 	<!--plugins-->
 	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
 	<link href="{% static "assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" %}" rel="stylesheet" />
@@ -22,7 +22,7 @@
 	<link rel="stylesheet" href="{% static "assets/css/header-colors.css" %}" />
 {% endblock %}
 {% block page_content %}
-<h6 class="mb-0 text-uppercase">Alert</h6>
+<h6 class="mb-0 text-uppercase">Client Medicare</h6>
 <hr/>
 <div class="card">
     <div class="card-body">
@@ -30,27 +30,59 @@
             <table id="tableClient" class="table table-striped table-bordered">
                 <thead>
                     <tr>
+                        <th>Agent USA</th>
                         <th>Agent COL</th>
-                        <th>Name Client</th>
+                        <th>Name</th>
+                        <th>Phone Numbers</th>
 						<th>Date</th>
-						<th>Obs</th>
-						{% if request.user.role == 'Admin' %} <th>Is Active</th> {% endif %}
-						<th>Option</th>
+						{% if request.user.role == 'Admin' %}
+							<th>
+								Active
+							</th>
+						{% endif %}
+                        <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for alertClient in alertC %}
+                    {% for item in medicares %}
                     <tr>
-                        <td>{{alertClient.agent.first_name}} {{alertClient.agent.last_name}}</td>
-                        <td>{{alertClient.name_client}}</td>
-                        <td>{{alertClient.datetime}}</td>
-						<td>{{alertClient.truncated_contect}}</td> 
-						{% if request.user.role == 'Admin' %} <td>{{alertClient.is_active}}</td> {% endif %}						
-						<td>
+                        <td>{{item.truncated_agent_usa }}</td>
+                        <td>{{item.agent.first_name}} {{item.last_name}}</td>
+                        <td>{{item.first_name}} {{item.last_name}}</td>
+                        <td>+ {{item.phone_number}}</td>
+						<td>{{item.created_at|date:"m-d-Y"}}</td>
+						{% if request.user.role == 'Admin' %}
+							<td>
+								{{item.is_active}}
+							</td>
+						{% endif  %}
+                        <td>
 							<div class="d-flex order-actions">
-								<a href="{% url 'editAlert' alertClient.id %}" class=""><i class='bx bxs-edit'></i></a>
-								<a href="{% url 'toggleAlert' alertClient.id %}" class="ms-3"><i class='bx bxs-trash'></i></a>
+								<!-- Botón principal del dropdown -->
+								<button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+									Consents
+								</button>
+								<!-- Lista del dropdown -->
+								<ul class="dropdown-menu">
+									<li>
+										<form action="{% url 'consetMedicare' item.id 'EN' %}" method="get" target="_blank">
+											<button type="submit" class="dropdown-item">English</button>
+										</form>
+									</li>
+									<li>
+										<form action="{% url 'consetMedicare' item.id 'ES' %}" method="get" target="_blank"> 
+											<button type="submit" class="dropdown-item">Spanish</button>
+										</form>
+									</li>
+								</ul>
+								<a href="{% url 'editClientMedicare' item.id  %}" class="ms-3"><i class='bx bxs-edit'></i></a>					
+								{% if request.user.is_superuser %}
+								<a href="{% url 'desactiveMedicare' item.id %}" class="ms-3">
+									<i class="bx bxs-trash"></i>
+								</a>
+								{% endif %}
 							</div>
+							
 						</td> 
                     </tr>
                     {% endfor %}
@@ -71,7 +103,7 @@
 	<script src="{% static "assets/plugins/datatable/js/jquery.dataTables.min.js" %}"></script>
 	<script src="{% static "assets/plugins/datatable/js/dataTables.bootstrap5.min.js" %}"></script>
 	<script>
-		$(document).ready(function() {$('#tableClient').DataTable();} );
+		$(document).ready(function() {$('#tableClient').DataTable();} );		
 	</script>
 	<!--app JS-->
 	<script src="{% static "assets/js/app.js" %}"></script>

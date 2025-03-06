@@ -29,15 +29,13 @@
         <div class="card radius-10">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <table class="table table-primary table-striped table-bordered">
+                    <table class="table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th scope="col">Username</th>
-                                <th class="text-center">Week #1</th>
-                                <th class="text-center">Week #2</th>
-                                <th class="text-center">Week #3</th>
-                                <th class="text-center">Week #4</th>
-                                <th class="text-center">Week #5</th>
+                                {% for weekRange in weekRanges %}
+                                <th class="text-center">{{weekRange}}</th>
+                                {% endfor %}
                             </tr>
                         </thead>
                         <tbody>
@@ -68,6 +66,10 @@
 
 {% endblock %}
 {% block end_js %}
+    <script>
+        let weekRanges = JSON.parse("{{weekRange|safe}}".replace(/'/g, '"'));
+    </script>
+
 	<!-- Bootstrap JS -->
 	<script src="{% static "assets/js/bootstrap.bundle.min.js"  %}"></script> 
 	<!--plugins-->

@@ -1,7 +1,7 @@
-{% extends "dashboard/index.html" %}
+
 {% load static %}
 {% block head %}
-    <title>Table Sales Week</title>
+    <title>Table Sales Week TV</title>
 	<!--plugins-->
 	<link href="{% static "assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" %}" rel="stylesheet"/>
 	<link href="{% static "assets/plugins/simplebar/css/simplebar.css" %}" rel="stylesheet" />
@@ -55,9 +55,9 @@
                     </tbody>
                 </table>
                 {% if toggle %}
-                <a class="btn btn-outline-primary" href="{% url "weeklyLiveView" %}">View Daily</a>
+                <a class="btn btn-outline-primary" href="{% url "weeklyLiveViewTV" %}">View Daily</a>
                 {% else %}
-                <a class="btn btn-outline-primary" href="{% url "monthLiveView" %}">View Month</a>
+                <a class="btn btn-outline-primary" href="{% url "monthLiveViewTV" %}">View Month</a>
                 {% endif %}
             </div>
         </div>

@@ -32,7 +32,14 @@
 							<div class="card-body text-center">
 								<h1 class="display-1"><span class="text-primary ">Welcome!</span></h1>
                                 <h5>{{motivation.content}}</h5>
-								<div class="mt-5"> <a href="{% url "index" %}" class="btn btn-primary btn-lg px-md-5 radius-30">Go Home</a>
+								<div class="mt-5"> 
+									{% if request.user.username == 'zohiraDuarte' or  request.user.username == 'vladimirDeLaHoz' %}
+										<a href="{% url "clientObamacare" %}" class="btn btn-primary btn-lg px-md-5 radius-30">Go Home</a>
+									{% elif request.user.role == 'TV' %}
+										<a href="{% url "weeklyLiveViewTV" %}" class="btn btn-primary btn-lg px-md-5 radius-30">Go Home</a>
+									{% else %}
+										<a href="{% url "index" %}" class="btn btn-primary btn-lg px-md-5 radius-30">Go Home</a>
+									{% endif %}
 									<a href="{% url "logout" %}" class="btn btn-outline-dark btn-lg ms-3 px-md-5 radius-30">Exit</a>
 								</div>
 							</div>

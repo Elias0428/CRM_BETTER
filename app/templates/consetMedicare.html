@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope of Appointment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="card shadow p-4">
+            <h2 class="text-center mb-4">Scope of Appointment Spanish</h2>
+            
+            
+            <form>
+                <p class="text-justify">
+                    Los Centros de Servicios de Medicare y Medicaid exigen que los agentes documenten el alcance de una cita de marketing antes de CUALQUIER reunión de ventas para garantizar la comprensión de lo que se discutirá entre el agente y el beneficiario de Medicare (o su representante autorizado). Toda la información provista en este formulario es confidencial y debe ser completada por cada beneficiario de Medicare o su representante autorizado. Los agentes deben tener licencia, contrato y certificación, cuando corresponda, para poder hablar de los productos que se enumeran a continuación. Favor marcar en las siguientes casillas lo que desea hablar durante la reunión con el Agente Licenciado.
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label">Seleccione los planes a discutir:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="plan1">
+                        <label class="form-check-label" for="plan1">Planes de Prescripción de Medicare Parte D</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="plan2">
+                        <label class="form-check-label" for="plan2">Planes de Medicare Advantage (Parte C) y Planes de Costo</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="plan3">
+                        <label class="form-check-label" for="plan3">Productos Dental-Visión-Oescucha</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="plan4">
+                        <label class="form-check-label" for="plan4">Productos de Complementarios de Hospitalización</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="plan5">
+                        <label class="form-check-label" for="plan5">Planes Suplementarios de Medicare (Medigap)</label>
+                    </div>
+                </div>
+
+                <p class="text-justify">
+                    Al enviar este formulario, acepta una reunión telefónica con un agente de seguros de salud con licencia de Lapeira & Associates LLC para analizar el tipo de productos que puso sus iniciales arriba. Tenga en cuenta que la persona que hablará sobre los productos es un agente con licencia empleado o contratado por un plan de Medicare. No trabajan directamente para el gobierno federal. Al proporcionar su información en el formulario anterior, usted acepta expresamente recibir información de Lapeira & Associates LLC a través de una llamada telefónica, correo electrónico y/o mensaje de texto/SMS (incluso mediante el uso de un sistema de marcación telefónica automática o voz artificial/pregrabada, SMS o MMS (mensajes de texto), incluso si su(s) número(s) de teléfono está(n) actualmente incluido(s) en alguna lista de No llamar estatal, federal o corporativa). Se pueden aplicar tarifas estándar de mensajes de texto y cargos por datos móviles. El agente de seguros de salud con licencia también puede recibir un pago en función de su inscripción en un plan. Su consentimiento en este formulario NO lo obliga a inscribirse en un plan, no afecta su inscripción actual ni lo inscribe en un plan de Medicare.
+                </p>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6">
+                        <label for="nombreBeneficiario" class="form-label">Nombre del Beneficiario *</label>
+                        <input type="text" class="form-control" id="nombreBeneficiario" required>
+                    </div>
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="firmaBeneficiario" class="form-label">Firma del Beneficiario o Persona Autorizada</label>
+                        <input type="text" class="form-control" id="firmaBeneficiario">
+                    </div>
+            
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="nombreAutorizado" class="form-label">Nombre de Persona Autorizada</label>
+                        <input type="text" class="form-control" id="nombreAutorizado">
+                    </div>
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="relacionBeneficiario" class="form-label">Su relación con el Beneficiario</label>
+                        <select class="form-select" id="relacionBeneficiario">
+                            <option selected>Seleccione</option>
+                            <option value="Familiar">Familiar</option>
+                            <option value="Representante legal">Representante legal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-12 col-lg-6">
+                        <label for="direccion" class="form-label">Dirección (Para encontrar opciones de planes de salud en su área)</label>
+                        <input type="text" class="form-control" id="direccion">
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="telefono" class="form-label">Teléfono *</label>
+                        <input type="tel" class="form-control" id="telefono" required>
+                    </div>
+                    
+                    <div class="col-12 col-lg-3">
+                        <label for="fechaCita" class="form-label">Fecha de la Cita</label>
+                        <input type="date" class="form-control" id="fechaCita">
+                    </div>
+                </div>
+
+                <br><br>
+                <h4>Medicare Advantage Plans (Part C) and Cost Plans</h4>
+                <hr>
+                <p>Medicare Health Maintenance Organization (HMO) — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. In most HMOs, you can only get your care from doctors or hospitals in the plan’s network (except in emergencies</p>
+                <p>Medicare HMO Point-of-Service (HMO-POS) — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. HMO-POS plans may allow you to get some services out of network for a higher copayment or coinsurance.</p>
+                <p>Medicare Preferred Provider Organization (PPO) Plan — A Medicare Advantage Plan that provides all Original Medicare Part A and Part B health coverage and sometimes covers Part D prescription drug coverage. PPOs have network doctors, providers and hospitals but you can also use out-of- network providers, usually at a higher cost.</p>
+                <p>Medicare Private Fee-For-Service (PFFS) Plan — A Medicare Advantage Plan in which you may go to any Medicare-approved doctor, hospital and provider that accepts the plan’s payment, terms and conditions and agrees to treat you — not all providers will. If you join a PFFS Plan that has a network, you can see any of the network providers who have agreed to always treat plan members. You will usually pay more to see out-of-network providers.</p>
+                <p>Medicare Special Needs Plan (SNP) — A Medicare Advantage Plan that has a benefit package designed for people with special health care needs. Examples of the specific groups served include people who have both Medicare and Medicaid, people who reside in nursing homes, and people who have certain chronic medical conditions.</p>
+                <p>Medicare Medical Savings Account (MSA) Plan — MSA Plans combine a high deductible health plan with a bank account. The plan deposits money from Medicare into the account. You can use it to pay your medical expenses until your deductible is met.</p>
+                <p>Medicare Cost Plan — In a Medicare Cost Plan, you can go to providers both in and out of network. If you get services outside of the plan’s network, your Medicare-covered services will be paid for under Original Medicare but you will be responsible for Medicare coinsurance and deductibles.</p>
+                <h4>Stand-alone Medicare Prescription Drug Plans (Part D)</h4>
+                <hr>
+                <p>Medicare Prescription Drug Plan (PDP) — A stand-alone drug plan that adds prescription drug coverage to Original Medicare, some Medicare Cost Plans, some Medicare Private-Fee-For-Service Plans, and Medicare Medical Savings Account Plans.</p>
+                <h4>Other Related Products</h4>
+                <hr>
+                <p>Medicare Supplement (Medigap) Products— Insurance plans that help pay some of the out-of- pocket costs not paid by Original Medicare (Parts A and B) such as deductibles and co-insurance amounts for Medicare approved services.</p>
+                <p>Dental/Vision/Hearing Products — Plans offering additional benefits for consumers who are looking to cover needs for dental, vision, or hearing. These plans are not affiliated or connected to Medicare.</p>
+                <p>Hospital Indemnity Products— Plans offering additional benefits; payable to consumers based upon their medical utilization; sometimes used to defray copays/coinsurance. These plans are not affiliated or connected to Medicare.</p>
+
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">ENVIAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

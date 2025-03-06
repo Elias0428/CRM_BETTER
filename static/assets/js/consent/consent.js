@@ -87,29 +87,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function validateSelects() {
-const idsSelectWithValidation = ['apply', 'work', 'migration_status', 'selectAgent']
-console.log(idsSelectWithValidation)
-let isValid = true;
-const phoneNumber = document.getElementById('phone_number')
+    const idsSelectWithValidation = ['apply', 'work', 'migration_status', 'selectAgent']
+    console.log(idsSelectWithValidation)
+    let isValid = true;
+    const phoneNumber = document.getElementById('phone_number')
 
 
-// Función para validar los Select
-for (let i = 0; i < idsSelectWithValidation.length; i++) {
-    var idSelect = idsSelectWithValidation[i];
-    console.log(idSelect)
-    var select = document.getElementById(idSelect);
-    console.log(select)
-    if (select.value == 'no_valid') {
-    isValid = false;
-    select.focus(); // Hace foco en el select inválido
-    break; // Detiene la iteración
+    // Función para validar los Select
+    for (let i = 0; i < idsSelectWithValidation.length; i++) {
+        var idSelect = idsSelectWithValidation[i];
+        console.log(idSelect)
+        var select = document.getElementById(idSelect);
+        console.log(select)
+        if (select.value == 'no_valid') {
+        isValid = false;
+        select.focus(); // Hace foco en el select inválido
+        break; // Detiene la iteración
+        }
     }
-}
 
-if (!isValid){
-    return false;
-}
-return true;
+    if (!isValid){
+        return false;
+    }
+    return true;
 }
 
 
@@ -207,6 +207,10 @@ inputs.forEach(input => {
 // Actualizar el span con los valores de los inputs
 function updateSpan() {
     changeSpan('textName', `${inputName.value} ${inputLastName.value}`);
+    changeSpan('textName2', `${inputName.value} ${inputLastName.value}`);
+    changeSpan('textName3', `${inputName.value} ${inputLastName.value}`);
+    changeSpan('textName4', `${inputName.value} ${inputLastName.value}`);
+    changeSpan('textName5', `${inputName.value} ${inputLastName.value}`);
 }
 
 // Agregar evento al cambio del selectAgent
@@ -215,6 +219,9 @@ selectAgent.addEventListener('change', function () {
     const selectedText = selectAgent.options[selectAgent.selectedIndex].text;
     changeSpan('textAgent', selectedText);
     changeSpan('textAgent2', selectedText);
+    changeSpan('textAgent3', selectedText);
+    changeSpan('textAgent4', selectedText);
+    changeSpan('textAgent5', selectedText);
 
     updateCarrierByAgent(selectedText);
 });
@@ -234,6 +241,12 @@ function changeCarrierSpans(carrier) {
     changeSpan('textCarrier', carrier);
     changeSpan('textCarrier2', carrier);
     changeSpan('textCarrier3', carrier);
+    changeSpan('textCarrier4', carrier);
+    changeSpan('textCarrier5', carrier);
+    changeSpan('textCarrier6', carrier);
+    changeSpan('textCarrier7', carrier);
+    changeSpan('textCarrier8', carrier);
+    changeSpan('textCarrier9', carrier);
 }
 
 // Función para determinar y actualizar los spans del carrier según el agente
@@ -303,6 +316,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isCanvasEmpty()) {
             alert("Debe firmar antes de revisar.");
             return;
+        }else if (!validatePhoneNumber()){
+            alert("Valide su numero de telefono.");
+            return;
+        }else if (!validateEmail()){
+            alert("Valide su Email.");
+            return;
         }
 
         toggleFields();
@@ -340,5 +359,154 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+/**
+ * Función que escucha cambios en inputs basado en un array de IDs
+ * @param {string[]} inputIds - Array con los IDs de los inputs a escuchar
+ * @param {Function} callback - Función que se ejecutará cuando cambie algún input
+ */
+function listenToInputChanges(inputIds, callback) {
+  // Validar parámetros
+  if (!Array.isArray(inputIds)) {
+    throw new Error("El primer parámetro debe ser un array de strings");
+  }
 
+  if (typeof callback !== "function") {
+    throw new Error("El segundo parámetro debe ser una función callback");
+  }
 
+  // Objeto para almacenar los valores actuales
+  const currentValues = {};
+
+  // Función para manejar los cambios
+  function handleChange(event) {
+    const inputId = event.target.id;
+    const newValue = event.target.value;
+
+    // Actualizar el valor en nuestro registro
+    currentValues[inputId] = newValue;
+
+    // Ejecutar callback con el id, valor y todos los valores actuales
+    callback({
+      inputId,
+      value: newValue,
+      allValues: { ...currentValues },
+    });
+  }
+
+  // Agregar listeners a cada input
+  inputIds.forEach((id) => {
+    const inputElement = document.getElementById(id);
+
+    if (!inputElement) {
+      console.warn(`Input con ID '${id}' no encontrado`);
+      return;
+    }
+
+    // Guardar valor inicial
+    currentValues[id] = inputElement.value;
+
+    // Agregar event listener
+    inputElement.addEventListener("input", handleChange);
+  });
+
+  // Retornar función para eliminar los listeners cuando ya no se necesiten
+  return function removeListeners() {
+    inputIds.forEach((id) => {
+      const inputElement = document.getElementById(id);
+      if (inputElement) {
+        inputElement.removeEventListener("input", handleChange);
+      }
+    });
+  };
+}
+
+const inputIdsToListen = ['inputName', 'inputLastName', 'inputPhone', 'inputEmail', 'inputAddress', 'inputCity', 'inputState' ,'inputZipcode', 'inputDateBirth', 'inputTaxes', 'work', 'migration_status', 'selectAgent', 'insuranceAgency'];
+
+const cleanup = listenToInputChanges(inputIdsToListen, (data) => {
+    if (['inputName', 'inputLastName'].includes(data.inputId)) {
+        changeinputsValue(`inputNameHidden`, `${data.allValues.inputName} ${data.allValues.inputLastName}`)
+    }else if (['inputAddress', 'inputApto', 'inputCity', 'inputState', 'inputZipcode'].includes(data.inputId)){
+        changeinputsValue(`inputAddressHidden`, `${data.allValues.inputAddress} ${data.allValues.inputCity} ${data.allValues.inputState} ${data.allValues.inputZipcode}`)
+    }else if(data.inputId == 'agent_usa'){
+        changeinputsValue(`selectAgentHidden`, data.allValues.selectAgent)
+        changeinputsValue(`insuranceAgencyHidden`, data.allValues.insuranceAgency)
+    }else if(['Telefono', 'Sms', 'Email', 'Whatsapp'].includes(data.inputId)){
+
+    }else{
+        changeinputsValue(`${data.inputId}Hidden`, data.value)
+    }
+});
+
+function changeinputsValue(id, text) {
+    const input = document.getElementById(id)
+    input.value = text 
+}
+
+// Funcion para validar el numero de telefono:
+const phoneInput = document.getElementById('inputPhone');
+const errorDisplay = document.getElementById('error');
+
+// Función de validación
+function validatePhoneNumber() {
+    let value = phoneInput.value;
+    // Filtrar solo números
+    value = value.replace(/[^0-9]/g, '');
+    // Limitar a 11 caracteres
+    if (value.length > 11) {
+        value = value.slice(0, 11);
+    }
+    phoneInput.value = value;
+    errorDisplay.style.display = 'none'; // Esconder mensaje de error al cambiar input
+
+    if (phoneInput === document.activeElement) {
+        return null; // Evitar validación completa mientras se escribe
+    }
+    
+    // Validar al perder el enfoque
+    if (value.length === 10) {
+        // Si tiene 10 dígitos, agregar '1' al inicio
+        phoneInput.value = '1' + value;
+        return true;
+    } else if (value.length === 11 && value.startsWith('1')) {
+        return true;
+    } else {
+        // Si la longitud es incorrecta o no empieza con '1', mostrar error
+        errorDisplay.style.display = 'block';
+        phoneInput.focus()
+        return false;
+    }
+}
+
+// Asignar la función a eventos de input y blur
+phoneInput.addEventListener('input', validatePhoneNumber);
+phoneInput.addEventListener('blur', validatePhoneNumber);
+
+const emailInput = document.getElementById('inputEmail');
+const errorDisplayEmail = document.getElementById('errorEmail');
+
+// Función de validación de email
+function validateEmail() {
+    const value = emailInput.value;
+    errorDisplayEmail.style.display = 'none'; // Esconder mensaje de error al cambiar input
+    
+    // Expresión regular para validar email
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    
+    if (emailInput === document.activeElement) {
+        return null; // Evitar validación completa mientras se escribe
+    }
+
+    // Validar email
+    if (emailRegex.test(value)) {
+        return true;
+    } else {
+        // Mostrar error si el correo es inválido
+        errorDisplayEmail.style.display = 'block';
+        emailInput.focus()
+        return false;
+    }
+}
+
+// Asignar la función a eventos de input y blur
+emailInput.addEventListener('input', validateEmail);
+emailInput.addEventListener('blur', validateEmail);

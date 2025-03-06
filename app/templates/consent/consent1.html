@@ -126,6 +126,13 @@
             box-shadow: 0 0 8px rgb(22, 107, 1); /* Sombra negra alrededor del input */
         }
 
+        .custom-link {
+            color: black;
+        }
+        .custom-link:hover {
+            color: red; /* Cambia el color al pasar el mouse */
+        }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -154,10 +161,10 @@
                 <label class="form-label">{% trans "Nombre del Aplicante" %}<span class="text-danger">*</span></label>
                 <div class="row g-2">
                     <div class="col">
-                        <input id="inputName" name="first_name" type="text" class="form-control" value="{{obamacare.client.first_name}}">
+                        <input id="inputName" name="first_name" type="text" class="form-control" value="{{obamacare.client.first_name}}" required>
                     </div>
                     <div class="col">
-                        <input id="inputLastName" name="last_name" type="text" class="form-control" value="{{obamacare.client.last_name}}">
+                        <input id="inputLastName" name="last_name" type="text" class="form-control" value="{{obamacare.client.last_name}}" required>
                     </div>
                 </div>
             </div>
@@ -167,13 +174,15 @@
                 <div class="col-md-6">
                     <div class="bg-info p-3 rounded">
                         <label class="form-label">{% trans "Teléfono" %}<span class="text-danger">*</span></label>
-                        <input name="phone_number" type="tel" class="form-control" value="{{obamacare.client.phone_number}}">
+                        <input id="inputPhone" name="phone_number" type="number" class="form-control" value="{{obamacare.client.phone_number}}" required>
+                        <p id="error" style="color: red; display: none;">{% blocktrans %}Número no válido. Debe ser un número de 10 o 11 dígitos.{% endblocktrans %}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="bg-lila p-3 rounded">
                         <label class="form-label">Email</label>
-                        <input name="email" class="form-control" value="{{obamacare.client.email}}">
+                        <input id="inputEmail" name="email" type="email" class="form-control" value="{{obamacare.client.email}}">
+                        <p id="errorEmail" style="color: red; display: none;">{% blocktrans %}Email no valido.{% endblocktrans %}</p>
                     </div>
                 </div>
             </div>
@@ -185,21 +194,21 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input contactMethod" type="checkbox"  id="{% trans "Telefono" %}"  name="phone" {% if contact.phone %}checked{% endif %} />
+                                    <input id="Telefono" class="form-check-input contactMethod" type="checkbox" name="phone" {% if contact.phone %}checked{% endif %} />
                                     <label class="form-check-label" for="">{% trans "Telefono" %}</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input contactMethod" type="checkbox"  id="Sms"  name="sms" {% if contact.sms %}checked{% endif %} />
+                                    <input id="Sms" class="form-check-input contactMethod" type="checkbox" name="sms" {% if contact.sms %}checked{% endif %} />
                                     <label class="form-check-label" for="">{% trans "Mensajes de Texto" %}</label>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input contactMethod" type="checkbox" id="Email"  name="email" {% if contact.email %}checked{% endif %} />
+                                    <input id="Email" class="form-check-input contactMethod" type="checkbox" name="email" {% if contact.email %}checked{% endif %} />
                                     <label class="form-check-label" for="">Email</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input contactMethod" type="checkbox" id="Whatsapp" name="whatsapp" {% if contact.whatsapp %}checked{% endif %} />
+                                    <input id="Whatsapp" class="form-check-input contactMethod" type="checkbox" name="whatsapp" {% if contact.whatsapp %}checked{% endif %} />
                                     <label class="form-check-label" for="">Whatsapp</label>
                                 </div>
                             </div>
@@ -260,23 +269,23 @@
                         <label class="form-label">{% trans "Direccion" %}<span class="text-danger">*</span></label>
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <input name="address" class="form-control" value="{{obamacare.client.address}}">
+                                <input id="inputAddress" name="address" class="form-control" value="{{obamacare.client.address}}">
                                 <small>{% trans "Direccion" %}</small>
                             </div>
                             <div class="col-12 mb-3">
-                                <input class="form-control">
+                                <input id="inputApto" class="form-control">
                                 <small>{% trans "Apto" %}</small>
                             </div>
                             <div class="col-6 mb-3">
-                                <input name="city" class="form-control" value="{{obamacare.client.city}}">
+                                <input id="inputCity" class="form-control" value="{{obamacare.client.city}}">
                                 <small>{% trans "Ciudad" %}</small>
                             </div>
                             <div class="col-6 mb-3">
-                                <input name="state" class="form-control" value="{{obamacare.client.state}}">
+                                <input id="inputState" class="form-control" value="{{obamacare.client.state}}">
                                 <small>{% trans "Estado" %}</small>
                             </div>
                             <div class="col-12">
-                                <input name="zipcode" class="form-control" value="{{obamacare.client.zipcode}}">
+                                <input id="inputZipcode" name="zipcode" class="form-control" value="{{obamacare.client.zipcode}}">
                                 <small>ZipCode</small>
                             </div>
                         </div>
@@ -286,15 +295,15 @@
                     <div class="row">
                         <div class="col-12 bg-rosa p-3 rounded mb-3">
                             <label class="form-label">{% trans "Fecha de Nacimiento " %}<span class="text-danger">*</span></label>
-                            <input name="date_birth" type="date" class="form-control" value="{{obamacare.client.date_birth|date:'Y-m-d'}}"/>
+                            <input id="inputDateBirth" name="date_birth" type="date" class="form-control" value="{{obamacare.client.date_birth|date:'Y-m-d'}}"/>
                         </div>
                         <div class="col-12 bg-orange p-3 rounded mb-3">
                             <label class="form-label">{% trans "Ingreso Anual Estimado " %}<span class="text-danger">*</span></label>
-                            <input name="taxes" type="number" class="form-control" value="{{obamacare.taxes}}"/>
+                            <input id="inputTaxes" name="taxes" type="number" class="form-control" value="{{obamacare.taxes}}"/>
                         </div>
                         <div class="col-12 bg-info p-3 rounded">
                             <label class="form-label">{% trans "Tipo de Ingreso " %}<span class="text-danger">*</span></label>
-                            <select name="work" class="form-select" id="work">
+                            <select id="work" name="work" class="form-select">
                                 <option value="no_valid">Please Select</option>
                                 <option {%if obamacare.work == 'W2'%}selected{%endif%} value="W2">W2</option>
                                 <option {%if obamacare.work == '1099'%}selected{%endif%} value="1099">1099</option>
@@ -386,13 +395,14 @@
                     <h5 class="mb-3 roboto-black">{% trans "Mis Derechos como Paciente" %}</h5>
                     <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", autorizo a " %}<span id="textAgent" class="roboto-black">{{obamacare.agent_usa}}</span> de <span class="roboto-black" id="textCarrier">{{company}}</span>{% blocktrans %} para servir como mi agente y broker de seguros de salud, es decir mi Agente de Registro, para mi y las personas en mi núcleo familiar, cuando aplica, para el propósito de enrolamiento en un Plan Médico Calificado ofrecido en el Mercado de Salud Federal.{% endblocktrans %}</p>
                     <p class="mb-3 roboto-black" id="authorizationText" ></p>
-                    <p class="roboto-light">{% trans "Al firmar esta forma, autorizo a " %}<span class="roboto-black" id="textCarrier2">{{obamacare.agent_usa}}</span>{% blocktrans %}, y su staff, a trabajar para mi y las personas en mi núcleo familiar, cuando aplica, en las siguientes funciones de apoyo de seguro y cualquier otra tarea administrativa necesaria para mantener mi solicitud y cobertura en buen estado, como sigue:{% endblocktrans %}</p>
+                    <p class="roboto-light">{% trans "Al firmar esta forma, autorizo a " %}<span class="roboto-black" id="textAgent2">{{obamacare.agent_usa}}</span>{% blocktrans %}, y su staff, a trabajar para mi y las personas en mi núcleo familiar, cuando aplica, en las siguientes funciones de apoyo de seguro y cualquier otra tarea administrativa necesaria para mantener mi solicitud y cobertura en buen estado, como sigue:{% endblocktrans %}</p>
                     <ol class="roboto-light">
                         <li>{% blocktrans %}Realizar búsquedas de aplicaciones nuevas o actuales en el mercado de salud.{% endblocktrans %}</li>
                         <li>{% blocktrans %}Completar una aplicación para búsqueda de eligibilidad y enrolamiento en el Mercado de Salud Federal, o en programas de gobierno tales como Medicaid y CHIP, en los sitios de Enrolamiento Directo del Mercado de Salud, o enrolamiento en programas del mercado de salud que ayudan a aplicar a crédito fiscales o enrolamiento de productos de seguros en planes a nivel estatal.{% endblocktrans %}</li>
                         <li>{% blocktrans %}Proveer mantenimiento de mi cuenta en el Mercado de Salud Federal, asistencia en enrolamiento, información sobre los beneficios de los planes, nuevos productos, beneficios de nuevos productos, y asesoría en los pagos de transacciones si es necesario.{% endblocktrans %}</li>
                         <li>{% blocktrans %}Apoyar si es necesario en responder inquietudes del Mercado de Salud Federal en lo referente a mi aplicación.{% endblocktrans %}</li>
-                        <li>{% blocktrans %}Contactarme vía telefónica o por cualquier medio electrónico o escrito para ayudarme y asistirme en cualquier acción necesaria para mantener mi póliza en buen estado.{% endblocktrans %}</li>
+                        <li>{% blocktrans %}Consentimiento de comunicación (Cumplimiento TCPA): Yo,{% endblocktrans %} <span id="textName2" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span> {% blocktrans %}, doy mi consentimiento para recibir comunicaciones de{% endblocktrans %} <span class="roboto-black" id="textCarrier3">{{company}}</span> {% blocktrans %}con respecto a opciones de seguro de salud, beneficios, productos de seguros, actualizaciones de pólizas, primas, solicitudes y asuntos relacionados a través de llamadas telefónicas, correos electrónicos, mensajes SMS y otras formas de comunicación para ayudarme o recordarme cualquier acción necesaria para mantener mi póliza en buen estado. Entiendo que dichas comunicaciones pueden involucrar el uso de sistemas automatizados o mensajes de voz pregrabados de{% endblocktrans %} <span class="roboto-black" id="textCarrier4">{{company}}</span> {% blocktrans %}en el número proporcionado. Al proporcionar mi información de contacto con mi firma electrónica, cuando hago clic en el botón "enviar", acepto los Términos de Uso de{% endblocktrans %} <span class="roboto-black" id="textCarrier5">{{company}}</span> {% blocktrans %} {% endblocktrans %}. {% blocktrans %}Este consentimiento incluye aceptar resolver cualquier reclamo de la Ley de Protección al Consumidor de Teléfonos mediante arbitraje. Esto aplica incluso si su número está en una lista de no llamar. Aceptar estas llamadas o textos no es un requisito para comprar bienes o servicios de nosotros. Al recibir un mensaje de texto, puede responder <span class="roboto-black">SI</span> para recibir actualizaciones e información sobre su póliza de{% endblocktrans %} <span class="roboto-black" id="textCarrier6">{{company}}</span> {% blocktrans %}También puede responder <span class="roboto-black">AYUDA</span> para obtener ayuda. Pueden aplicarse tarifas de mensajes y datos. Hasta 5 mensajes/mes. Responda <span class="roboto-black">ALTO</span> para cancelar en cualquier momento. Para obtener más información sobre nuestras Políticas de Privacidad, haga clic aquí:{% endblocktrans %} <a href="https://lapeirainsurance.com/privacy-policy/">https://lapeirainsurance.com/privacy-policy/</a>. {% blocktrans %}Para obtener más información sobre nuestros Términos de Uso, haga clic aquí:{% endblocktrans %} <a href="https://lapeirainsurance.com/terms-of-use/">https://lapeirainsurance.com/terms-of-use/</a>.
+                        </li>
                     </ol>
                     <p class="roboto-light">{% blocktrans %}Entiendo que mi Agente de Registro no utilizará o compartirá mi información de identificación personal (PII) para ningún propósito excepto los aquí listados en esta autorización. Entiendo que esta autorización será válida hasta que sea revocada por mi en cualquier momento. Para revocar esta autorización, debo hacerlo por escrito y enviarlo a la persona correspondiente a través del correo electrónico: client@lapeira.com.{% endblocktrans %}</p>
                     <p class="roboto-light">{% blocktrans %}Entiendo que la información que yo le suministre a mi Agente de Registro se va a utilizar ÚNICAMENTE para asistirme en verificar mi elegibilidad y mi aplicacion o enrolamiento en el mercado de salud federal (Marketplace). Esta aprobación incluye la búsqueda de una aplicacion activa utilizando la páginas web aprobadas para el enrolamiento clásico directo (DE) o el Enhanced Direct Enrollment (EDE). Así mismo, entiendo que no tengo que compatir otra informacion adicional excepto la que es requerida para mi enrolamiento o verificacion de eligibilidad en el mercado de salud federal (Marketplace){% endblocktrans %}</p>
@@ -405,9 +415,9 @@
                     </ol>
                     <p class="roboto-light">{% blocktrans %}Además, confirmo que no se me ha ofrecido ni prometido ningún tipo de ofertas gratuitas, recompensas en efectivo, reembolsos u otros incentivos relacionados con la inscripción en el plan de salud. Reconozco que no se me ha hecho ninguna afirmación o promesa sobre este tipo de incentivos durante el proceso de inscripción.{% endblocktrans %}</p>
                     <span class="roboto-black">Certificación de Revisión y Reconocimiento de la Información</span><br>
-                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
-                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent2">{{obamacare.agent_usa}}</span><br>
-                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier3">{{company}}</span><br>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName3" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
+                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent3">{{obamacare.agent_usa}}</span><br>
+                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier7">{{company}}</span><br>
                         {% trans "Teléfono de la Agencia: " %}<span class="roboto-black">+1 (855) 963 6900</span>
                     </p>
                 </div>
@@ -430,15 +440,15 @@
 
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Nombre del Aplicante" %}</label>
-                <input readonly type="text" class="form-control input-verde-sombra" value="{{obamacare.client.first_name}} {{obamacare.client.last_name}}" >
+                <input readonly type="text" id="inputNameHidden" class="form-control input-verde-sombra" value="{{obamacare.client.first_name}} {{obamacare.client.last_name}}" >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Teléfono" %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.client.phone_number}}"  >
+                <input disabled id="inputPhoneHidden" type="text" class="form-control input-verde-sombra" value="{{obamacare.client.phone_number}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">Email</label>
-                <input disabled type="email" class="form-control input-verde-sombra" value="{{obamacare.client.email}}"  >
+                <input disabled id="inputEmailHidden" type="email" class="form-control input-verde-sombra" value="{{obamacare.client.email}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% blocktrans %}Acepto a ser contactado por mi broker, mi carrier, y/o el mercado de salud vía:{% endblocktrans %}</label>
@@ -474,23 +484,23 @@
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Direccion" %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.client.address}}"  >
+                <input disabled id="inputAddressHidden" type="text" class="form-control input-verde-sombra" value="{{obamacare.client.address}}, {{obamacare.client.city}}, {{obamacare.client.state}}, {{obamacare.client.zipcode}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Fecha de Nacimiento " %}</label>
-                <input disabled class="form-control input-verde-sombra"  value="{{obamacare.client.date_birth}}"  >
+                <input disabled id="inputDateBirthHidden" class="form-control input-verde-sombra"  value="{{obamacare.client.date_birth}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Ingreso Anual Estimado " %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.taxes}}"  >
+                <input disabled id="inputTaxesHidden" type="text" class="form-control input-verde-sombra" value="{{obamacare.taxes}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Tipo de Ingreso " %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra" value="{{obamacare.work}}"  >
+                <input disabled id="workHidden" type="text" class="form-control input-verde-sombra" value="{{obamacare.work}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Estatus de Inmigración " %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra"name="estatus_migratorio" value="{{obamacare.client.migration_status}}"  >
+                <input disabled id="migration_statusHidden" type="text" class="form-control input-verde-sombra"name="estatus_migratorio" value="{{obamacare.client.migration_status}}"  >
             </div>            
             <div hidden class="mb-3">
                 <label class="form-label">Social Security</label>
@@ -498,15 +508,15 @@
             </div>                        
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Agente Autorizado de Registro" %}</label>
-                <input disabled type="text" class="form-control input-verde-sombra"name="agente_autorizado" value="{{obamacare.agent_usa}}"  >
+                <input disabled id="selectAgentHidden" type="text" class="form-control input-verde-sombra"name="agente_autorizado" value="{{obamacare.agent_usa}}"  >
             </div>
             <div hidden class="mb-3">
                 <label class="form-label">{% trans "Agencia de Seguros" %} </label>
-                <input disabled id="insuranceAgency" type="text" class="form-control input-verde-sombra"value="{{company}}"/  >
+                <input disabled id="insuranceAgencyHidden" type="text" class="form-control input-verde-sombra"value="{{company}}"/  >
             </div>
             <div hidden class="mb-3">
                 <h5 class="mb-3 roboto-black">{% trans "Mis Derechos como Paciente" %}</h5>
-                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", autorizo a " %}<span id="textAgent" class="roboto-black">{{obamacare.agent_usa}}</span> de <span class="roboto-black" id="textCarrier">{{company}}</span>{% blocktrans %} para servir como mi agente y broker de seguros de salud, es decir mi Agente de Registro, para mi y las personas en mi núcleo familiar, cuando aplica, para el propósito de enrolamiento en un Plan Médico Calificado ofrecido en el Mercado de Salud Federal.{% endblocktrans %}</p>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName4" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", autorizo a " %}<span id="textAgent4" class="roboto-black">{{obamacare.agent_usa}}</span> de <span class="roboto-black" id="textCarrier8">{{company}}</span>{% blocktrans %} para servir como mi agente y broker de seguros de salud, es decir mi Agente de Registro, para mi y las personas en mi núcleo familiar, cuando aplica, para el propósito de enrolamiento en un Plan Médico Calificado ofrecido en el Mercado de Salud Federal.{% endblocktrans %}</p>
                     <p class="mb-3 roboto-black" id="authorizationText" ></p>
                     <p class="roboto-light">{% trans "Al firmar esta forma, autorizo a " %}<span class="roboto-black" id="textCarrier2">{{obamacare.agent_usa}} </span>{% blocktrans %}, y su staff, a trabajar para mi y las personas en mi núcleo familiar, cuando aplica, en las siguientes funciones de apoyo de seguro y cualquier otra tarea administrativa necesaria para mantener mi solicitud y cobertura en buen estado, como sigue:{% endblocktrans %}</p>
                     <ol class="roboto-light">
@@ -527,9 +537,9 @@
                     </ol>
                     <p class="roboto-light">{% blocktrans %}Además, confirmo que no se me ha ofrecido ni prometido ningún tipo de ofertas gratuitas, recompensas en efectivo, reembolsos u otros incentivos relacionados con la inscripción en el plan de salud. Reconozco que no se me ha hecho ninguna afirmación o promesa sobre este tipo de incentivos durante el proceso de inscripción.{% endblocktrans %}</p>
                     <span class="roboto-black">Certificación de Revisión y Reconocimiento de la Información</span><br>
-                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
-                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent2">{{obamacare.agent_usa}}</span><br>
-                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier3">{{company}}</span><br>
+                    <p class="roboto-light">{% trans "Yo, " %}<span id="textName5" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span>{% trans ", he revisado y confirmado que la información para mi aplicación en el mercado de salud es CORRECTA Y VERIDICA y estará disponible como es requerido por el Centro de Servicios de Medicare & Medicaid (CMS) para efectos de elegibilidad y enrolamiento." %}</p> 
+                    <p class="roboto-light">{% trans "Nombre del Agente en Registro: " %}<span class="roboto-black" id="textAgent5">{{obamacare.agent_usa}}</span><br>
+                        {% trans "Nombre de la Agencia en Registro: " %}<span class="roboto-black" id="textCarrier9">{{company}}</span><br>
                         {% trans "Teléfono de la Agencia: " %}<span class="roboto-black">+1 (855) 963 6900</span>
                     </p>
             </div>
@@ -547,7 +557,7 @@
                 <div class="row row-cols-auto g-3">                    
                     
                     <div hidden class="col mb-3">
-                        <button  id="submitButton" class="btn btn-outline-primary ps-4 pe-4">{% trans "Guardar" %}</button>
+                        <button  id="submitButton" class="btn btn-outline-primary ps-4 pe-4">{% trans "Enviar" %}</button>
                     </div>
                     <div class="col mb-3 ">
                         <button id="revisar" class="btn btn-outline-primary ps-4 pe-4">{% trans "Revise su informacion" %}</button>

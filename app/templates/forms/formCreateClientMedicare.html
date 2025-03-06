@@ -31,18 +31,18 @@
 	<!-- Agregar el estilo de Flatpickr -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-	<title>Create Client</title>
+	<title>Create Client Medicare</title>
 {% endblock %}
 
 {% block page_content %}
 <!--end breadcrumb-->
 <div class="card">
 	<div class="card-body">
-		<h5 class="mb-1">Add Client</h5>
+		<h5 class="mb-1">Add Client Medicare</h5>
 		<p class="mb-4">Information about the client</p>
 		<hr/>
 		<div id="editor">
-			<form id="formCreateClient" method="POST">
+			<form id="formCreateClientMedicare" method="POST">
 			{% csrf_token %}
 				<div id="test-l-1" role="tabpanel" class="bs-stepper-pane" aria-labelledby="stepper1trigger1">
 					<div class="row g-3">
@@ -53,13 +53,6 @@
 								<option value="GINA PAOLA LAPEIRA - NPN 19944280">GINA PAOLA LAPEIRA - NPN 19944280</option>
 								<option value="LUIS EDUARDO LAPEIRA - NPN 20556081">LUIS EDUARDO LAPEIRA - NPN 20556081</option>
 								<option value="DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958">DANIEL SANTIAGO LAPEIRA ACEVEDO - NPN 19904958</option>
-								<option value="ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295">ZOHIRA RAQUEL DUARTE AGUILAR - NPN 19582295</option>
-								<option value="DANIESKA LOPEZ SEQUEIRA - NPN 20134539">DANIESKA LOPEZ SEQUEIRA - NPN 20134539</option>
-								<option value="VLADIMIR DE LA HOZ FONTALVO - NPN 19915005">VLADIMIR DE LA HOZ FONTALVO - NPN 19915005</option>
-								<option value="FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603">FRANK JOSE LOPEZ SEQUEIRA - NPN 21226603</option>
-								<option value="BORJA G CANTON HERRERA - NPN 20673324">BORJA G CANTON HERRERA - NPN 20673324</option>
-								<option value="RODRIGO G CANTON - NPN 20670005">RODRIGO G CANTON - NPN 20670005</option>
-								<option value="EVELYN BEATRIZ HERRERA - NPN 20671818">EVELYN BEATRIZ HERRERA - NPN 20671818</option>
 							</select>
 						</div>
 						<div class="col-12 col-lg-4">
@@ -127,31 +120,40 @@
 								<option value="STUDENT VISA">Student Visa (I-20)</option>
 								<option value="CURRENTLY IN PROCESS">Currently In Process (this means the client received an i-797)</option>
 							</select>
-						</div>
-						<div class="col-12 col-lg-3">
-							<label for="applyObama" class="form-label">Apply</label>
-							<select class="form-select" id="applyObama"  name="apply"  >
-								<option disabled selected value="">Please Select</option>
-								<option value = "True" >YES</option>
-								<option value = "False" >NO</option>
-							</select>
-						</div>						
-						<div class="col-12 col-lg-4">
-							<label for="type_sales" class="form-label">Type of Sale</label>
-							<select class="form-select"  name="type_sales" id="type_sales" aria-label="Default select example" >
-								<option value="no_valid" disabled selected>Please Select</option>
-								<option value="ACA">OBAMACARE</option>
-								<option value="SUPLEMENTARIO">SUPPLEMENTAL</option>
-								<option value="ACA/SUPLEMENTARIO">OBAMACARE/SUPPLEMENTAL</option>
-							</select>
-						</div>
-						<div class="col-12 col-lg-5">
+						</div>	
+						<div class="col-12 col-lg-2">
 							<label for="social_security" class="form-label">Social Security</label>
 							<input type="text" maxlength="11" oninput="formatInput(this)" pattern="\d{3}-\d{2}-\d{4}" class="form-control" name ="social_security" id="social_security" >
 						</div>
+						<div class="col-12 col-lg-3">
+							<label for="dateMedicare" class="form-label">Appointment Date (Medicare)</label>
+							<input type="text" class="form-control" name="dateMedicare" id="dateMedicare" required>
+						</div>
+						<div class="col-12 col-lg-5">
+							<label for="nameAutorized" class="form-label">Name authorized person</label>
+							<input type="text"  class="form-control" name ="nameAutorized" id="nameAutorized" >
+						</div>
+						<div class="col-12 col-lg-2">
+							<label for="relationship" class="form-label">Relationship</label>
+							<select class="form-select" id="relationship"  name="relationship" required>
+								<option value="no_valid" disabled selected>Please Select</option>
+								<option value="N/A">N/A</option>
+								<option value="Daughter/Son">Daughter/Son</option>
+								<option value="Legal Guardian">Legal Guardian</option>
+							</select>
+						</div>
+						<div class="col-12 col-lg-3">
+							<label for="language" class="form-label">Language</label>
+							<select class="form-select" id="language"  name="language" required>
+								<option value="no_valid" disabled selected>Please Select</option>
+								<option value="EN">English</option>
+								<option value="ES">Spanish</option>
+							</select>
+						</div>
+						
 						<h5 class="text-danger text-center">{{error_message}}</h5>
 						<div class="col-12 col-lg-12">
-							<button type="submit" class="btn btn-primary px-4" id="sendClient">Next<i class='bx bx-right-arrow-alt ms-2'></i></button>
+							<button type="submit" class="btn btn-primary px-4" id="sendClient">Submit </button>
 						</div>
 						
 					</div><!---end row-->
@@ -161,6 +163,7 @@
 		</div>
 	</div>
 </div>
+
 {% endblock %}
 
 {% block end_js %}
@@ -175,20 +178,10 @@
 	
 	<!--app JS-->
 	<script src="{% static "assets/js/app.js" %}"></script>
-	<script src="{% static "assets/js/validationFormCreateClient.js" %}"></script>
-	<script src="{% static "assets/js/validationZicode.js" %}"></script>
+	<script src="{% static "assets/js/validationFormCreateClientMedicare.js" %}"></script>
 
 	<!-- Agregar la librería de Flatpickr -->
 	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-	<script>
-		// Usar Flatpickr para formatear el campo de fecha
-		document.addEventListener('DOMContentLoaded', function () {
-			flatpickr("#date_birth", {
-				dateFormat: "m/d/Y", // Formato MM/DD/YYYY
-			});
-		});
-	</script>
 
 	<script>
         function formatInput(input) {

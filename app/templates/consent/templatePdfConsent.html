@@ -268,8 +268,21 @@
                 <li>{% blocktrans %} Completar una aplicación para búsqueda de eligibilidad y enrolamiento en el Mercado de Salud Federal, o en programas de gobierno tales como Medicaid y CHIP.{% endblocktrans %}</li>
                 <li>{% blocktrans %} Proveer mantenimiento de mi cuenta en el Mercado de Salud Federal, asistencia en enrolamiento e información sobre los beneficios.{% endblocktrans %}</li>
                 <li>{% blocktrans %} Apoyar si es necesario en responder inquietudes del Mercado de Salud Federal.{% endblocktrans %}</li>
-                <li>{% blocktrans %} Contactarme vía telefónica o por cualquier medio electrónico o escrito para asistencia.{% endblocktrans %}</li>
+                <li>{% trans "Consentimiento de comunicación (Cumplimiento de TCPA): Yo," %} <span id="textName" class="roboto-black">{{obamacare.client.first_name}} {{obamacare.client.last_name}}</span> ,
+                    {% trans "doy mi consentimiento para recibir comunicaciones de" %} <span class="roboto-black" id="textCarrier">{{company}}</span> 
+                    {% blocktrans %} sobre opciones de seguro médico, beneficios, productos de seguros, actualizaciones de pólizas, primas, solicitudes y asuntos relacionados a través de llamadas telefónicas, correos electrónicos, mensajes SMS y otras formas de comunicación para ayudarme o recordarme de cualquier acción necesaria para mantener mi póliza al día. Entiendo que dichas comunicaciones pueden implicar el uso de sistemas automatizados o mensajes de voz pregrabados de {% endblocktrans %}
+                    <span class="roboto-black" id="textCarrier">{{company}}</span> {% trans "al número proporcionado. Al proporcionar mi información de contacto con mi firma electrónica, cuando hago clic en el botón 'enviar', acepto los Términos de uso de" %}  
+                    {% blocktrans %} Este consentimiento incluye aceptar resolver cualquier reclamo de la Ley de Protección al Consumidor Telefónico mediante arbitraje. Esto se aplica incluso si su número está en una lista de no llamar. No es necesario aceptar estas llamadas o mensajes de texto para comprarnos bienes o servicios. Entiendo que en caso de recibir un mensaje de texto, puedo responder YES para recibir actualizaciones e information acerca de mi poliza de parte de . También entiendo que puedo responder HELP para recibir ayuda. Entiendo que msg & data rates pueden aplicar, que puedo recibir hasta 5 msgs/mes. Entiendo que puedo responder STOP para opt-out en cualquier momento. Para mayor informacion acerca las Politicas de Privacidad puedo darle click aquí:  <a  class="custom-link" href="https://lapeirainsurance.com/privacy-policy/."><strong> Lapeira insurance Privacidad </strong></a> Para mayor informacion acerca los Términos de Uso puedo darle click aquí: <a  class="custom-link" href="https://lapeirainsurance.com/terms-of-use/. "><strong>Lapeira Insurance Terminos</strong> </a>{% endblocktrans %}</li>
             </ul>
+
+                    <span class="roboto-black">{% trans "Reconocimiento de Información Correcta y No Falsificación" %}</span><br>
+                    <p class="roboto-light">{% blocktrans %}Al firmar este formulario, afirmo y reconozco que he sido completamente informado y se me ha brindado una explicación clara sobre lo siguiente:{% endblocktrans %}</p>
+                        <ol class="roboto-light">
+                            <li>{% blocktrans %}Los beneficios específicos incluidos en el plan de salud, incluyendo cualquier cobertura de seguro o beneficios asociados.{% endblocktrans %}</li>
+                            <li>{% blocktrans %}Si el plan de salud en el que me estoy inscribiendo es considerado un plan de salud mayor o integral, o si es equivalente a dicha cobertura de seguro.{% endblocktrans %}</li>
+                            <li>{% blocktrans %}Los costos verdaderos y precisos asociados con el plan de salud, incluyendo primas, deducibles y otras obligaciones financieras.{% endblocktrans %}</li>
+                        </ol>
+                    <p class="roboto-light">{% blocktrans %}Además, confirmo que no se me ha ofrecido ni prometido ningún tipo de ofertas gratuitas, recompensas en efectivo, reembolsos u otros incentivos relacionados con la inscripción en el plan de salud. Reconozco que no se me ha hecho ninguna afirmación, promesa ni engaños sobre este tipo de incentivos durante el proceso de inscripción.{% endblocktrans %}</p>
 
             <div class="highlight">
                 <p>
