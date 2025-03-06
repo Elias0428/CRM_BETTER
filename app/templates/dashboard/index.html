@@ -60,161 +60,150 @@
 			 </div>
 			<!--navigation-->
 
-			{% if request.user.username != 'zohiraDuarte' and request.user.username != 'vladimirDeLaHoz' %} 
-				<ul class="metismenu" id="menu">					
-					<li>
-						<a href="javascript:;" class="has-arrow">
-							<div class="parent-icon"><i class='bx bx-home-alt'></i></div>
-							<div class="menu-title">Dashboard</div>
-						</a>
-						<ul>						
-							<li> <a href="{% url "index" %}"><i class='bx bx-radio-circle'></i>Home</a>
-							</li>
-							{% if request.user.role == 'Admin' or request.user.role == 'S' or request.user.role == 'TV' %}
-								{% if toggle %}
-									<li> <a href="{% url "monthLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
-								{% else %}
-									<li> <a href="{% url "weeklyLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
-								{% endif %}
-							{% endif %}
-						</ul>
-					</li>
-					<li class="menu-label">enter data</li>
-					<li>
-						<a href="javascript:;" class="has-arrow">
-							<div class="parent-icon"><i class="fadeIn animated bx bx-user-plus"></i></div>
-							<div class="menu-title">New Sale</div>
-						</a>
-						<ul>
-							<li> <a href="{% url "formCreateClient" %}"><i class='bx bx-radio-circle'></i>New Client</a>
-							</li>
-							<li> <a href="{% url "formCreateClientMedicare" %}"><i class='bx bx-radio-circle'></i>New Client Medicare</a>
-							</li>
-							<li> <a href="{% url "select_client" %}"><i class='bx bx-radio-circle'></i>Existing Client</a>
-							</li>
-							<li> <a href="{% url "formCreateAlert" %}"><i class='bx bx-radio-circle'></i>Create Alert</a>
-							</li>
-						</ul>
-					</li>
-					<li class="menu-label">Tables</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"><i class="fadeIn animated bx bx-task"></i></div>
-							<div class="menu-title">Information Client</div>
-						</a>
-						<ul>
-							<li> <a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
-							</li>
-							<li> <a href="{% url "clientSupp" %}"><i class='bx bx-radio-circle'></i>Clients Supp</a>
-							</li>
-							<li> <a href="{% url "clientMedicare" %}"><i class='bx bx-radio-circle'></i>Clients Medicare</a>
-							</li>
-							<li> <a href="{% url "alert" %}"><i class='bx bx-radio-circle'></i>Alert</a>
-							</li>
-						</ul>
-					</li>
-					{% if request.user.role == 'Admin' or request.user.role == 'S'  %}
-					<li class="menu-label">Reports</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"> <i class="fadeIn animated bx bx-spreadsheet"></i></div>
-							<div class="menu-title">Sales Reports</div>
-						</a>
-						<ul>
-							<li> <a href="{% url 'sale' %}"><i class='bx bx-radio-circle'></i>Sale</a>
-							</li>
-							<li> <a href="{% url 'sale6Week' %}"><i class='bx bx-radio-circle'></i>Sales for the last 6 weeks</a>
-							</li>
-							<li> <a href="{% url 'weekSalesWiew' %}"><i class='bx bx-radio-circle'></i>Sales Week</a>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"> <i class="fadeIn animated bx bx-user-pin"></i></div>
-							<div class="menu-title">Customer Reports</div>
-						</a>
-						<ul>
-							<li> <a href="{% url 'customerPerformance' %}"><i class='bx bx-radio-circle'></i>Customer performance</a>
-							</li>
-							<li> <a href="{% url 'typification' %}"><i class='bx bx-radio-circle'></i>Typification</a>
-							</li>
-							<li> <a href="{% url 'customerTypification' %}"><i class='bx bx-radio-circle'></i>Typification customer</a>
-							</li>
-						</ul>
-					</li>
-					<li class="menu-label">Chart</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"> <i class="fadeIn animated bx bx-line-chart"></i></div>
-							<div class="menu-title">Graphical reports</div>
-						</a>
-						<ul>
-							<li> <a href="{% url 'averageCustomer' %}"><i class='bx bx-radio-circle'></i>Effective Calls</a>
-							</li>
-							<li> <a href="{% url 'salesPerformance' %}"><i class='bx bx-radio-circle'></i>Sales Performance</a>
-							</li>
-							<li> <a href="{% url 'chart6Week' %}"><i class='bx bx-radio-circle'></i>Sale 6 Week</a>
-							</li>
-						</ul>
-					</li>
-					{% endif %}
-					{% if request.user.role == 'Admin' or request.user.role == 'AU' or request.user.role == 'S' %}
-					<li class="menu-label">Reports Quality</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"> <i class="lni lni-checkbox"></i> </div>
-							<div class="menu-title">Quality</div>
-						</a>
-						<ul>
-							<li> <a href="{% url 'formCreateControl' %}"><i class='bx bx-radio-circle'></i>Add Quality</a>
-							</li>
-							<li> <a href="{% url 'control' %}"><i class='bx bx-radio-circle'></i>View quality</a>
-							</li>
-							<li> <a href="{% url 'createQuality' %}"><i class='bx bx-radio-circle'></i>Generate pdf</a>
-							</li>
-						</ul>
-					</li>
-					{% endif %}
-					
-					<li class="menu-label">BD Excel</li>
-					<li>
-						<a class="has-arrow" href="javascript:;">
-							<div class="parent-icon"> <i class="lni lni-folder"></i> </div>
-							<div class="menu-title">Add BD</div>
-						</a>
-						<ul>
-							{% if request.user.role == 'Admin'  %}
-								<li> <a href="{% url "upload_excel" %}"><i class='bx bx-radio-circle'></i>Add Excel</a>
-								</li>
-								<li> <a href="{% url "manage_agent_assignments" %}"><i class='bx bx-radio-circle'></i>Assign BD to agents</a>
-								</li>
-								<li> <a href="{% url "reportBd" %}"><i class='bx bx-radio-circle'></i>Report BD</a>
-								</li>
-							{% endif %}
-							<li> <a href="{% url "bd" %}"><i class='bx bx-radio-circle'></i>View BD</a>
-							</li>
-						</ul>
-					</li>
-					{% if request.user.role == 'Admin'  %}
-					<li class="menu-label">User</li>
-					<li>
-						<li> <a href="{% url "formCreateUser" %}"><i class='bx bx-radio-circle'></i>View User</a>
-						</li>
-					</li>
-					{% endif %}					
-				</ul>
-			{% else %}
-				<ul class="metismenu" id="menu">	
-					<li class="menu-label">Information Client</li>
-					<li>
-						<li> 
-							<a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
-						</li>
-					</li>
-			{% endif %}
 
+			<ul class="metismenu" id="menu">					
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-home-alt'></i></div>
+						<div class="menu-title">Dashboard</div>
+					</a>
+					<ul>						
+						<li> <a href="{% url "index" %}"><i class='bx bx-radio-circle'></i>Home</a>
+						</li>
+						{% if request.user.role == 'Admin' or request.user.role == 'S' or request.user.role == 'TV' %}
+							{% if toggle %}
+								<li> <a href="{% url "monthLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+							{% else %}
+								<li> <a href="{% url "weeklyLiveView" %}"><i class='bx bx-radio-circle'></i>View TV</a></li>
+							{% endif %}
+						{% endif %}
+					</ul>
+				</li>
+				<li class="menu-label">enter data</li>
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class="fadeIn animated bx bx-user-plus"></i></div>
+						<div class="menu-title">New Sale</div>
+					</a>
+					<ul>
+						<li> <a href="{% url "formCreateClient" %}"><i class='bx bx-radio-circle'></i>New Client</a>
+						</li>
+						<li> <a href="{% url "formCreateClientMedicare" %}"><i class='bx bx-radio-circle'></i>New Client Medicare</a>
+						</li>
+						<li> <a href="{% url "select_client" %}"><i class='bx bx-radio-circle'></i>Existing Client</a>
+						</li>
+						<li> <a href="{% url "formCreateAlert" %}"><i class='bx bx-radio-circle'></i>Create Alert</a>
+						</li>
+					</ul>
+				</li>
+				<li class="menu-label">Tables</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="fadeIn animated bx bx-task"></i></div>
+						<div class="menu-title">Information Client</div>
+					</a>
+					<ul>
+						<li> <a href="{% url "clientObamacare" %}"><i class='bx bx-radio-circle'></i>Clients Obama</a>
+						</li>
+						<li> <a href="{% url "clientSupp" %}"><i class='bx bx-radio-circle'></i>Clients Supp</a>
+						</li>
+						<li> <a href="{% url "clientMedicare" %}"><i class='bx bx-radio-circle'></i>Clients Medicare</a>
+						</li>
+						<li> <a href="{% url "alert" %}"><i class='bx bx-radio-circle'></i>Alert</a>
+						</li>
+					</ul>
+				</li>
+				{% if request.user.role == 'Admin' or request.user.role == 'S'  %}
+				<li class="menu-label">Reports</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="fadeIn animated bx bx-spreadsheet"></i></div>
+						<div class="menu-title">Sales Reports</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'sale' %}"><i class='bx bx-radio-circle'></i>Sale</a>
+						</li>
+						<li> <a href="{% url 'sale6Week' %}"><i class='bx bx-radio-circle'></i>Sales for the last 6 weeks</a>
+						</li>
+						<li> <a href="{% url 'weekSalesWiew' %}"><i class='bx bx-radio-circle'></i>Sales Week</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="fadeIn animated bx bx-user-pin"></i></div>
+						<div class="menu-title">Customer Reports</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'customerPerformance' %}"><i class='bx bx-radio-circle'></i>Customer performance</a>
+						</li>
+						<li> <a href="{% url 'typification' %}"><i class='bx bx-radio-circle'></i>Typification</a>
+						</li>
+						<li> <a href="{% url 'customerTypification' %}"><i class='bx bx-radio-circle'></i>Typification customer</a>
+						</li>
+					</ul>
+				</li>
+				<li class="menu-label">Chart</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="fadeIn animated bx bx-line-chart"></i></div>
+						<div class="menu-title">Graphical reports</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'averageCustomer' %}"><i class='bx bx-radio-circle'></i>Effective Calls</a>
+						</li>
+						<li> <a href="{% url 'salesPerformance' %}"><i class='bx bx-radio-circle'></i>Sales Performance</a>
+						</li>
+						<li> <a href="{% url 'chart6Week' %}"><i class='bx bx-radio-circle'></i>Sale 6 Week</a>
+						</li>
+					</ul>
+				</li>
+				{% endif %}
+				{% if request.user.role == 'Admin' or request.user.role == 'AU' or request.user.role == 'S' %}
+				<li class="menu-label">Reports Quality</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="lni lni-checkbox"></i> </div>
+						<div class="menu-title">Quality</div>
+					</a>
+					<ul>
+						<li> <a href="{% url 'formCreateControl' %}"><i class='bx bx-radio-circle'></i>Add Quality</a>
+						</li>
+						<li> <a href="{% url 'control' %}"><i class='bx bx-radio-circle'></i>View quality</a>
+						</li>
+						<li> <a href="{% url 'createQuality' %}"><i class='bx bx-radio-circle'></i>Generate pdf</a>
+						</li>
+					</ul>
+				</li>
+				{% endif %}
 				
+				<li class="menu-label">BD Excel</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="lni lni-folder"></i> </div>
+						<div class="menu-title">Add BD</div>
+					</a>
+					<ul>
+						{% if request.user.role == 'Admin'  %}
+							<li> <a href="{% url "upload_excel" %}"><i class='bx bx-radio-circle'></i>Add Excel</a>
+							</li>
+							<li> <a href="{% url "manage_agent_assignments" %}"><i class='bx bx-radio-circle'></i>Assign BD to agents</a>
+							</li>
+							<li> <a href="{% url "reportBd" %}"><i class='bx bx-radio-circle'></i>Report BD</a>
+							</li>
+						{% endif %}
+						<li> <a href="{% url "bd" %}"><i class='bx bx-radio-circle'></i>View BD</a>
+						</li>
+					</ul>
+				</li>
+				{% if request.user.role == 'Admin'  %}
+				<li class="menu-label">User</li>
+				<li>
+					<li> <a href="{% url "formCreateUser" %}"><i class='bx bx-radio-circle'></i>View User</a>
+					</li>
+				</li>
+				{% endif %}					
+			</ul>				
 
 			<!--end navigation-->
 		</div>
