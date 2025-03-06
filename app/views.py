@@ -1217,7 +1217,7 @@ def editAlert(request, alertClient_id):
 @login_required(login_url='/login') 
 def formCreateUser(request):
 
-    users = User.objects.all()
+    users = User.objects.exclude(is_superuser = 1)
 
     roles = User.ROLES_CHOICES  # Obtén las opciones dinámicamente desde el modelo
 
