@@ -4850,6 +4850,8 @@ def saveAppointment(request, obamacare_id):
 def paymentClients(request):
 
     payments = Payments.objects.values('month').annotate(total=Count('id')).order_by('month')
+    # Calcular el total general de todos los meses
+    total_general = Payments.objects.aggregate(total=Count('id'))['total']
 
     if request.method == "POST":       
 
@@ -4889,6 +4891,6 @@ def paymentClients(request):
 
         return response 
 
-    context = {'payments' : payments }
+    context = {'payments' : payments, 'total' : total_general }
 
     return render(request, 'table/paymentClients.html',context)
