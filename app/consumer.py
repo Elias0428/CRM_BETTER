@@ -52,3 +52,30 @@ class UserUpdateConsumer(AsyncWebsocketConsumer):
             'user_id': user_id,
             'message': message
         }))
+
+
+class ProductAlertConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.group_name = 'product_alerts'
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message = data['message']
+
+        # Enviar el mensaje a todos los clientes conectados
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'send_alert',
+                'message': message,
+            }
+        )
+
+    async def send_alert(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({'message': message}))
