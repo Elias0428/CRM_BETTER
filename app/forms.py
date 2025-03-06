@@ -8,6 +8,12 @@ class ClientForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['agent','date_birth','social_security','old']
 
+class ClientMedicareForm(forms.ModelForm):
+    class Meta:
+        model = Medicare
+        fields = '__all__'
+        exclude = ['agent','date_birth','social_security','old','dateMedicare','status','status_color']
+
 
 class ObamaForm(forms.ModelForm):
     class Meta:
@@ -26,6 +32,12 @@ class DepentForm(forms.ModelForm):
         model = Dependent
         fields = '__all__'
         exclude = ['client','obamacare','date_birth']
+
+class PaymentsForm(forms.ModelForm):
+    class Meta:
+        model = Payments
+        fields = '__all__'
+        exclude = ['agent']
 
 class ClientAlertForm(forms.ModelForm):
     class Meta:
