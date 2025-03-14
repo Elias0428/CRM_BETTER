@@ -858,51 +858,6 @@
 						</div>
 					</div>
 
-					<!-- Modal para ver los pagos -->
-					<div class="modal fade" id="modalPayments" tabindex="-1" aria-labelledby="modalPayments" aria-hidden="true">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<h5 class="modal-title" id="verAppointment">Enter Payments</h5>
-									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-								</div>
-								<div class="modal-body">
-									<div class="table-responsive" >
-										<table id="paymentsTable" class="table" >
-											<thead>
-												<tr>
-													<th scope="col">Month</th>
-													<th scope="col">Option</th>
-												</tr>
-											</thead>
-											<tbody>
-												{% for month in monthInEnglish %}
-													<tr class="">
-														<td scope="row">{{month}}</td>
-														<td>
-															{% if request.user.role == 'Admin' %}
-																<label class="switch">
-																	<input value="{{month}}" type="checkbox" {% for payMonth in monthsPaid %} {% if month == payMonth.month %}checked{% endif %}{% endfor %} >
-																	<span class="slider round"></span>
-																</label>
-															{% else %}
-																<label class="switch">
-																	<input value="{{month}}" type="checkbox" {% for payMonth in monthsPaid %} {% if month == payMonth.month %}checked disabled{% endif %}{% endfor %}>
-																	<span class="slider round"></span>
-																</label>
-															{% endif %}
-														</td>
-													</tr>
-												{% endfor %}
-											</tbody>
-										</table>
-									</div>
-									
-								</div>
-							</div>
-						</div>
-					</div>
-
 					<!-- Modal para ver las Appointment -->
 					<div class="modal fade" id="verAppointment" tabindex="-1" aria-labelledby="verAppointment" aria-hidden="true">
 						<div class="modal-dialog">
