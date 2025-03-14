@@ -10,6 +10,7 @@ import random
 from collections import defaultdict
 from datetime import timedelta
 import openpyxl
+import re
 
 import pandas as pd
 
@@ -349,12 +350,20 @@ def fetchAca(request, client_id):
             }
         )
 
-        # Enviar alerta por WebSocket
+        #Aqui inicia el websocket
+        app_name = request.get_host()  # Obtener el host (ej. "127.0.0.1:8000" o "miapp.com")
+    
+        # Reemplazar ":" y otros caracteres inválidos con "_" para hacer un nombre válido
+        app_name = re.sub(r'[^a-zA-Z0-9_.-]', '_', app_name)
+
+        group_name = f'product_alerts_{app_name}'
+
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            'product_alerts',
+            group_name,
             {
                 'type': 'send_alert',
+                'event_type': 'new_client',
                 'message': f'New product Obamacare added',
             }
         )
@@ -420,12 +429,20 @@ def fetchSupp(request, client_id):
                 )
                 updated_supp_ids.append(new_supp.id)  # Agregar el ID creado a la lista
 
-                # Enviar alerta por WebSocket
+                #Aqui inicia el websocket
+                app_name = request.get_host()  # Obtener el host (ej. "127.0.0.1:8000" o "miapp.com")
+    
+                # Reemplazar ":" y otros caracteres inválidos con "_" para hacer un nombre válido
+                app_name = re.sub(r'[^a-zA-Z0-9_.-]', '_', app_name)
+
+                group_name = f'product_alerts_{app_name}'
+
                 channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(
-                    'product_alerts',
+                    group_name,
                     {
                         'type': 'send_alert',
+                        'event_type': 'new_client',
                         'message': f'New product Supplemental added',
                     }
                 )
